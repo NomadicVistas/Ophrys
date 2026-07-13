@@ -1,0 +1,17 @@
+{
+  "name": "ophrys",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A living AI installation about attraction without understanding.",
+  "scripts": {
+    "dev": "node --watch src/server.mjs",
+    "start": "node src/server.mjs",
+    "cycle": "node scripts/ophrys-cycle.mjs",
+    "check": "node --check src/server.mjs && node --check src/ophrys-store.mjs && node --check src/openai-artwork.mjs && node --check src/ophrys-cycle.mjs && node --check public/app.js && node --check public/studio.js && node --check public/admin.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

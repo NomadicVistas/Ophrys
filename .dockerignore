@@ -1,0 +1,6 @@
+.git
+.env*
+.ophrys-admin-token
+var
+coverage
+node_modules

@@ -50,9 +50,46 @@ The prototype should demonstrate:
 
 See [docs/HACKATHON.md](docs/HACKATHON.md) for the build brief and [docs/ETHICS.md](docs/ETHICS.md) for the public-data boundary.
 
-## Status
+## Online system
 
-Ophrys is in active artistic and technical development. This repository is the public collaboration space for the hackathon prototype. It documents the proposition and the smallest testable system; it does not present the final installation form.
+The Build Week implementation is one small Node 24 service with three deliberately different surfaces:
+
+- `/` — public exhibition and artwork field;
+- `/studio` — public evidence ledger for aggregate inputs, cycles, tactics and counter-readings;
+- `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
+
+The server uses built-in SQLite and calls the OpenAI Responses API with `gpt-5.6-sol`, explicit reasoning effort, `store:false` and strict structured artwork output. Model-generated code is never executed.
+
+## Run locally
+
+Requirements: Node 24+, an OpenAI API key for real composition cycles, and a long random Operator token.
+
+```bash
+export OPENAI_API_KEY="..."
+export OPHRYS_ADMIN_TOKEN="..."
+npm test
+npm start
+```
+
+Open `http://127.0.0.1:7799`, `/studio`, and `/admin`. Run a server-side composition cycle with:
+
+```bash
+npm run cycle
+```
+
+Without an API key, the public and Studio surfaces remain runnable with the human-authored seed work; only real GPT‑5.6 generation is unavailable.
+
+## Build Week status
+
+Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements.
+
+This is a testable prototype, not the final installation form. Generated work remains a candidate until a human curator approves publication.
+
+## How Codex contributed
+
+Codex accelerated the standalone architecture, GPT‑5.6 Responses integration, interface implementation, privacy-boundary tests, official-documentation review and parallel research/security audits. Human decisions remain explicit: Ewoud Bakker established the artistic proposition and title; Nomadic Vistas retains responsibility for curation, publication, rights, deployment and public claims.
+
+The project records where Codex accelerated work, where human judgment changed its direction, and which implementation was added during the submission window in [docs/HACKATHON_EVIDENCE.md](docs/HACKATHON_EVIDENCE.md) and [ops/PROGRESS_LOG.md](ops/PROGRESS_LOG.md).
 
 ## Project context
 

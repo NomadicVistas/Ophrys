@@ -1,0 +1,17 @@
+services:
+  ophrys:
+    build: .
+    container_name: ophrys
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 7799
+      OPHRYS_DB_PATH: /app/var/ophrys.sqlite
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPHRYS_ADMIN_TOKEN: ${OPHRYS_ADMIN_TOKEN}
+    ports:
+      - "127.0.0.1:7799:7799"
+    volumes:
+      - ./var:/app/var
+    security_opt:
+      - no-new-privileges:true

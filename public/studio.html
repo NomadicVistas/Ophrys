@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Inspect the public workings of the Ophrys AI installation.">
+  <title>Ophrys Studio — Public system trace</title>
+  <link rel="stylesheet" href="/styles.css"><script src="/studio.js" type="module"></script>
+</head>
+<body data-surface="studio" class="studio-body">
+  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>STUDIO</span></a><nav><a href="/">Public field</a><a href="#cycles">Cycles</a><a href="#works">Works</a></nav><div class="system-pill"><i></i><span>public trace</span></div></header>
+  <main class="studio-shell">
+    <section class="studio-intro"><p class="eyebrow">The organism does not explain itself through hidden reasoning</p><h1>Observe its inputs,<br>choices and limits.</h1><p>This Studio exposes operational traces, aggregate counts, generated propositions, publication state and curatorial constraints. It never presents model chain-of-thought as evidence.</p></section>
+    <section class="telemetry-grid" aria-live="polite">
+      <article><span>MODE</span><strong id="mode">—</strong></article><article><span>MODEL</span><strong id="model">—</strong></article><article><span>CYCLES</span><strong id="cycle-count">—</strong></article><article><span>WORKS</span><strong id="work-count">—</strong></article>
+    </section>
+    <section class="studio-panel"><header><div><p class="eyebrow">Aggregate public field</p><h2>What the room has registered</h2></div><p id="studio-disclosure">No visitor identifiers, exact paths or psychological classifications are retained.</p></header><div id="metrics" class="metric-list"></div></section>
+    <section id="cycles" class="studio-panel"><header><div><p class="eyebrow">Composition trace</p><h2>Recent system cycles</h2></div><p>Operational summaries show what happened without exposing private model reasoning.</p></header><div id="cycles-list" class="cycle-list"></div></section>
+    <section id="works" class="studio-panel"><header><div><p class="eyebrow">Curatorial studio</p><h2>Works and provisional tactics</h2></div><p>Every lure is coupled to a counter-reading.</p></header><div id="studio-artworks" class="studio-artworks"></div></section>
+    <section class="method-trace"><p class="eyebrow">Current method</p><ol id="method-list"></ol></section>
+  </main>
+  <footer><span>OPHRYS STUDIO / PUBLIC TRACE</span><a href="/admin">Operator access</a><a href="https://github.com/NomadicVistas/Ophrys">Source ↗</a></footer>
+</body>
+</html>
