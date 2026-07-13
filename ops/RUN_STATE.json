@@ -1,6 +1,15 @@
 {
   "schemaVersion": 1,
   "project": "Ophrys",
+  "automation": {
+    "jobId": "0d023788-f31e-4540-bc4c-d51882dfdfcb",
+    "name": "ophrys-build-week-hourly-sol",
+    "branch": "codex/hourly-builder",
+    "schedule": "25 * * * * Europe/Amsterdam",
+    "model": "codex/gpt-5.6-sol",
+    "reasoning": "high",
+    "deadline": "2026-07-22T00:00:00Z"
+  },
   "lastSuccessfulRun": null,
   "lastSelectedItem": null,
   "blockerStreak": 0,
