@@ -19,3 +19,7 @@ GPT‑5.6 may compose artwork candidates. It may not approve, publish, advertise
 ## D-005 · Bounded schemas, not generated executable code
 
 The composition organ emits strict JSON. Future visual/audio engines will render validated scores locally and will never execute arbitrary model output.
+
+## D-006 · Consequential refusal rotates a collective repertoire
+
+The public field renders a server-owned score with a fixed three-lure vocabulary and numeric bounds. Aggregate approach and attention alter its tempo and tilt. A refusal transaction suppresses the active lure, selects the next bounded lure and increments one coarse refusal count. The state is collective and contains no persistent visitor identifier or interpretation of why the refusal occurred.

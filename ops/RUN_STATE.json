@@ -10,8 +10,8 @@
     "reasoning": "high",
     "deadline": "2026-07-22T00:00:00Z"
   },
-  "lastSuccessfulRun": null,
-  "lastSelectedItem": null,
+  "lastSuccessfulRun": "2026-07-13T19:50:00Z",
+  "lastSelectedItem": "OPH-004",
   "blockerStreak": 0,
   "complete": false,
   "stopMarker": "ops/AUTONOMY_STOP"

@@ -16,6 +16,11 @@ const DEFAULT_SETTINGS = {
 
 const EVENT_KINDS = new Set(['arrival', 'threshold', 'artwork_open', 'studio_open', 'dwell_short', 'dwell_long', 'refusal', 'return'])
 const ARTWORK_STATUSES = new Set(['studio', 'published', 'archived'])
+const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
+
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value))
+}
 
 function isoHour(date = new Date()) {
   const value = new Date(date)
@@ -49,6 +54,13 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       kind TEXT NOT NULL,
       count INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (bucket, surface, kind)
+    );
+    CREATE TABLE IF NOT EXISTS field_state (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      active_lure TEXT NOT NULL,
+      suppressed_lure TEXT,
+      revision INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS cycles (
       id TEXT PRIMARY KEY,
@@ -87,6 +99,8 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (?, ?, ?)')
   const now = new Date().toISOString()
   for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) insertSetting.run(key, JSON.stringify(value), now)
+  db.prepare('INSERT OR IGNORE INTO field_state (id, active_lure, suppressed_lure, revision, updated_at) VALUES (1, ?, NULL, 0, ?)')
+    .run(LURE_REPERTOIRE[0], now)
 
   const count = db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count
   if (count === 0) {
@@ -131,13 +145,19 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return next
   }
 
-  function recordEvent({ kind, surface = 'public' }) {
+  function insertEvent(kind, surface) {
     if (!EVENT_KINDS.has(kind)) throw new Error('Unsupported aggregate event')
     const cleanSurface = String(surface).replace(/[^a-z0-9_/-]/gi, '').slice(0, 80) || 'public'
     db.prepare(`INSERT INTO visitor_metrics (bucket, surface, kind, count) VALUES (?, ?, ?, 1)
       ON CONFLICT(bucket, surface, kind) DO UPDATE SET count = count + 1`).run(isoHour(), cleanSurface, kind)
-    pruneMetrics()
     return { bucket: isoHour(), surface: cleanSurface, kind }
+  }
+
+  function recordEvent({ kind, surface = 'public' }) {
+    if (kind === 'refusal') return refuseLure({ surface })
+    const event = insertEvent(kind, surface)
+    pruneMetrics()
+    return event
   }
 
   function pruneMetrics() {
@@ -149,6 +169,47 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const since = new Date(Date.now() - Number(hours) * 3600_000).toISOString()
     return db.prepare(`SELECT surface, kind, SUM(count) AS count FROM visitor_metrics
       WHERE bucket >= ? GROUP BY surface, kind ORDER BY count DESC, surface, kind`).all(since)
+  }
+
+  function getFieldScore() {
+    const metrics = getMetrics()
+    const totals = Object.fromEntries([...EVENT_KINDS].map(kind => [kind, 0]))
+    for (const metric of metrics) totals[metric.kind] = (totals[metric.kind] || 0) + Number(metric.count)
+    const state = db.prepare('SELECT active_lure AS activeLure, suppressed_lure AS suppressedLure, revision, updated_at AS updatedAt FROM field_state WHERE id = 1').get()
+    const approach = totals.arrival + totals.threshold + totals.artwork_open + totals.return
+    const attention = totals.dwell_short + (totals.dwell_long * 2)
+    return {
+      schemaVersion: 1,
+      revision: Number(state.revision),
+      phase: state.suppressedLure ? 'counter-read' : 'lure',
+      activeLure: LURE_REPERTOIRE.includes(state.activeLure) ? state.activeLure : LURE_REPERTOIRE[0],
+      suppressedLure: LURE_REPERTOIRE.includes(state.suppressedLure) ? state.suppressedLure : null,
+      density: clamp(3 + Math.floor(Math.sqrt(approach + attention)), 3, 12),
+      tempoBpm: clamp(24 + (approach * 2) + attention - (totals.refusal * 3), 18, 72),
+      tiltDegrees: clamp((totals.threshold - totals.dwell_long) * 3, -24, 24),
+      aggregateBasis: { approach, attention, refusal: totals.refusal },
+      repertoire: [...LURE_REPERTOIRE],
+      updatedAt: state.updatedAt,
+    }
+  }
+
+  function refuseLure({ surface = 'public' } = {}) {
+    db.exec('BEGIN IMMEDIATE')
+    try {
+      const current = db.prepare('SELECT active_lure AS activeLure, revision FROM field_state WHERE id = 1').get()
+      const currentIndex = Math.max(0, LURE_REPERTOIRE.indexOf(current.activeLure))
+      const nextLure = LURE_REPERTOIRE[(currentIndex + 1) % LURE_REPERTOIRE.length]
+      const updatedAt = new Date().toISOString()
+      db.prepare('UPDATE field_state SET active_lure = ?, suppressed_lure = ?, revision = ?, updated_at = ? WHERE id = 1')
+        .run(nextLure, current.activeLure, Number(current.revision) + 1, updatedAt)
+      insertEvent('refusal', surface)
+      db.exec('COMMIT')
+    } catch (error) {
+      db.exec('ROLLBACK')
+      throw error
+    }
+    pruneMetrics()
+    return getFieldScore()
   }
 
   function createCycle({ id, trigger, status = 'running', model, startedAt = new Date().toISOString() }) {
@@ -215,7 +276,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return {
       identity: { name: 'Ophrys', proposition: 'Attraction without understanding.', organism: 'Autopoiesis installation brain' },
       system: { mode: settings.systemMode, model: settings.model, publicationMode: settings.publicationMode, cycleEnabled: settings.cycleEnabled },
-      metrics: getMetrics(), artworks: listArtworks({ publicOnly: true, limit: 12 }),
+      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ publicOnly: true, limit: 12 }),
       disclosure: 'Ophrys stores aggregate event counts only. It does not retain faces, voices, identities, demographic classifications, emotions, or individual movement histories.',
     }
   }
@@ -224,7 +285,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const settings = getSettings()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30),
+      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }
@@ -244,5 +305,5 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  return { db, getSettings, updateSettings, recordEvent, pruneMetrics, getMetrics, createCycle, completeCycle, createArtwork, commitArtworkCycle, setArtworkStatus, listArtworks, listCycles, publicState, studioState, publicStudioState, close: () => db.close() }
+  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, commitArtworkCycle, setArtworkStatus, listArtworks, listCycles, publicState, studioState, publicStudioState, close: () => db.close() }
 }

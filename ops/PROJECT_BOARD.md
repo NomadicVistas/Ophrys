@@ -7,7 +7,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-001 | P0 | DONE | Standalone public/Studio/Operator skeleton | Routes render; public/admin boundary tests pass |
 | OPH-002 | P0 | DONE | Aggregate SQLite event model | No identity/profile tables; expiry and disclosure present |
 | OPH-003 | P0 | DONE | GPT‑5.6 Sol composition adapter | Responses API, strict schema, `store:false`, deterministic test |
-| OPH-004 | P0 | ACTIVE | Complete adaptive artwork loop | Bounded renderer changes from aggregate state; refusal changes next state |
+| OPH-004 | P0 | DONE | Complete adaptive artwork loop | Bounded field score changes tempo/tilt from aggregate state; tested refusal suppresses the active lure and rotates the next state |
 | OPH-005 | P0 | READY | Provenance and curator decision records | Model, prompt version, inputs, usage, rights, decision and rejection reason stored |
 | OPH-006 | P0 | READY | Accessibility and responsive verification | Keyboard, reduced motion, contrast, mobile and error-state evidence |
 | OPH-007 | P0 | BLOCKED [!] | Production deployment | Disk capacity, admin secret, Caddy route and HTTPS verified |

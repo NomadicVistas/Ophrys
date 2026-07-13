@@ -2,7 +2,7 @@
 
 | Risk | Level | Control | Owner/state |
 |---|---:|---|---|
-| Covert manipulation contradicts the critical artwork | Critical | Visible lure/reveal/counter-read; no individual targeting; consequential refusal | Product boundary active |
+| Covert manipulation contradicts the critical artwork | Critical | Visible lure/reveal/counter-read; no individual targeting; refusal atomically suppresses the active lure and rotates a bounded repertoire | OPH-004 tested |
 | Unsupported psychological inference | Critical | Aggregate events only; explicit observation/hypothesis split | Tests active |
 | Generated work is presented as approved art | High | All model output enters `studio`; human publication gate | Active |
 | Public Studio leaks secrets or provider details | High | Separate projection; redacted errors; server-only credentials | Active |

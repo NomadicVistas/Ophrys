@@ -18,6 +18,26 @@ test('aggregate events never create visitor identity records', () => {
   store.close()
 })
 
+test('aggregate conditions bound the field score and refusal rotates its repertoire', () => {
+  const store = createOphrysStore(':memory:')
+  const initial = store.getFieldScore()
+  for (let index = 0; index < 4; index++) store.recordEvent({ kind: 'threshold', surface: 'public' })
+  store.recordEvent({ kind: 'dwell_long', surface: 'public' })
+  const adapted = store.getFieldScore()
+  assert.ok(adapted.density > initial.density)
+  assert.ok(adapted.tempoBpm >= 18 && adapted.tempoBpm <= 72)
+  assert.ok(adapted.tiltDegrees >= -24 && adapted.tiltDegrees <= 24)
+
+  const refused = store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' })
+  assert.equal(refused.revision, initial.revision + 1)
+  assert.equal(refused.suppressedLure, initial.activeLure)
+  assert.notEqual(refused.activeLure, initial.activeLure)
+  assert.equal(refused.phase, 'counter-read')
+  assert.equal(refused.aggregateBasis.refusal, 1)
+  assert.equal(store.getMetrics().some(item => item.kind === 'refusal' && item.count === 1), true)
+  store.close()
+})
+
 test('public and protected server surfaces keep their boundary', async () => {
   const store = createOphrysStore(':memory:')
   const server = createOphrysServer({ store, adminToken: 'test-operator-token' })
@@ -31,6 +51,17 @@ test('public and protected server surfaces keep their boundary', async () => {
   const publicState = await publicResponse.json()
   assert.equal(publicState.artworks[0].status, 'published')
   assert.match(publicState.disclosure, /aggregate event counts only/i)
+  const originalLure = publicState.fieldScore.activeLure
+
+  const refusalResponse = await fetch(`${origin}/api/public/event`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'refusal', surface: 'public/counter-control' }),
+  })
+  assert.equal(refusalResponse.status, 202)
+  const refusal = await refusalResponse.json()
+  assert.equal(refusal.fieldScore.suppressedLure, originalLure)
+  assert.notEqual(refusal.fieldScore.activeLure, originalLure)
 
   assert.equal((await fetch(`${origin}/api/admin/state`)).status, 401)
   const adminResponse = await fetch(`${origin}/api/admin/state`, { headers: { authorization: 'Bearer test-operator-token' } })

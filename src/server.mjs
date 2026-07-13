@@ -88,8 +88,14 @@ export function createOphrysServer({ store = createOphrysStore(), adminToken = p
         if (aggregateWindow.minute !== minute) aggregateWindow = { minute, count: 0 }
         if (++aggregateWindow.count > 300) return json(response, 429, { error: 'Aggregate event capacity reached' })
         const event = await body(request, 4096)
-        store.recordEvent({ kind: event.kind, surface: event.surface })
-        return json(response, 202, { accepted: true, disclosure: 'Recorded as an aggregate hourly count; no visitor identifier was stored.' })
+        const result = store.recordEvent({ kind: event.kind, surface: event.surface })
+        return json(response, 202, {
+          accepted: true,
+          fieldScore: event.kind === 'refusal' ? result : undefined,
+          disclosure: event.kind === 'refusal'
+            ? 'The current lure was suppressed and rotated; only an aggregate refusal count was stored.'
+            : 'Recorded as an aggregate hourly count; no visitor identifier was stored.',
+        })
       }
 
       if (url.pathname.startsWith('/api/admin/')) {

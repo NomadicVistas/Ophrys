@@ -14,6 +14,7 @@ Work added from July 13, 2026 onward:
 - GPT‑5.6 Sol Responses API composition organ with strict structured output;
 - single-flight cycles, retention, human publication gates and public disclosure;
 - deterministic privacy, authorization and API-contract tests;
+- a bounded aggregate-driven public field score with consequential refusal and immediate counter-read rendering;
 - standalone project board, evidence log and deployment plan.
 
 Git history is the canonical dated implementation record.
@@ -38,7 +39,7 @@ GPT‑5.6 Sol is used application-side to compose bounded artwork candidates fro
 - [ ] Commit SHA for the runnable baseline.
 - [ ] Public HTTPS demo and testing instructions.
 - [ ] Successful live GPT‑5.6 cycle with redacted response/usage evidence.
-- [ ] Completed adaptive loop and refusal demonstration.
+- [x] Completed adaptive loop and refusal demonstration (OPH-004; deterministic test and local running-service smoke evidence).
 - [ ] English public YouTube video under three minutes.
 - [ ] Devpost submission URL and representative confirmation.
 

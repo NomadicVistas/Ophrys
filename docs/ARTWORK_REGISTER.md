@@ -15,3 +15,5 @@ Required fields:
 - public/exhibition status and documentation links.
 
 Current seed work: `False Spring` — human-authored baseline, public status, used to test the exhibition interface.
+
+Implementation note: the adaptive field score is system state, not a newly approved artwork. Its fixed `orbit`, `interruption`, and `split-signal` repertoire exists to test the seed work's consequential counter-reading; model-generated candidates still require separate provenance and human approval.

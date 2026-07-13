@@ -13,4 +13,11 @@
 - Installed guarded hourly job `ophrys-build-week-hourly-sol` (`0d023788-f31e-4540-bc4c-d51882dfdfcb`) at minute 25 Europe/Amsterdam, using GPT‑5.6 Sol, high reasoning and a 55-minute timeout. It may push one verified change to the builder branch per run and is barred from deployment, dark patterns, production publication and cron proliferation.
 - Deployment remains blocked by host disk pressure, missing Operator secret and incomplete Caddy/TLS configuration.
 
-Next: publish the baseline, install the guarded hourly builder, then implement OPH-004. A live cycle also requires API quota to be added to the configured OpenAI project.
+Next: implement provenance and curator decision records (OPH-005). A live cycle also requires API quota to be added to the configured OpenAI project.
+
+## 2026-07-13 — adaptive loop
+
+- Completed OPH-004 with a server-owned, bounded field score derived from coarse aggregate approach and attention counts.
+- Added a visible public counter-control. Refusal atomically suppresses the active lure, rotates a fixed three-state repertoire, increments the aggregate refusal count and returns the revised score for immediate rendering.
+- Kept the state collective and minimal: the durable field record contains only active/suppressed lure names, a global revision and update time; it contains no visitor record or inferred trait.
+- Verified the loop with four deterministic tests plus a running-service smoke check (`orbit` → `interruption`, revision `1`, aggregate refusal `1`). `npm run check` and `npm test` pass.
