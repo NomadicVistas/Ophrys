@@ -27,3 +27,8 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Completed OPH-005 by persisting a provenance packet with each generated candidate: prompt version, aggregate input summary, returned usage payload, rights basis, and curator review fields now travel with the artwork record.
 - Operator status changes now require and store a rationale, and archiving a candidate refuses without a rejection reason.
 - The Studio and Operator views surface the stored packet so the candidate remains inspectable without collapsing into hidden approval logic.
+
+## 2026-07-13 — scheduler model pin
+
+- The first validation run used GPT‑5.6 Sol as configured. A later scheduled run silently used the workspace fallback model even though the job still named Sol; its OPH-005 change was independently reviewed and all five tests pass.
+- Disabled fallbacks on `ophrys-build-week-hourly-sol`. Future runs must use `codex/gpt-5.6-sol` with high reasoning or fail visibly instead of substituting another model.
