@@ -27,3 +27,7 @@ The public field renders a server-owned score with a fixed three-lure vocabulary
 ## D-007 · Artwork provenance lives with the candidate
 
 Each generated artwork stores a provenance packet alongside the candidate record. The packet carries the prompt version, aggregate input summary, returned usage data, rights basis, and curator review fields so approval, revision and rejection remain inspectable without exposing private visitor data or hidden reasoning.
+
+## D-008 · Accessibility changes the encounter structure
+
+Keyboard access, reduced motion and failure states are part of the artwork's public agency rather than a separate explanatory layer. Primary navigation remains present on narrow screens, refusal and Operator controls use native elements, artwork cards lead somewhere on activation, and a failed data request visibly declines to claim system state. The automated suite protects these boundaries without claiming final WCAG certification.

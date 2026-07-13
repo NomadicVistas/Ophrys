@@ -62,8 +62,12 @@ function artworkRow(work) {
   return article
 }
 
-const state = await fetch('/api/studio/state').then(response => response.json()).catch(() => null)
-if (state) {
+const status = document.querySelector('#studio-status')
+
+try {
+  const response = await fetch('/api/studio/state')
+  if (!response.ok) throw new Error(`Studio state failed (${response.status})`)
+  const state = await response.json()
   document.querySelector('#mode').textContent = state.system.systemMode
   document.querySelector('#model').textContent = state.system.model
   document.querySelector('#cycle-count').textContent = state.cycles.length
@@ -74,6 +78,10 @@ if (state) {
   document.querySelector('#cycles-list').replaceChildren(...(state.cycles.length ? state.cycles.map(cycleRow) : [element('p', 'empty', 'The first GPT‑5.6 cycle has not run yet.')]))
   document.querySelector('#studio-artworks').replaceChildren(...state.artworks.map(artworkRow))
   document.querySelector('#method-list').replaceChildren(...state.method.map(step => element('li', '', step)))
+  status.hidden = true
+} catch {
+  status.className = 'surface-status error'
+  status.textContent = 'The public trace could not be loaded. No system state is being claimed.'
 }
 
 fetch('/api/public/event', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'studio_open', surface: 'studio' }) }).catch(() => {})

@@ -9,7 +9,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-003 | P0 | DONE | GPT‑5.6 Sol composition adapter | Responses API, strict schema, `store:false`, deterministic test |
 | OPH-004 | P0 | DONE | Complete adaptive artwork loop | Bounded field score changes tempo/tilt from aggregate state; tested refusal suppresses the active lure and rotates the next state |
 | OPH-005 | P0 | DONE | Provenance and curator decision records | Model, prompt version, inputs, usage, rights, decision and rejection reason stored |
-| OPH-006 | P0 | READY | Accessibility and responsive verification | Keyboard, reduced motion, contrast, mobile and error-state evidence |
+| OPH-006 | P0 | DONE | Accessibility and responsive verification | Keyboard, reduced motion, contrast, mobile and error-state evidence recorded in `docs/ACCESSIBILITY.md`; automated and Chromium smoke checks pass |
 | OPH-007 | P0 | BLOCKED [!] | Production deployment | Disk capacity, admin secret, Caddy route and HTTPS verified |
 | OPH-008 | P0 | READY | Hackathon evidence package | Prior/new work, Codex account, session ID, test instructions complete |
 | OPH-009 | P0 | BLOCKED [!] | Submission video and Devpost entry | Human recording, approval and submission required |

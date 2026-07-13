@@ -1,4 +1,7 @@
-const state = await fetch('/api/public/state').then(response => response.json()).catch(() => null)
+const state = await fetch('/api/public/state').then(async response => {
+  if (!response.ok) throw new Error(`Public state failed (${response.status})`)
+  return response.json()
+}).catch(() => null)
 
 function element(tag, className, text) {
   const node = document.createElement(tag)
@@ -27,8 +30,9 @@ function renderField(score) {
 }
 
 function artworkCard(work, index) {
-  const article = element('article', 'artwork-card')
-  article.tabIndex = 0
+  const article = element('a', 'artwork-card')
+  article.href = '/studio#works'
+  article.setAttribute('aria-label', `Inspect ${work.title} in the public Studio`)
   article.style.setProperty('--index', index)
   const visual = element('div', 'artwork-visual')
   visual.append(element('span', 'visual-code', String(index + 1).padStart(2, '0')), element('i', 'visual-ring'), element('i', 'visual-line'))
@@ -40,7 +44,6 @@ function artworkCard(work, index) {
   article.append(visual, meta)
   const register = () => send('artwork_open', `artwork/${work.id}`)
   article.addEventListener('click', register, { once: true })
-  article.addEventListener('focus', register, { once: true })
   return article
 }
 
@@ -52,7 +55,9 @@ if (state?.artworks?.length) {
   renderField(state.fieldScore)
 } else {
   grid.replaceChildren(element('p', 'loading', 'The public field is temporarily quiet. Open Studio to inspect the system state.'))
+  document.querySelector('#system-status').textContent = 'field unavailable'
 }
+grid.setAttribute('aria-busy', 'false')
 
 document.querySelector('#refuse-lure').addEventListener('click', async event => {
   const button = event.currentTarget

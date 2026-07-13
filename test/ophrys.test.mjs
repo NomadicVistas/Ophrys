@@ -1,10 +1,51 @@
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
 import { runOphrysCycle } from '../src/ophrys-cycle.mjs'
 import { generateArtwork } from '../src/openai-artwork.mjs'
+
+const publicFile = name => readFileSync(new URL(`../public/${name}`, import.meta.url), 'utf8')
+
+function relativeLuminance(hex) {
+  const channels = hex.match(/[0-9a-f]{2}/gi).map(value => Number.parseInt(value, 16) / 255)
+  const [red, green, blue] = channels.map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+}
+
+function contrastRatio(foreground, background) {
+  const values = [relativeLuminance(foreground), relativeLuminance(background)].sort((a, b) => b - a)
+  return (values[0] + 0.05) / (values[1] + 0.05)
+}
+
+test('public surfaces preserve keyboard, motion, contrast, mobile and error-state boundaries', () => {
+  const pages = ['index.html', 'studio.html', 'admin.html'].map(publicFile)
+  for (const page of pages) {
+    assert.match(page, /<html lang="en">/)
+    assert.match(page, /name="viewport"/)
+    assert.match(page, /class="skip-link" href="#main-content"/)
+    assert.match(page, /<main id="main-content"/)
+    assert.match(page, /<nav aria-label="Primary">/)
+    assert.match(page, /href="\/accessibility\.css"/)
+  }
+
+  const accessibility = publicFile('accessibility.css')
+  assert.match(accessibility, /:focus-visible/)
+  assert.match(accessibility, /@media \(max-width: 720px\)[\s\S]*\.site-header nav[\s\S]*display: flex/)
+  assert.match(accessibility, /@media \(prefers-reduced-motion: reduce\)[\s\S]*animation: none !important;[\s\S]*transition: none !important;/)
+  assert.ok(contrastRatio('666a60', 'edeee7') >= 4.5, 'muted metadata text must meet WCAG AA normal-text contrast')
+  assert.ok(contrastRatio('ff705d', '0e110e') >= 4.5, 'Operator error text must meet WCAG AA normal-text contrast')
+
+  const publicScript = publicFile('app.js')
+  assert.match(publicScript, /field unavailable/)
+  assert.match(publicScript, /aria-busy', 'false'/)
+  assert.match(publicScript, /article\.href = '\/studio#works'/)
+  assert.doesNotMatch(publicScript, /article\.tabIndex/)
+  assert.match(publicFile('studio.js'), /The public trace could not be loaded\. No system state is being claimed\./)
+  assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
+})
 
 test('aggregate events never create visitor identity records', () => {
   const store = createOphrysStore(':memory:')

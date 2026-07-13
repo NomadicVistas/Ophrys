@@ -13,5 +13,5 @@
 | Domain or TLS fails during judging | High | Loopback service, Caddy runbook, readiness probes, deployment receipt | Blocked [!] |
 | Host disk exhaustion prevents build/deploy | Critical | No image builds until safe cleanup is approved | Blocked [!] |
 | Admin compromise | High | Long random token, same-origin mutations, edge protection, no public admin data | Deployment gate |
-| Accessibility is sacrificed for spectacle | Medium | Keyboard, reduced motion, contrast and mobile acceptance tests | OPH-006 |
+| Accessibility is sacrificed for spectacle | Medium | Keyboard, reduced motion, contrast, mobile and failure-state acceptance tests | OPH-006 verified; final deployed screen-reader/device pass remains |
 | Hackathon evaluates only prior concept | High | Prior/new record, commits, Codex account and runnable new software | Active |

@@ -32,3 +32,10 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 
 - The first validation run used GPT‑5.6 Sol as configured. A later scheduled run silently used the workspace fallback model even though the job still named Sol; its OPH-005 change was independently reviewed and all five tests pass.
 - Disabled fallbacks on `ophrys-build-week-hourly-sol`. Future runs must use `codex/gpt-5.6-sol` with high reasoning or fail visibly instead of substituting another model.
+
+## 2026-07-13 — accessibility and responsive verification
+
+- Completed OPH-006 across the public, Studio and Operator surfaces with skip links, persistent mobile navigation, visible focus treatment, live status/error regions and a global reduced-motion boundary.
+- Recast artwork cards as real links to the Studio ledger. Keyboard focus no longer records an artwork-open event; the coarse aggregate event occurs only when the link is activated.
+- Corrected muted small-text contrast from 3.71:1 to 4.74:1 and added deterministic contrast, semantic, responsive, motion and fallback-state assertions.
+- Verified all surfaces in Chromium 149 at desktop and 390 × 844 mobile dimensions, including the reduced-motion preference. `npm run check` and all six tests pass.

@@ -16,6 +16,7 @@ Work added from July 13, 2026 onward:
 - deterministic privacy, authorization and API-contract tests;
 - a bounded aggregate-driven public field score with consequential refusal and immediate counter-read rendering;
 - artwork candidates with stored provenance packets, including prompt version, aggregate input summary, usage data, rights basis and curator rationale;
+- accessible keyboard paths, reduced-motion behaviour, AA contrast checks, responsive mobile navigation and truthful failure states across all three surfaces;
 - standalone project board, evidence log and deployment plan.
 
 Git history is the canonical dated implementation record.

@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow">
-  <title>Ophrys Operator</title><link rel="stylesheet" href="/styles.css"><script src="/admin.js" type="module"></script>
+  <title>Ophrys Operator</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/accessibility.css"><script src="/admin.js" type="module"></script>
 </head>
 <body data-surface="admin" class="admin-body">
-  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>OPERATOR</span></a><nav><a href="/">Public</a><a href="/studio">Studio</a></nav><div class="system-pill warning"><i></i><span>protected control</span></div></header>
-  <main class="admin-shell">
-    <section id="login-panel" class="admin-login"><p class="eyebrow">Protected backbone</p><h1>Operator access</h1><p>The token stays in this browser tab and is sent only as an authorization header.</p><form id="login-form"><label>Admin token<input id="token" type="password" autocomplete="current-password" required></label><button class="button" type="submit">Open controls</button><p id="login-error" class="error"></p></form></section>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>OPERATOR</span></a><nav aria-label="Primary"><a href="/">Public</a><a href="/studio">Studio</a></nav><div class="system-pill warning"><i></i><span>protected control</span></div></header>
+  <main id="main-content" class="admin-shell">
+    <section id="login-panel" class="admin-login"><p class="eyebrow">Protected backbone</p><h1>Operator access</h1><p id="token-help">The token stays in this browser tab and is sent only as an authorization header.</p><form id="login-form"><label>Admin token<input id="token" type="password" autocomplete="current-password" aria-describedby="token-help" required></label><button class="button" type="submit">Open controls</button><p id="login-error" class="error" role="alert" aria-live="assertive"></p></form></section>
     <section id="admin-panel" hidden>
       <header class="admin-intro"><div><p class="eyebrow">Human responsibility remains active</p><h1>Direct the organism</h1></div><button id="logout" class="text-button">Lock controls</button></header>
       <div class="admin-grid">
@@ -21,9 +22,9 @@
           <label>Metric window (hours)<input name="metricWindowHours" type="number" min="1" max="168" step="1"></label>
           <label>Metric retention (hours)<input name="metricRetentionHours" type="number" min="24" max="720" step="1"></label>
           <label>Curatorial directive<textarea name="curatorialDirective" rows="8"></textarea></label>
-          <button class="button" type="submit">Save settings</button><span id="settings-status"></span>
+          <button class="button" type="submit">Save settings</button><span id="settings-status" role="status" aria-live="polite"></span>
         </form>
-        <section class="control-panel cycle-control"><h2>Composition organ</h2><p>Run one GPT‑5.6 cycle now. In curated mode, the resulting work enters Studio until approved.</p><button id="run-cycle" class="button signal">Generate artwork</button><pre id="cycle-result">Awaiting instruction.</pre></section>
+        <section class="control-panel cycle-control"><h2>Composition organ</h2><p>Run one GPT‑5.6 cycle now. In curated mode, the resulting work enters Studio until approved.</p><button id="run-cycle" class="button signal" type="button">Generate artwork</button><pre id="cycle-result" role="status" aria-live="polite">Awaiting instruction.</pre></section>
       </div>
       <section class="control-panel"><h2>Artwork queue</h2><div id="admin-artworks" class="admin-artworks"></div></section>
     </section>
