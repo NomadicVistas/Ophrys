@@ -18,6 +18,7 @@ Work added from July 13, 2026 onward:
 - artwork candidates with stored provenance packets, including prompt version, aggregate input summary, usage data, rights basis and curator rationale;
 - accessible keyboard paths, reduced-motion behaviour, AA contrast checks, responsive mobile navigation and truthful failure states across all three surfaces;
 - standalone project board, evidence log and deployment plan.
+- a credential-free judging smoke path that verifies the public encounter, consequential refusal, Studio trace, Operator boundary and human-curated publication mode.
 
 Git history is the canonical dated implementation record.
 
@@ -38,12 +39,15 @@ GPT‑5.6 Sol is used application-side to compose bounded artwork candidates fro
 ## Required completion evidence
 
 - [ ] `/feedback` Codex Session ID for the primary implementation thread.
-- [ ] Commit SHA for the runnable baseline.
-- [ ] Public HTTPS demo and testing instructions.
+- [x] Runnable baseline commit: `5e8900af1e34048774462420fa1de12105776821`.
+- [x] Credential-free local test instructions and automated judging smoke path in `docs/JUDGING.md`.
+- [ ] Public HTTPS demo (blocked by OPH-007 deployment authority and infrastructure gates).
 - [ ] Successful live GPT‑5.6 cycle with redacted response/usage evidence.
 - [x] Completed adaptive loop and refusal demonstration (OPH-004; deterministic test and local running-service smoke evidence).
 - [ ] English public YouTube video under three minutes.
 - [ ] Devpost submission URL and representative confirmation.
+
+The `/feedback` identifier must come from the primary Codex implementation thread; this scheduled builder cannot truthfully manufacture or substitute its cron/session metadata. Video, Devpost and public deployment require human authority. The implementation boundary, exact commit evidence and repeatable local test sequence are recorded in `docs/JUDGING.md`.
 
 ## Current external blocker
 

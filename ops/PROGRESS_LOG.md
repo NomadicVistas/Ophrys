@@ -39,3 +39,10 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Recast artwork cards as real links to the Studio ledger. Keyboard focus no longer records an artwork-open event; the coarse aggregate event occurs only when the link is activated.
 - Corrected muted small-text contrast from 3.71:1 to 4.74:1 and added deterministic contrast, semantic, responsive, motion and fallback-state assertions.
 - Verified all surfaces in Chromium 149 at desktop and 390 × 844 mobile dimensions, including the reduced-motion preference. `npm run check` and all six tests pass.
+
+## 2026-07-13 — reproducible judging evidence
+
+- Advanced OPH-008 with a credential-free `npm run judge:smoke` path using an ephemeral loopback service and in-memory database.
+- Recorded the exact runnable baseline SHA and the dated prior/new implementation boundary in `docs/JUDGING.md`, alongside a five-minute local and browser test sequence.
+- Kept external proof honest: the primary Codex `/feedback` Session ID, public HTTPS URL, live GPT-5.6 Sol cycle, video and Devpost confirmation remain open and are not replaced with scheduler metadata.
+- Verified `npm run check`, all six tests and the judging smoke; refusal rotated `orbit` to `interruption` at collective revision 1. OPH-008 is now blocked only on human/external evidence.

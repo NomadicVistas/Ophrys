@@ -81,7 +81,7 @@ Without an API key, the public and Studio surfaces remain runnable with the huma
 
 ## Build Week status
 
-Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements.
+Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements, or follow [the five-minute judging guide](docs/JUDGING.md) for a credential-free verification path.
 
 This is a testable prototype, not the final installation form. Generated work remains a candidate until a human curator approves publication.
 
