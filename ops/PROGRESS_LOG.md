@@ -46,3 +46,10 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Recorded the exact runnable baseline SHA and the dated prior/new implementation boundary in `docs/JUDGING.md`, alongside a five-minute local and browser test sequence.
 - Kept external proof honest: the primary Codex `/feedback` Session ID, public HTTPS URL, live GPT-5.6 Sol cycle, video and Devpost confirmation remain open and are not replaced with scheduler metadata.
 - Verified `npm run check`, all six tests and the judging smoke; refusal rotated `orbit` to `interruption` at collective revision 1. OPH-008 is now blocked only on human/external evidence.
+
+## 2026-07-13 — artwork candidate comparison
+
+- Completed OPH-010 with a protected Operator workspace that selects up to two candidates for side-by-side comparison without changing their publication state.
+- Aligned each candidate across proposition, visitor relation, exhibition form, learning question, lure hypothesis, counter-reading, materials, model/prompt/usage provenance, rights basis and current review.
+- Replaced prompt-based status shortcuts with explicit per-candidate decision forms. Approval and rejection now both require a written curatorial rationale, enforced in the store as well as the browser, and the decision remains attached to the provenance packet.
+- Verified `npm run check`, all six tests and the credential-free judging smoke.

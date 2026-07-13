@@ -4,7 +4,7 @@
 |---|---:|---|---|
 | Covert manipulation contradicts the critical artwork | Critical | Visible lure/reveal/counter-read; no individual targeting; refusal atomically suppresses the active lure and rotates a bounded repertoire | OPH-004 tested |
 | Unsupported psychological inference | Critical | Aggregate events only; explicit observation/hypothesis split | Tests active |
-| Generated work is presented as approved art | High | All model output enters `studio`; human publication gate | Active |
+| Generated work is presented as approved art | High | All model output enters `studio`; protected comparison workspace and rationale-required human publication gate | OPH-010 tested |
 | Public Studio leaks secrets or provider details | High | Separate projection; redacted errors; server-only credentials | Active |
 | Concurrent cycles corrupt state or duplicate work | High | SQLite WAL, busy timeout, one-running-cycle index, transactional completion | Active |
 | Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 implemented |

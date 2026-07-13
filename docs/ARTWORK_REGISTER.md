@@ -14,7 +14,7 @@ Required fields:
 - rejection or revision reason;
 - public/exhibition status and documentation links.
 
-Implementation note: generated candidates now keep that packet in the artwork record itself, including prompt version, aggregate input summary, returned usage payload, rights basis and curator review fields. Archiving a candidate requires an explicit rejection reason.
+Implementation note: generated candidates keep that packet in the artwork record itself, including prompt version, aggregate input summary, returned usage payload, rights basis and curator review fields. The protected Operator can align up to two candidates for comparison. Both approval and rejection require an explicit curatorial rationale, enforced server-side and retained with the candidate.
 
 Current seed work: `False Spring` — human-authored baseline, public status, used to test the exhibition interface.
 

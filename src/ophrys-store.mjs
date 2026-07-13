@@ -276,7 +276,9 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     if (!current) throw new Error('Artwork not found')
     const provenance = parseObject(current.provenance)
     const normalizedReason = typeof reason === 'string' ? reason.trim() : ''
-    if (status === 'archived' && !normalizedReason) throw new Error('Rejection reason required before archiving a candidate')
+    if (['published', 'archived'].includes(status) && !normalizedReason) {
+      throw new Error('Curatorial rationale required before approving or rejecting a candidate')
+    }
     const decision = status === 'published' ? 'approved' : status === 'archived' ? 'rejected' : 'returned_for_revision'
     const reviewedAt = new Date().toISOString()
     const updatedProvenance = {

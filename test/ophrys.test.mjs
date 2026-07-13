@@ -45,6 +45,10 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.doesNotMatch(publicScript, /article\.tabIndex/)
   assert.match(publicFile('studio.js'), /The public trace could not be loaded\. No system state is being claimed\./)
   assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
+  assert.match(publicFile('admin.html'), /id="candidate-comparison"/)
+  assert.match(publicFile('admin.js'), /selectedCandidateIds\.size < 2/)
+  assert.match(publicFile('admin.js'), /Curatorial rationale/)
+  assert.match(publicFile('comparison.css'), /@media \(max-width: 1050px\)[\s\S]*\.candidate-comparison[\s\S]*grid-template-columns: 1fr/)
 })
 
 test('aggregate events never create visitor identity records', () => {
@@ -109,6 +113,21 @@ test('public and protected server surfaces keep their boundary', async () => {
   const adminResponse = await fetch(`${origin}/api/admin/state`, { headers: { authorization: 'Bearer test-operator-token' } })
   assert.equal(adminResponse.status, 200)
   assert.equal((await adminResponse.json()).system.model, 'gpt-5.6-sol')
+
+  const missingRationale = await fetch(`${origin}/api/admin/artworks/seed-false-spring/status`, {
+    method: 'PATCH',
+    headers: { authorization: 'Bearer test-operator-token', 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'published', reason: '' }),
+  })
+  assert.equal(missingRationale.status, 400)
+  assert.match((await missingRationale.json()).error, /Curatorial rationale required/i)
+
+  const reasonedApproval = await fetch(`${origin}/api/admin/artworks/seed-false-spring/status`, {
+    method: 'PATCH',
+    headers: { authorization: 'Bearer test-operator-token', 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'published', reason: 'The seed remains the clearest bounded public baseline.' }),
+  })
+  assert.equal(reasonedApproval.status, 200)
 
   server.close()
   await once(server, 'close')
@@ -191,7 +210,12 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.promptVersion, 'ophrys-composition-v1')
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
-  assert.throws(() => store.setArtworkStatus(work.id, 'archived'), /Rejection reason required/i)
+  assert.throws(() => store.setArtworkStatus(work.id, 'published'), /Curatorial rationale required/i)
+  assert.throws(() => store.setArtworkStatus(work.id, 'archived'), /Curatorial rationale required/i)
+  store.setArtworkStatus(work.id, 'published', { reason: 'The proposition and counter-reading are sufficiently precise for public review.' })
+  const approved = store.listArtworks({ limit: 4 }).find(item => item.id === work.id)
+  assert.equal(approved.provenance.review.decision, 'approved')
+  assert.equal(approved.provenance.review.rationale, 'The proposition and counter-reading are sufficiently precise for public review.')
   store.setArtworkStatus(work.id, 'archived', { reason: 'The packet needs a fuller counter-reading before publication.' })
   const archived = store.listArtworks({ limit: 4 }).find(item => item.id === work.id)
   assert.equal(archived.status, 'archived')

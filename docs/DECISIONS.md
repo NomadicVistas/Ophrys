@@ -31,3 +31,7 @@ Each generated artwork stores a provenance packet alongside the candidate record
 ## D-008 · Accessibility changes the encounter structure
 
 Keyboard access, reduced motion and failure states are part of the artwork's public agency rather than a separate explanatory layer. Primary navigation remains present on narrow screens, refusal and Operator controls use native elements, artwork cards lead somewhere on activation, and a failed data request visibly declines to claim system state. The automated suite protects these boundaries without claiming final WCAG certification.
+
+## D-009 · Comparison precedes publication decisions
+
+Candidate selection is reversible Operator-interface state and never changes a candidate record. The Operator may align at most two works across the same artistic, public-agency and provenance fields, then approve or reject each independently. Both terminal decisions require a written human rationale stored in the candidate's provenance packet; model output and comparison position never decide publication.

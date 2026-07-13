@@ -13,7 +13,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-007 | P0 | BLOCKED [!] | Production deployment | Disk capacity, admin secret, Caddy route and HTTPS verified |
 | OPH-008 | P0 | BLOCKED [!] | Hackathon evidence package | Prior/new boundary, baseline SHA and repeatable judge path complete; primary `/feedback` Session ID and public URL require human/external state |
 | OPH-009 | P0 | BLOCKED [!] | Submission video and Devpost entry | Human recording, approval and submission required |
-| OPH-010 | P1 | READY | Artwork candidate comparison | Curator can compare, approve, reject and record rationale |
+| OPH-010 | P1 | DONE | Artwork candidate comparison | Operator compares up to two candidates across artistic, public-agency and provenance fields; approval and rejection both require stored rationale |
 | OPH-011 | P1 | READY | Education encounter protocol | Lure → reveal → counter-read flow tested with explicit learning outcome |
 | OPH-012 | P1 | READY | Cost and compute ledger | Usage, latency, model and bounded budget visible to Operator/Studio |
 | OPH-013 | P2 | LATER | Physical light/sound bridge | Hardware adapter consumes the same bounded artwork score |

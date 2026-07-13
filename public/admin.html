@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow">
-  <title>Ophrys Operator</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/accessibility.css"><script src="/admin.js" type="module"></script>
+  <title>Ophrys Operator</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/accessibility.css"><link rel="stylesheet" href="/comparison.css"><script src="/admin.js" type="module"></script>
 </head>
 <body data-surface="admin" class="admin-body">
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -26,7 +26,12 @@
         </form>
         <section class="control-panel cycle-control"><h2>Composition organ</h2><p>Run one GPT‑5.6 cycle now. In curated mode, the resulting work enters Studio until approved.</p><button id="run-cycle" class="button signal" type="button">Generate artwork</button><pre id="cycle-result" role="status" aria-live="polite">Awaiting instruction.</pre></section>
       </div>
-      <section class="control-panel"><h2>Artwork queue</h2><div id="admin-artworks" class="admin-artworks"></div></section>
+      <section class="control-panel comparison-panel" aria-labelledby="comparison-heading">
+        <header><div><p class="eyebrow">Bounded human review</p><h2 id="comparison-heading">Candidate comparison</h2></div><p>Select up to two works from the queue. Compare their propositions, visitor relations, lure/counter-read pair and provenance before making a decision.</p></header>
+        <p id="comparison-selection-status" class="surface-status" role="status" aria-live="polite">Select candidates from the queue below.</p>
+        <div id="candidate-comparison" class="candidate-comparison"></div>
+      </section>
+      <section class="control-panel"><h2>Artwork queue</h2><p>Selection does not change publication state. Approval and rejection remain explicit human decisions in the comparison workspace.</p><div id="admin-artworks" class="admin-artworks"></div></section>
     </section>
   </main>
 </body>

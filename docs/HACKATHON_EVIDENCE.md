@@ -16,6 +16,7 @@ Work added from July 13, 2026 onward:
 - deterministic privacy, authorization and API-contract tests;
 - a bounded aggregate-driven public field score with consequential refusal and immediate counter-read rendering;
 - artwork candidates with stored provenance packets, including prompt version, aggregate input summary, usage data, rights basis and curator rationale;
+- a protected two-candidate comparison workspace with aligned artistic, public-agency and provenance fields plus rationale-required human approval or rejection;
 - accessible keyboard paths, reduced-motion behaviour, AA contrast checks, responsive mobile navigation and truthful failure states across all three surfaces;
 - standalone project board, evidence log and deployment plan.
 - a credential-free judging smoke path that verifies the public encounter, consequential refusal, Studio trace, Operator boundary and human-curated publication mode.

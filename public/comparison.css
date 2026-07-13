@@ -1,0 +1,101 @@
+.comparison-panel > header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4vw;
+}
+
+.comparison-panel > header > p {
+  color: #aeb2a8;
+}
+
+.candidate-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: #44483f;
+}
+
+.comparison-card {
+  min-width: 0;
+  padding: 1.5rem;
+  background: #0e110e;
+}
+
+.comparison-card > header {
+  min-height: 10rem;
+}
+
+.comparison-card h3 {
+  margin: .65rem 0 .25rem;
+  font-size: 2rem;
+  letter-spacing: -.04em;
+}
+
+.comparison-field {
+  padding: 1rem 0;
+  border-top: 1px solid #33372f;
+}
+
+.comparison-field h4 {
+  margin: 0;
+  color: var(--signal);
+  font-family: var(--mono);
+  font-size: .62rem;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.comparison-field p {
+  margin: .4rem 0 0;
+  color: #c1c4bc;
+  font-size: .82rem;
+}
+
+.candidate-decision {
+  display: grid;
+  gap: .8rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--signal);
+}
+
+.candidate-decision label {
+  display: grid;
+  gap: .4rem;
+  color: #aaaea5;
+  font-family: var(--mono);
+  font-size: .65rem;
+  text-transform: uppercase;
+}
+
+.candidate-decision textarea {
+  width: 100%;
+  padding: .8rem;
+  border: 1px solid #4b5046;
+  background: #171b16;
+  color: var(--paper);
+}
+
+.decision-help {
+  margin: 0;
+  color: #aeb2a8;
+  font-size: .75rem;
+}
+
+.candidate-decision-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+@media (max-width: 1050px) {
+  .candidate-comparison {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .comparison-panel > header {
+    grid-template-columns: 1fr;
+  }
+}

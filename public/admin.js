@@ -1,6 +1,7 @@
 const TOKEN_KEY = 'ophrys-admin-token'
 let token = sessionStorage.getItem(TOKEN_KEY) || ''
 let state = null
+const selectedCandidateIds = new Set()
 
 const loginPanel = document.querySelector('#login-panel')
 const adminPanel = document.querySelector('#admin-panel')
@@ -29,6 +30,86 @@ function setForm(settings) {
   }
 }
 
+function comparisonField(label, value) {
+  const section = element('section', 'comparison-field')
+  section.append(element('h4', '', label), element('p', '', value || 'Not recorded'))
+  return section
+}
+
+async function decideCandidate(work, status, reason) {
+  await api(`/api/admin/artworks/${work.id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, reason }),
+  })
+  await load()
+}
+
+function comparisonCard(work) {
+  const provenance = work.provenance || {}
+  const review = provenance.review || {}
+  const usage = provenance.response?.usage
+  const article = element('article', 'comparison-card')
+  const header = element('header')
+  header.append(element('span', `status ${work.status}`, work.status), element('h3', '', work.title), element('p', 'medium', work.medium))
+  article.append(
+    header,
+    comparisonField('Proposition', work.proposition),
+    comparisonField('Public relation', work.visitorRelation),
+    comparisonField('Exhibition form', work.exhibitionForm),
+    comparisonField('Learning question', work.learningQuestion),
+    comparisonField('Lure hypothesis', work.lureHypothesis),
+    comparisonField('Counter-reading', work.counterReading),
+    comparisonField('Materials', Array.isArray(work.materials) ? work.materials.join(', ') : String(work.materials || '')),
+    comparisonField('Provenance', `${work.model} / ${provenance.promptVersion || 'prompt unrecorded'}${usage ? ` / ${usage.total_tokens ?? 'unknown'} tokens` : ''}`),
+    comparisonField('Rights basis', provenance.rightsBasis),
+    comparisonField('Current review', review.rationale || review.rejectionReason || review.decision || 'Pending'),
+  )
+
+  const form = element('form', 'candidate-decision')
+  const label = element('label', '', 'Curatorial rationale')
+  const reason = element('textarea')
+  reason.name = 'reason'; reason.rows = 4; reason.required = true; reason.maxLength = 2000
+  reason.value = review.rationale || review.rejectionReason || ''
+  reason.setAttribute('aria-describedby', `decision-help-${work.id}`)
+  label.append(reason)
+  const help = element('p', 'decision-help', 'Required for approval or rejection. This record becomes part of the candidate provenance packet.')
+  help.id = `decision-help-${work.id}`
+  const actions = element('div', 'candidate-decision-actions')
+  const approve = element('button', 'button signal', 'Approve for publication')
+  approve.type = 'submit'; approve.value = 'published'; approve.disabled = work.status === 'published'
+  const reject = element('button', 'button', 'Reject and archive')
+  reject.type = 'submit'; reject.value = 'archived'; reject.disabled = work.status === 'archived'
+  actions.append(approve, reject)
+  const result = element('p', '', '')
+  result.setAttribute('role', 'status'); result.setAttribute('aria-live', 'polite')
+  form.append(label, help, actions, result)
+  form.addEventListener('submit', async event => {
+    event.preventDefault()
+    const status = event.submitter?.value
+    if (!['published', 'archived'].includes(status)) return
+    const rationale = reason.value.trim()
+    if (!rationale) { result.textContent = 'Enter a curatorial rationale before deciding.'; reason.focus(); return }
+    approve.disabled = true; reject.disabled = true; result.textContent = 'Recording decision…'
+    try { await decideCandidate(work, status, rationale) }
+    catch (error) { result.textContent = error.message; approve.disabled = work.status === 'published'; reject.disabled = work.status === 'archived' }
+  })
+  article.append(form)
+  return article
+}
+
+function renderComparison() {
+  const selected = [...selectedCandidateIds].map(id => state.artworks.find(work => work.id === id)).filter(Boolean)
+  const status = document.querySelector('#comparison-selection-status')
+  status.textContent = selected.length === 0
+    ? 'Select one or two candidates from the queue below.'
+    : selected.length === 1
+      ? `${selected[0].title} selected. Select one more candidate for side-by-side comparison.`
+      : `Comparing ${selected[0].title} with ${selected[1].title}.`
+  const workspace = document.querySelector('#candidate-comparison')
+  workspace.replaceChildren(...selected.map(comparisonCard))
+  if (selected.length === 0) workspace.append(element('p', 'empty', 'No candidates selected.'))
+}
+
 function artworkControl(work) {
   const row = element('article', 'admin-work')
   const provenance = work.provenance || {}
@@ -43,31 +124,27 @@ function artworkControl(work) {
   if (provenance.rightsBasis) body.append(element('p', '', provenance.rightsBasis))
   if (review.rationale || review.rejectionReason) body.append(element('p', '', review.rationale || review.rejectionReason))
   const controls = element('div', 'admin-work-actions')
-  for (const status of ['published', 'studio', 'archived']) {
-    const button = element('button', 'text-button', status)
-    button.type = 'button'; button.disabled = status === work.status
-    button.addEventListener('click', async () => {
-      const promptLabel = status === 'archived' ? 'Rejection reason' : 'Curatorial rationale'
-      const answer = window.prompt(`${promptLabel} for ${work.title}`, review.rationale || '')
-      if (answer === null) return
-      if (status === 'archived' && !answer.trim()) {
-        window.alert('A rejection reason is required before archiving a candidate.')
-        return
-      }
-      await api(`/api/admin/artworks/${work.id}/status`, { method: 'PATCH', body: JSON.stringify({ status, reason: answer }) })
-      await load()
-    })
-    controls.append(button)
-  }
+  const compare = element('button', 'text-button', selectedCandidateIds.has(work.id) ? 'Remove from comparison' : 'Compare candidate')
+  compare.type = 'button'; compare.setAttribute('aria-pressed', String(selectedCandidateIds.has(work.id)))
+  compare.addEventListener('click', () => {
+    if (selectedCandidateIds.has(work.id)) selectedCandidateIds.delete(work.id)
+    else if (selectedCandidateIds.size < 2) selectedCandidateIds.add(work.id)
+    else { document.querySelector('#comparison-selection-status').textContent = 'Two candidates are already selected. Remove one before adding another.'; return }
+    document.querySelector('#admin-artworks').replaceChildren(...state.artworks.map(artworkControl))
+    renderComparison()
+  })
+  controls.append(compare)
   row.append(body, controls)
   return row
 }
 
 async function load() {
   state = await api('/api/admin/state')
+  for (const id of selectedCandidateIds) if (!state.artworks.some(work => work.id === id)) selectedCandidateIds.delete(id)
   loginPanel.hidden = true; adminPanel.hidden = false
   setForm(state.system)
   document.querySelector('#admin-artworks').replaceChildren(...state.artworks.map(artworkControl))
+  renderComparison()
 }
 
 document.querySelector('#login-form').addEventListener('submit', async event => {
