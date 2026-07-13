@@ -26,10 +26,13 @@ Publish only `127.0.0.1:7799:7799` on the host. Caddy should reverse proxy the p
 ## Current deployment gates
 
 - [ ] Host disk has safe working capacity.
-- [ ] Container image builds and tests on Node 24.
-- [ ] Operator token is generated and stored outside Git.
+- [x] Node 24 service runs healthy from the already-present runtime image without pulling or building under disk pressure.
+- [ ] The project Dockerfile image builds and tests once safe disk capacity is available.
+- [x] Operator token is generated with mode `0600` and stored outside Git.
 - [ ] Caddy site block routes to the service.
 - [ ] HTTPS certificate and redirect are verified.
-- [ ] `/api/health/live` and `/api/health/ready` return 200.
-- [ ] Public, Studio and unauthorized Operator probes pass.
-- [ ] Deployment receipt records image, commit, time and rollback target.
+- [x] `/api/health/live` and `/api/health/ready` return 200 inside the running service.
+- [x] Public, Studio and unauthorized/authenticated Operator probes pass locally.
+- [x] Deployment receipt records image, commit, time and rollback target.
+
+The service is ready on host loopback. The public release remains blocked until the host-level Caddy TLS failure is repaired and its upstream route is verified.

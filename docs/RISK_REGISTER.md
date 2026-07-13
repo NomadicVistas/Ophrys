@@ -10,8 +10,8 @@
 | Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 |
 | API cost or runaway generation | High | One bounded cycle, output limit, timeout, Operator control; budget still required | Human decision [!] |
 | OpenAI API quota blocks live judging evidence | High | Deterministic contract test remains runnable; add project quota and capture one redacted successful cycle | Blocked [!] |
-| Domain or TLS fails during judging | High | Loopback service, Caddy runbook, readiness probes, deployment receipt | Blocked [!] |
-| Host disk exhaustion prevents build/deploy | Critical | No image builds until safe cleanup is approved | Blocked [!] |
+| Domain or TLS fails during judging | High | Healthy loopback service, Caddy runbook, probes and deployment receipt; repair host-level TLS before marking public | Caddy handshake blocked [!] |
+| Host disk exhaustion prevents build/deploy | Critical | Reused an existing Node 24 runtime without pulling/building; no project image build until safe cleanup is approved | 496 MB free at receipt [!] |
 | Admin compromise | High | Long random token, same-origin mutations, edge protection, no public admin data | Deployment gate |
 | Accessibility is sacrificed for spectacle | Medium | Keyboard, reduced motion, contrast and mobile acceptance tests | OPH-006 |
 | Hackathon evaluates only prior concept | High | Prior/new record, commits, Codex account and runnable new software | Active |

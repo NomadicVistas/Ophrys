@@ -10,7 +10,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-004 | P0 | ACTIVE | Complete adaptive artwork loop | Bounded renderer changes from aggregate state; refusal changes next state |
 | OPH-005 | P0 | READY | Provenance and curator decision records | Model, prompt version, inputs, usage, rights, decision and rejection reason stored |
 | OPH-006 | P0 | READY | Accessibility and responsive verification | Keyboard, reduced motion, contrast, mobile and error-state evidence |
-| OPH-007 | P0 | BLOCKED [!] | Production deployment | Disk capacity, admin secret, Caddy route and HTTPS verified |
+| OPH-007 | P0 | BLOCKED [!] | Production deployment | Loopback service and Operator secret verified; host Caddy route, HTTPS and safe disk capacity remain |
 | OPH-008 | P0 | READY | Hackathon evidence package | Prior/new work, Codex account, session ID, test instructions complete |
 | OPH-009 | P0 | BLOCKED [!] | Submission video and Devpost entry | Human recording, approval and submission required |
 | OPH-010 | P1 | READY | Artwork candidate comparison | Curator can compare, approve, reject and record rationale |
