@@ -15,6 +15,7 @@ Work added from July 13, 2026 onward:
 - single-flight cycles, retention, human publication gates and public disclosure;
 - deterministic privacy, authorization and API-contract tests;
 - a bounded aggregate-driven public field score with consequential refusal and immediate counter-read rendering;
+- artwork candidates with stored provenance packets, including prompt version, aggregate input summary, usage data, rights basis and curator rationale;
 - standalone project board, evidence log and deployment plan.
 
 Git history is the canonical dated implementation record.

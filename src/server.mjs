@@ -112,7 +112,7 @@ export function createOphrysServer({ store = createOphrysStore(), adminToken = p
         const artworkMatch = url.pathname.match(/^\/api\/admin\/artworks\/([a-zA-Z0-9-]+)\/status$/)
         if (request.method === 'PATCH' && artworkMatch) {
           const input = await body(request)
-          store.setArtworkStatus(artworkMatch[1], input.status)
+          store.setArtworkStatus(artworkMatch[1], input.status, { reason: input.reason, reviewedBy: 'operator' })
           return json(response, 200, { updated: true, id: artworkMatch[1], status: input.status })
         }
       }

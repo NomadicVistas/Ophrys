@@ -3,6 +3,7 @@ import { once } from 'node:events'
 import test from 'node:test'
 import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
+import { runOphrysCycle } from '../src/ophrys-cycle.mjs'
 import { generateArtwork } from '../src/openai-artwork.mjs'
 
 test('aggregate events never create visitor identity records', () => {
@@ -87,7 +88,7 @@ test('GPT-5.6 generation uses Responses structured output without storing the re
   }
   const fetchImpl = async (_url, options) => {
     request = JSON.parse(options.body)
-    return { ok: true, status: 200, json: async () => ({ id: 'resp_test', model: 'gpt-5.6-sol', output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(expected) }] }] }) }
+    return { ok: true, status: 200, json: async () => ({ id: 'resp_test', model: 'gpt-5.6-sol', usage: { input_tokens: 111, output_tokens: 222, total_tokens: 333 }, output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(expected) }] }] }) }
   }
   const result = await generateArtwork({ settings: { model: 'gpt-5.6-sol', reasoningEffort: 'high', systemMode: 'compose', explorationRate: .3, curatorialDirective: 'Keep attraction visible, uncertain, and contestable.' }, metrics: [], recentArtworks: [], apiKey: 'test', fetchImpl })
   assert.equal(result.artwork.title, 'Mimic Field')
@@ -95,4 +96,65 @@ test('GPT-5.6 generation uses Responses structured output without storing the re
   assert.equal(request.store, false)
   assert.equal(request.reasoning.effort, 'high')
   assert.equal(request.text.format.type, 'json_schema')
+  assert.equal(result.usage.total_tokens, 333)
+  assert.equal(result.provenance.promptVersion, 'ophrys-composition-v1')
+  assert.deepEqual(result.provenance.response.usage.total_tokens, 333)
+  assert.match(result.provenance.rightsBasis, /aggregate public events/i)
+})
+
+test('artwork provenance packets store the composition packet and curator decision', async () => {
+  const store = createOphrysStore(':memory:')
+  const generated = {
+    title: 'Packet Study',
+    medium: 'Spatial light and public trace',
+    proposition: 'A bounded field reveals its own recordkeeping and makes the curatorial packet inspectable before approval.',
+    publicDescription: 'A compact artwork proposition that shows how a candidate can remain provisional while its provenance packet is still legible.',
+    visitorRelation: 'Visitors can inspect the candidate, its counter-reading and its review packet without yielding personal data.',
+    exhibitionForm: 'Threshold field, explicit residue and a review surface share one bounded technical body.',
+    learningQuestion: 'What does a public artwork owe to its own record of becoming?',
+    lureHypothesis: 'A visible packet makes the difference between a candidate and a decision harder to ignore.',
+    counterReading: 'A refusal to approve becomes part of the packet rather than a hidden operator note.',
+    materials: ['light', 'trace', 'review surface'],
+  }
+  await runOphrysCycle({
+    store,
+    trigger: 'test',
+    force: true,
+    generator: async () => ({
+      artwork: generated,
+      model: 'gpt-5.6-sol',
+      responseId: 'resp_packet',
+      usage: { input_tokens: 88, output_tokens: 144, total_tokens: 232 },
+      provenance: {
+        promptVersion: 'ophrys-composition-v1',
+        sourceReferences: ['Aggregate public metrics', 'Recent candidate titles'],
+        rightsBasis: 'Generated from aggregate events only.',
+        inputSummary: {
+          promptVersion: 'ophrys-composition-v1',
+          settings: { systemMode: 'compose', model: 'gpt-5.6-sol', reasoningEffort: 'high', explorationRate: 0.3, metricWindowHours: 24 },
+          aggregateEventSummary: [{ surface: 'public', kind: 'arrival', count: 3 }],
+          recentArtworkSummary: [{ id: 'seed-false-spring', title: 'False Spring', status: 'published', createdAt: new Date().toISOString() }],
+          requiredSpatialGrammar: ['threshold', 'field', 'residue', 'counter-field'],
+          desiredAudience: ['curious general public'],
+        },
+        response: { responseId: 'resp_packet', model: 'gpt-5.6-sol', usage: { input_tokens: 88, output_tokens: 144, total_tokens: 232 } },
+        review: { status: 'studio', decision: 'pending', rationale: null, rejectionReason: null, reviewedAt: null, reviewedBy: null },
+      },
+    }),
+  })
+
+  const artworks = store.listArtworks({ limit: 4 })
+  const work = artworks.find(item => item.title === 'Packet Study')
+  assert.ok(work)
+  assert.equal(work.model, 'gpt-5.6-sol')
+  assert.equal(work.provenance.promptVersion, 'ophrys-composition-v1')
+  assert.equal(work.provenance.response.usage.total_tokens, 232)
+  assert.match(work.provenance.rightsBasis, /aggregate events only/i)
+  assert.throws(() => store.setArtworkStatus(work.id, 'archived'), /Rejection reason required/i)
+  store.setArtworkStatus(work.id, 'archived', { reason: 'The packet needs a fuller counter-reading before publication.' })
+  const archived = store.listArtworks({ limit: 4 }).find(item => item.id === work.id)
+  assert.equal(archived.status, 'archived')
+  assert.equal(archived.provenance.review.decision, 'rejected')
+  assert.equal(archived.provenance.review.rejectionReason, 'The packet needs a fuller counter-reading before publication.')
+  store.close()
 })

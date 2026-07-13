@@ -7,7 +7,7 @@
 | Generated work is presented as approved art | High | All model output enters `studio`; human publication gate | Active |
 | Public Studio leaks secrets or provider details | High | Separate projection; redacted errors; server-only credentials | Active |
 | Concurrent cycles corrupt state or duplicate work | High | SQLite WAL, busy timeout, one-running-cycle index, transactional completion | Active |
-| Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 |
+| Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 implemented |
 | API cost or runaway generation | High | One bounded cycle, output limit, timeout, Operator control; budget still required | Human decision [!] |
 | OpenAI API quota blocks live judging evidence | High | Deterministic contract test remains runnable; add project quota and capture one redacted successful cycle | Blocked [!] |
 | Domain or TLS fails during judging | High | Loopback service, Caddy runbook, readiness probes, deployment receipt | Blocked [!] |

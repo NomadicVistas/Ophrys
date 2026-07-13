@@ -32,6 +32,9 @@ function cycleRow(cycle) {
 
 function artworkRow(work) {
   const article = element('article', 'studio-work')
+  const provenance = work.provenance || {}
+  const review = provenance.review || {}
+  const response = provenance.response || {}
   const head = element('header')
   head.append(element('span', `status ${work.status}`, work.status), element('span', '', date(work.createdAt)))
   article.append(head, element('h3', '', work.title), element('p', 'medium', work.medium), element('p', '', work.proposition))
@@ -39,6 +42,23 @@ function artworkRow(work) {
   const lure = element('div'); lure.append(element('span', '', 'LURE HYPOTHESIS'), element('p', '', work.lureHypothesis))
   const counter = element('div'); counter.append(element('span', '', 'COUNTER-READING'), element('p', '', work.counterReading))
   pair.append(lure, counter); article.append(pair)
+  const provenancePair = element('div', 'tactic-pair')
+  const input = element('div')
+  const recentTitles = (provenance.inputSummary?.recentArtworkSummary || []).map(item => item.title).filter(Boolean).slice(0, 3)
+  const inputPieces = [provenance.promptVersion || 'prompt version unrecorded']
+  if (recentTitles.length) inputPieces.push(`recent: ${recentTitles.join(', ')}`)
+  if (response.responseId) inputPieces.push(`response: ${response.responseId}`)
+  input.append(element('span', '', 'PROMPT / INPUT'), element('p', '', inputPieces.join(' · ')))
+  const rights = element('div')
+  const usage = response.usage?.total_tokens ?? response.usage?.output_tokens ?? response.usage?.input_tokens ?? null
+  const rightsPieces = [provenance.rightsBasis || 'Rights basis unrecorded.']
+  if (usage !== null) rightsPieces.push(`usage: ${usage} tokens`)
+  rightsPieces.push(`decision: ${review.decision || 'pending'}`)
+  if (review.rationale) rightsPieces.push(`rationale: ${review.rationale}`)
+  if (review.rejectionReason) rightsPieces.push(`rejection: ${review.rejectionReason}`)
+  rights.append(element('span', '', 'RIGHTS / REVIEW'), element('p', '', rightsPieces.join(' · ')))
+  provenancePair.append(input, rights)
+  article.append(provenancePair)
   return article
 }
 

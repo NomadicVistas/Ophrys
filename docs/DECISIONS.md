@@ -23,3 +23,7 @@ The composition organ emits strict JSON. Future visual/audio engines will render
 ## D-006 · Consequential refusal rotates a collective repertoire
 
 The public field renders a server-owned score with a fixed three-lure vocabulary and numeric bounds. Aggregate approach and attention alter its tempo and tilt. A refusal transaction suppresses the active lure, selects the next bounded lure and increments one coarse refusal count. The state is collective and contains no persistent visitor identifier or interpretation of why the refusal occurred.
+
+## D-007 · Artwork provenance lives with the candidate
+
+Each generated artwork stores a provenance packet alongside the candidate record. The packet carries the prompt version, aggregate input summary, returned usage data, rights basis, and curator review fields so approval, revision and rejection remain inspectable without exposing private visitor data or hidden reasoning.

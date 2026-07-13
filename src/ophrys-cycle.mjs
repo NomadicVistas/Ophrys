@@ -23,8 +23,9 @@ export async function runOphrysCycle({ store, trigger = 'manual', force = false,
     store.commitArtworkCycle(cycleId, {
       id: artworkId, ...result.artwork, model: result.model,
       status, createdAt: new Date().toISOString(),
+      provenance: result.provenance,
     }, { summary, responseId: result.responseId })
-    return { skipped: false, cycleId, artworkId, status, title: result.artwork.title, model: result.model }
+    return { skipped: false, cycleId, artworkId, status, title: result.artwork.title, model: result.model, usage: result.usage || null }
   } catch (error) {
     const message = safeError(error)
     store.completeCycle(cycleId, { status: 'failed', summary: 'The composition cycle stopped without publishing.', error: message })

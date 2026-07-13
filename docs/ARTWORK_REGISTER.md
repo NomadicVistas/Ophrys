@@ -14,6 +14,8 @@ Required fields:
 - rejection or revision reason;
 - public/exhibition status and documentation links.
 
+Implementation note: generated candidates now keep that packet in the artwork record itself, including prompt version, aggregate input summary, returned usage payload, rights basis and curator review fields. Archiving a candidate requires an explicit rejection reason.
+
 Current seed work: `False Spring` — human-authored baseline, public status, used to test the exhibition interface.
 
 Implementation note: the adaptive field score is system state, not a newly approved artwork. Its fixed `orbit`, `interruption`, and `split-signal` repertoire exists to test the seed work's consequential counter-reading; model-generated candidates still require separate provenance and human approval.

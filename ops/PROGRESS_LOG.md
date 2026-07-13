@@ -21,3 +21,9 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Added a visible public counter-control. Refusal atomically suppresses the active lure, rotates a fixed three-state repertoire, increments the aggregate refusal count and returns the revised score for immediate rendering.
 - Kept the state collective and minimal: the durable field record contains only active/suppressed lure names, a global revision and update time; it contains no visitor record or inferred trait.
 - Verified the loop with four deterministic tests plus a running-service smoke check (`orbit` → `interruption`, revision `1`, aggregate refusal `1`). `npm run check` and `npm test` pass.
+
+## 2026-07-13 — provenance packet
+
+- Completed OPH-005 by persisting a provenance packet with each generated candidate: prompt version, aggregate input summary, returned usage payload, rights basis, and curator review fields now travel with the artwork record.
+- Operator status changes now require and store a rationale, and archiving a candidate refuses without a rejection reason.
+- The Studio and Operator views surface the stored packet so the candidate remains inspectable without collapsing into hidden approval logic.

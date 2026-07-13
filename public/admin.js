@@ -31,13 +31,30 @@ function setForm(settings) {
 
 function artworkControl(work) {
   const row = element('article', 'admin-work')
-  const body = element('div'); body.append(element('span', `status ${work.status}`, work.status), element('h3', '', work.title), element('p', '', work.proposition))
+  const provenance = work.provenance || {}
+  const review = provenance.review || {}
+  const body = element('div')
+  body.append(
+    element('span', `status ${work.status}`, work.status),
+    element('h3', '', work.title),
+    element('p', '', work.proposition),
+    element('p', '', `Prompt ${provenance.promptVersion || 'unrecorded'} / ${review.decision || 'pending'}`),
+  )
+  if (provenance.rightsBasis) body.append(element('p', '', provenance.rightsBasis))
+  if (review.rationale || review.rejectionReason) body.append(element('p', '', review.rationale || review.rejectionReason))
   const controls = element('div', 'admin-work-actions')
   for (const status of ['published', 'studio', 'archived']) {
     const button = element('button', 'text-button', status)
     button.type = 'button'; button.disabled = status === work.status
     button.addEventListener('click', async () => {
-      await api(`/api/admin/artworks/${work.id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) })
+      const promptLabel = status === 'archived' ? 'Rejection reason' : 'Curatorial rationale'
+      const answer = window.prompt(`${promptLabel} for ${work.title}`, review.rationale || '')
+      if (answer === null) return
+      if (status === 'archived' && !answer.trim()) {
+        window.alert('A rejection reason is required before archiving a candidate.')
+        return
+      }
+      await api(`/api/admin/artworks/${work.id}/status`, { method: 'PATCH', body: JSON.stringify({ status, reason: answer }) })
       await load()
     })
     controls.append(button)

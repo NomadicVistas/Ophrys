@@ -32,6 +32,11 @@ function parseValue(value) {
   try { return JSON.parse(value) } catch { return value }
 }
 
+function parseObject(value) {
+  const parsed = parseValue(value || '{}')
+  return parsed && typeof parsed === 'object' ? parsed : {}
+}
+
 function ensureParent(path) {
   if (path !== ':memory:') mkdirSync(dirname(resolve(path)), { recursive: true })
 }
@@ -88,11 +93,14 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       materials TEXT NOT NULL,
       model TEXT NOT NULL,
       status TEXT NOT NULL,
+      provenance TEXT NOT NULL DEFAULT '{}',
       created_at TEXT NOT NULL,
       FOREIGN KEY (cycle_id) REFERENCES cycles(id)
     );
     CREATE UNIQUE INDEX IF NOT EXISTS one_active_cycle ON cycles(status) WHERE status = 'running';
   `)
+  const artworkColumns = db.prepare('PRAGMA table_info(artworks)').all().map(row => row.name)
+  if (!artworkColumns.includes('provenance')) db.exec("ALTER TABLE artworks ADD COLUMN provenance TEXT NOT NULL DEFAULT '{}'")
   db.prepare("UPDATE cycles SET status = 'abandoned', summary = 'Cycle expired before completion.', completed_at = ? WHERE status = 'running' AND started_at < ?")
     .run(new Date().toISOString(), new Date(Date.now() - 2 * 3600_000).toISOString())
 
@@ -115,6 +123,21 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       counterReading: 'A visible refusal control suppresses the currently favoured signal and records disagreement as a compositional event.',
       materials: ['directional light', 'spatial audio', 'coarse threshold sensor', 'local event display'],
       model: 'curatorial seed', status: 'published', createdAt: now,
+      provenance: {
+        promptVersion: 'human-baseline',
+        sourceReferences: ['Human-authored baseline work'],
+        rightsBasis: 'Baseline work authored by the project team for the exhibition interface.',
+        inputSummary: { type: 'seed baseline', note: 'No model request; used to test the exhibition interface.' },
+        response: { responseId: null, model: 'curatorial seed', usage: null },
+        review: {
+          status: 'published',
+          decision: 'approved',
+          rationale: 'Human-authored seed work for the public exhibition interface.',
+          rejectionReason: null,
+          reviewedAt: now,
+          reviewedBy: 'human baseline',
+        },
+      },
     })
   }
 
@@ -226,11 +249,12 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     db.prepare(`INSERT INTO artworks (
       id, cycle_id, title, medium, proposition, public_description, visitor_relation,
       exhibition_form, learning_question, lure_hypothesis, counter_reading, materials,
-      model, status, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      model, status, provenance, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .run(input.id, input.cycleId, input.title, input.medium, input.proposition, input.publicDescription,
         input.visitorRelation, input.exhibitionForm, input.learningQuestion, input.lureHypothesis,
-        input.counterReading, JSON.stringify(input.materials || []), input.model, input.status, input.createdAt || new Date().toISOString())
+        input.counterReading, JSON.stringify(input.materials || []), input.model, input.status,
+        JSON.stringify(input.provenance || {}), input.createdAt || new Date().toISOString())
     return input.id
   }
 
@@ -246,9 +270,28 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  function setArtworkStatus(id, status) {
+  function setArtworkStatus(id, status, { reason = null, reviewedBy = 'operator' } = {}) {
     if (!ARTWORK_STATUSES.has(status)) throw new Error('Invalid artwork status')
-    const result = db.prepare('UPDATE artworks SET status = ? WHERE id = ?').run(status, id)
+    const current = db.prepare('SELECT provenance FROM artworks WHERE id = ?').get(id)
+    if (!current) throw new Error('Artwork not found')
+    const provenance = parseObject(current.provenance)
+    const normalizedReason = typeof reason === 'string' ? reason.trim() : ''
+    if (status === 'archived' && !normalizedReason) throw new Error('Rejection reason required before archiving a candidate')
+    const decision = status === 'published' ? 'approved' : status === 'archived' ? 'rejected' : 'returned_for_revision'
+    const reviewedAt = new Date().toISOString()
+    const updatedProvenance = {
+      ...provenance,
+      review: {
+        ...(provenance.review || {}),
+        status,
+        decision,
+        rationale: normalizedReason || null,
+        rejectionReason: status === 'archived' ? normalizedReason : null,
+        reviewedAt,
+        reviewedBy,
+      },
+    }
+    const result = db.prepare('UPDATE artworks SET status = ?, provenance = ? WHERE id = ?').run(status, JSON.stringify(updatedProvenance), id)
     if (result.changes !== 1) throw new Error('Artwork not found')
   }
 
@@ -262,7 +305,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       visitorRelation: row.visitor_relation, exhibitionForm: row.exhibition_form,
       learningQuestion: row.learning_question, lureHypothesis: row.lure_hypothesis,
       counterReading: row.counter_reading, materials: parseValue(row.materials),
-      model: row.model, status: row.status, createdAt: row.created_at,
+      model: row.model, status: row.status, provenance: parseObject(row.provenance), createdAt: row.created_at,
     }))
   }
 
