@@ -36,7 +36,11 @@ Ophrys should begin as a bounded, inspectable system. A transparent feedback loo
 
 ## Inspectable ecosystem ledger
 
-The runnable service projects artwork, runtime-field and counter-signal nodes as one closed bounded graph. Artwork relations record explicit composition or curatorial context. Public refusals instead coalesce into at most one UTC-hour counter-signal node containing accepted/applied/deferred totals, with a `counter-to` edge to the shared runtime field. Counter-signals use the aggregate-retention policy and never become publication or approval records.
+The runnable service projects artwork, runtime-field, simulated physical-output and counter-signal nodes as one closed bounded graph. Artwork relations record explicit composition or curatorial context. Public refusals instead coalesce into at most one UTC-hour counter-signal node containing accepted/applied/deferred totals, with a `counter-to` edge to the shared runtime field. The current bounded score also has one `simulated-as` edge to a deterministic light/sound evidence frame. Counter-signals use the aggregate-retention policy and never become publication or approval records; simulator evidence cannot claim hardware liveness.
+
+## Transport-free physical bridge
+
+`src/physical-bridge.mjs` is a pure adapter boundary. It accepts field-score schema version 1, verifies the bounded lure repertoire and numeric ranges, and emits capped light, sound and timing values plus a stable input digest. It imports no network, process, serial, GPIO or device transport. A rejected input becomes an explicit quiet fallback: light disabled, sound disabled and zero timing. Studio displays the derived frame and its limits, but the service neither sends device commands nor stores sensor streams.
 
 ## Possible first stack
 

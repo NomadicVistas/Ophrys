@@ -1,6 +1,6 @@
 # Judging guide
 
-This path demonstrates the Build Week implementation without an API key, external service, persistent visitor record or model-generated code. It exercises the public field, consequential refusal, public Studio trace and protected Operator boundary.
+This path demonstrates the Build Week implementation without an API key, external service, persistent visitor record, hardware action or model-generated code. It exercises the public field, consequential refusal, public Studio trace, transport-free light/sound simulator and protected Operator boundary.
 
 ## Five-minute local verification
 
@@ -21,6 +21,7 @@ The smoke command starts Ophrys on an ephemeral loopback port with an in-memory 
 - only published work enters the public projection;
 - the first refusal in a declared 60-second interval suppresses the active lure, rotates the bounded repertoire and increments the public field revision; further same-interval refusals are counted as aggregate pressure but explicitly deferred;
 - Studio exposes that refusal as a coarse aggregate event and counter-read state;
+- the bounded field score produces a digest-linked light/sound simulator frame with hardware action disabled and transport set to `none`;
 - Operator data is denied without a bearer token; and
 - publication remains in human-curated mode.
 
@@ -35,7 +36,7 @@ OPHRYS_DB_PATH=:memory: OPHRYS_ADMIN_TOKEN=local-judging-token npm start
 ```
 
 1. Open `http://127.0.0.1:7799/#encounter`. Follow **Lure → Reveal → Counter-read**: notice the active lure, compare the separately labelled observation, interpretation, uncertainty, artistic choice and human responsibility, then activate **Refuse this lure**. On the first action in the current interval, the named lure must be suppressed, another must replace it, and the public field revision must increase. If the field interval is already refractory, the control must say that anonymous pressure was counted while no new revision is claimed. The learning and facilitation protocol is in `docs/EDUCATION_ENCOUNTER.md`.
-2. Open `http://127.0.0.1:7799/studio`. Under **Aggregate public field**, inspect the refusal count. The Studio separates observed counts, the provisional tactic, the counter-reading and curatorial status.
+2. Open `http://127.0.0.1:7799/studio`. Under **Aggregate public field**, inspect the refusal count. Under **Simulated physical bridge**, inspect the light/sound frame, source revision and digest; confirm that the panel says hardware action is disabled and does not claim a device rendered it. The Studio separates observed counts, the provisional tactic, the counter-reading and curatorial status.
 3. Open `http://127.0.0.1:7799/admin`. An empty or incorrect token must fail. The local token above reveals protected controls; it is deliberately disposable and must never be used for deployment.
 4. Test keyboard navigation and, if available, reduced-motion mode. The recorded browser matrix and automated assertions are in `docs/ACCESSIBILITY.md`.
 

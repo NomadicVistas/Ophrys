@@ -7,7 +7,7 @@ Last re-audited: 2026-07-14. This is the active phase-two plan; the stopped phas
 | Layer | Present on `codex/hourly-builder` | Evidence / gap |
 |---|---|---|
 | Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds honest continuity; OPH-017 separates accepted counter-pressure from bounded applied revisions and retains no request-level trace |
-| Ecosystem | Seed and generated artwork nodes, bounded runtime-field state, hourly counter-signal nodes, append-only curatorial decision nodes, redacted end-to-end candidate lifecycles, cycle/provenance packets, status transitions and explicit typed relations | OPH-019 connects aggregate observation through interpretation and human governance to a public/refused/revision/pending outcome; physical-output nodes remain to be connected |
+| Ecosystem | Seed and generated artwork nodes, bounded runtime-field state, hourly counter-signal nodes, append-only curatorial decision nodes, redacted end-to-end candidate lifecycles, simulator-only physical-output nodes, cycle/provenance packets, status transitions and explicit typed relations | OPH-020 connects the current field score to a digest-linked light/sound evidence frame while explicitly refusing hardware-liveness claims |
 | Development | Isolated review branch, narrow/full tests, project records, no deploy path | This job may commit and push only to `codex/hourly-builder`; it cannot merge or deploy |
 | Public production | `autopoiesis.art` is reachable and exposes a separate eight-agent gallery ecosystem | Read-only audit at 2026-07-14T11:49Z found no public Ophrys route; live copy claims “No prompts. No direction. Pure emergence.” and is not evidence for this bounded system |
 
@@ -39,8 +39,8 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 2 | OPH-017 · Counter-signal / erasure ledger nodes — **DONE** | OPH-015 topology; identity-free refractory bound is **DONE** | An anonymous burst rotates the field at most once per declared interval; refusals coalesce into one expiring hourly counter-signal node/edge with no request-level or individual attribution |
 | 3 | OPH-018 · Curatorial decision relations and lineage comparison — **DONE** | OPH-015, current rationale gate | Approve/reject/revise transitions appear as attributed human-governance edges; same-status requests cannot manufacture decisions; comparison never mutates candidate state |
 | 4 | OPH-019 · Public trace lifecycle — **DONE** | OPH-016–018 | Observation, interpretation, candidate, decision and public/refused outcome can be followed end-to-end with redacted public projections |
-| 5 | OPH-020 · Simulated physical bridge contract | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
-| 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric | OPH-019 | A visitor can distinguish node, relation, interpretation and human decision without disclosure; facilitator and automated evidence updated |
+| 5 | OPH-020 · Simulated physical bridge contract — **DONE** | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
+| 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
 | 7 | OPH-022 · Reliability/access/privacy/judge pass | Each preceding slice | Migrations, invalid relations, stale state, reduced motion, narrow screens, redaction and reproducible judge path are covered |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
@@ -61,7 +61,11 @@ On 2026-07-14 OPH-018 made approve, reject and return-for-revision into append-o
 
 On 2026-07-14 OPH-019 added a bounded read projection over existing cycle, provenance, artwork and curatorial-decision records. Each trace has five explicitly linked stages: coarse aggregate observation, provisional interpretation, Studio candidate, latest human-gate decision and public/refused/revision/pending outcome. Aggregate inputs are combined by event kind and the public projection omits source surfaces, request order, exact routes, provider response identifiers, raw errors and hidden model reasoning. The lifecycle does not create authority: only the existing authenticated, rationale-required decision transaction can produce a public or refused outcome. Deterministic tests prove both approval and refusal mappings, redaction, link closure and the empty state; the credential-free judge path now exercises a refused lifecycle without a paid API call.
 
-Next: OPH-020 should define a deterministic, simulated light/sound bridge consuming the existing bounded field score, including validation and a safe quiet fallback, without contacting real hardware.
+## Latest simulated physical bridge slice
+
+On 2026-07-14 OPH-020 added a pure deterministic adapter for field-score schema version 1. It validates the fixed lure repertoire, lure/counter-read relationship, score bounds, aggregate-count shape and canonical source timestamp before emitting capped light, sound and frame-timing values. Every valid frame carries a stable input digest and mapping version. Invalid or incomplete input returns zero light, zero sound and zero timing. The adapter has no device or network transport, reports `hardwareAction: false` and `transport: none`, and Studio explicitly says that a simulator frame is not evidence that a device rendered it. The current frame appears as a physical-output node related from the runtime field, preserving graph closure without claiming hardware liveness or adding visitor data.
+
+Next: OPH-021 should turn the connected runtime, lifecycle, governance and simulated-output records into a concise ecosystem literacy protocol and automated evidence rubric.
 
 ## Slice discipline
 

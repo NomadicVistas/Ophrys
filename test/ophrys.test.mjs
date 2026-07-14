@@ -8,6 +8,7 @@ import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
 import { runOphrysCycle } from '../src/ophrys-cycle.mjs'
 import { generateArtwork } from '../src/openai-artwork.mjs'
+import { simulatePhysicalBridge, validatePhysicalBridgeScore } from '../src/physical-bridge.mjs'
 
 const publicFile = name => readFileSync(new URL(`../public/${name}`, import.meta.url), 'utf8')
 
@@ -56,8 +57,10 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.html'), /PROJECTED COUNTER-SIGNALS[\s\S]*id="counter-signal-policy"/)
   assert.match(publicFile('studio.html'), /PROJECTED DECISIONS[\s\S]*id="curatorial-decision-policy"/)
   assert.match(publicFile('studio.html'), /id="lifecycles"[\s\S]*Public trace lifecycle[\s\S]*PROJECTED \/ TOTAL TRACES[\s\S]*id="lifecycle-redaction"/)
+  assert.match(publicFile('studio.html'), /id="physical-bridge"[\s\S]*Simulated physical bridge[\s\S]*id="physical-bridge-light"[\s\S]*id="physical-bridge-sound"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
   assert.match(publicFile('studio.js'), /renderLifecycles\(state\.lifecycles\)/)
+  assert.match(publicFile('studio.js'), /renderPhysicalBridge\(state\.physicalBridge\)/)
   assert.match(publicFile('studio.js'), /lifecycles\.traces\.map\(lifecycleRow\)/)
   assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
   assert.match(publicFile('studio.js'), /ecosystem\.counterSignalPolicy\.privacyLimit/)
@@ -192,7 +195,7 @@ test('the curatorial quartet enters the Studio without bypassing human publicati
   assert.deepEqual(store.listArtworks({ publicOnly: true, limit: 10 }).map(work => work.id), ['seed-false-spring'])
   const topology = store.getEcosystemTopology()
   assert.deepEqual(topology.statusCounts, { studio: 4, published: 1, archived: 0 })
-  assert.equal(topology.relations.length, 5)
+  assert.equal(topology.relations.length, 6)
   assert.equal(topology.nodeTypeCounts.curatorialDecision, 1)
   const emptyLifecycles = store.getPublicTraceLifecycles()
   assert.deepEqual(emptyLifecycles.projection, {
@@ -363,7 +366,7 @@ test('ecosystem topology projection stays closed when older relation endpoints f
 
   const topology = store.getEcosystemTopology()
   const nodeIds = new Set(topology.nodes.map(node => node.id))
-  assert.equal(topology.nodes.length, 41)
+  assert.equal(topology.nodes.length, 42)
   assert.equal(topology.relations.length, 120)
   assert.deepEqual(topology.statusCounts, { studio: 40, published: 0, archived: 0 })
   assert.deepEqual(topology.projection, {
@@ -371,12 +374,12 @@ test('ecosystem topology projection stays closed when older relation endpoints f
     counterSignalNodeLimit: 24,
     curatorialDecisionNodeLimit: 40,
     relationLimit: 120,
-    totalNodes: 48,
+    totalNodes: 49,
     totalArtworkNodes: 46,
     totalCounterSignalNodes: 0,
     totalCuratorialDecisionNodes: 1,
-    totalRelations: 866,
-    eligibleRelations: 780,
+    totalRelations: 867,
+    eligibleRelations: 781,
     nodesTruncated: true,
     relationsTruncated: true,
     scope: topology.projection.scope,
@@ -421,6 +424,59 @@ test('aggregate conditions bound the field score and an anonymous refusal burst 
   assert.equal(nextInterval.changed, true)
   assert.equal(nextInterval.fieldScore.revision, initial.revision + 2)
   assert.notEqual(nextInterval.fieldScore.activeLure, applied.fieldScore.activeLure)
+  store.close()
+})
+
+test('the physical bridge validates bounded scores and falls quiet without hardware transport', () => {
+  const store = createOphrysStore(':memory:')
+  const score = store.getFieldScore()
+  assert.deepEqual(validatePhysicalBridgeScore(score), { valid: true, errors: [] })
+
+  const first = simulatePhysicalBridge(score)
+  const repeated = simulatePhysicalBridge(structuredClone(score))
+  assert.deepEqual(repeated, first)
+  assert.equal(first.status, 'simulated')
+  assert.equal(first.source.revision, score.revision)
+  assert.equal(first.light.pulseBpm, score.tempoBpm)
+  assert.equal(first.sound.pulseBpm, score.tempoBpm)
+  assert.ok(first.light.intensityPercent >= 0 && first.light.intensityPercent <= 66)
+  assert.ok(first.sound.gainPercent >= 0 && first.sound.gainPercent <= 24)
+  assert.match(first.evidence.inputDigest, /^[a-f0-9]{64}$/)
+  assert.equal(first.safety.hardwareAction, false)
+  assert.equal(first.safety.transport, 'none')
+
+  const invalidScores = [
+    null,
+    { ...score, density: 13 },
+    { ...score, tempoBpm: 17 },
+    { ...score, tiltDegrees: Number.NaN },
+    { ...score, repertoire: ['orbit'] },
+    { ...score, aggregateBasis: { ...score.aggregateBasis, attention: -1 } },
+    { ...score, aggregateBasis: { ...score.aggregateBasis, visitorId: 'must-not-enter-the-contract' } },
+    { ...score, phase: 'counter-read', suppressedLure: score.activeLure },
+    { ...score, updatedAt: 'not-a-time' },
+  ]
+  for (const invalid of invalidScores) {
+    const fallback = simulatePhysicalBridge(invalid)
+    assert.equal(fallback.status, 'quiet-fallback')
+    assert.deepEqual(fallback.light, { enabled: false, pattern: 'quiet', intensityPercent: 0, hueDegrees: 0, pulseBpm: 0, tiltDegrees: 0 })
+    assert.deepEqual(fallback.sound, { enabled: false, voice: 'silence', gainPercent: 0, toneHz: 0, pulseBpm: 0 })
+    assert.equal(fallback.evidence.validation, 'failed')
+    assert.ok(fallback.evidence.errors.length >= 1)
+    assert.equal(fallback.safety.hardwareAction, false)
+    assert.equal(fallback.safety.transport, 'none')
+  }
+
+  const topology = store.getEcosystemTopology()
+  const output = topology.nodes.find(node => node.nodeType === 'physical-output')
+  assert.equal(output.id, first.id)
+  assert.equal(output.status, 'simulated')
+  assert.equal(topology.relations.some(relation => relation.fromNodeId === 'runtime-public-field' && relation.toNodeId === output.id && relation.kind === 'simulated-as'), true)
+  assert.match(topology.physicalOutputPolicy.boundary, /no real hardware action/i)
+  assert.equal(store.publicStudioState().physicalBridge.evidence.inputDigest, first.evidence.inputDigest)
+
+  const moduleSource = readFileSync(new URL('../src/physical-bridge.mjs', import.meta.url), 'utf8')
+  assert.doesNotMatch(moduleSource, /node:(?:http|https|net|dgram|child_process)|fetch\(|serial|gpio|mqtt/i)
   store.close()
 })
 
@@ -544,8 +600,9 @@ test('public and protected server surfaces keep their boundary', async () => {
   const studioResponse = await fetch(`${origin}/api/studio/state`)
   assert.equal(studioResponse.status, 200)
   const studioState = await studioResponse.json()
-  assert.equal(studioState.ecosystem.nodes.length, 7)
-  assert.equal(studioState.ecosystem.relations.length, 5)
+  assert.equal(studioState.ecosystem.nodes.length, 8)
+  assert.equal(studioState.ecosystem.relations.length, 6)
+  assert.equal(studioState.physicalBridge.safety.hardwareAction, false)
   assert.match(studioState.ecosystem.boundary, /autonomous approval/i)
 
   for (const slug of ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']) {
@@ -718,9 +775,9 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
   const topology = store.getEcosystemTopology()
-  assert.equal(topology.nodes.length, 8)
+  assert.equal(topology.nodes.length, 9)
   assert.deepEqual(topology.statusCounts, { studio: 5, published: 1, archived: 0 })
-  assert.equal(topology.relations.length, 6)
+  assert.equal(topology.relations.length, 7)
   const generatedRelation = topology.relations.find(relation => relation.fromArtworkId === work.id)
   assert.ok(generatedRelation)
   assert.deepEqual({ ...generatedRelation }, {

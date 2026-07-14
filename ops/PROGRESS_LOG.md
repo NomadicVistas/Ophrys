@@ -175,3 +175,14 @@ Next: implement OPH-020 as a deterministic simulated light/sound bridge with str
 - Verified the targeted transition/API tests, `npm run check`, all 17 tests and `npm run judge:smoke`.
 
 Next: OPH-020 remains the best bounded slice: a deterministic simulated light/sound bridge with strict score validation and a safe quiet fallback, without contacting real hardware.
+
+## 2026-07-14 — transport-free simulated physical bridge
+
+- Completed OPH-020 with a pure deterministic adapter that accepts only the existing bounded field-score schema and validates revision, phase/repertoire consistency, density, tempo, tilt, aggregate-count shape and canonical UTC source time.
+- Mapped each valid score into capped light intensity/pattern/hue and sound gain/tone values with a stable input digest and mapping version. Repeating the same score produces byte-equivalent simulator evidence.
+- Made failure quiet by construction: invalid or incomplete input returns light disabled, sound disabled and zero frame timing, with explicit validation errors.
+- Fixed the bridge to `hardwareAction: false` and `transport: none`; the module imports no device, network or process transport and performs no real hardware action.
+- Connected the current evidence frame to the runtime field with a typed `simulated-as` relation, displayed it in Studio and explicitly refused claims that a lamp, speaker, controller or installation rendered it.
+- Added deterministic boundary tests and extended the credential-free judge path. `npm run check`, all 18 tests and `npm run judge:smoke` pass.
+
+Next: OPH-021 ecosystem literacy protocol and evidence rubric, including the distinction between a simulated output record and physical hardware evidence.

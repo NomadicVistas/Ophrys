@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T19:30:23Z",
-  "lastSelectedItem": "OPH-018 curatorial transition invariant follow-up",
+  "lastSuccessfulRun": "2026-07-14T20:31:34Z",
+  "lastSelectedItem": "OPH-020 simulated physical light/sound bridge contract",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-020 simulated physical light/sound bridge contract",
+  "nextBestSlice": "OPH-021 ecosystem literacy protocol and evidence rubric",
   "deadline": "2026-07-22T00:00:00Z"
 }

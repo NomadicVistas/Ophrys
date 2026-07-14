@@ -154,6 +154,7 @@ function renderEcosystem(ecosystem) {
   document.querySelector('#published-node-count').textContent = String(ecosystem.statusCounts.published || 0)
   document.querySelector('#counter-signal-node-count').textContent = String(ecosystem.nodeTypeCounts.counterSignal || 0)
   document.querySelector('#decision-node-count').textContent = String(ecosystem.nodeTypeCounts.curatorialDecision || 0)
+  document.querySelector('#physical-output-node-count').textContent = String(ecosystem.nodeTypeCounts.physicalOutput || 0)
   document.querySelector('#lineage-boundary').textContent = ecosystem.boundary
   const truncation = []
   if (projection.nodesTruncated) truncation.push(`work view limited to ${projection.nodeLimit}, counter-signal view to ${projection.counterSignalNodeLimit}, and decision view to ${projection.curatorialDecisionNodeLimit}`)
@@ -161,9 +162,26 @@ function renderEcosystem(ecosystem) {
   document.querySelector('#lineage-projection').textContent = `${projection.scope} ${projection.eligibleRelations} of ${projection.totalRelations} total relations are eligible for this closed node projection.${truncation.length ? ` Current limits: ${truncation.join('; ')}.` : ''}`
   document.querySelector('#counter-signal-policy').textContent = `${ecosystem.counterSignalPolicy.aggregation} Retention: ${ecosystem.counterSignalPolicy.retentionHours} hours. ${ecosystem.counterSignalPolicy.privacyLimit}`
   document.querySelector('#curatorial-decision-policy').textContent = `${ecosystem.curatorialDecisionPolicy.authority} ${ecosystem.curatorialDecisionPolicy.limit}`
+  document.querySelector('#physical-output-policy').textContent = `${ecosystem.physicalOutputPolicy.contract}. ${ecosystem.physicalOutputPolicy.boundary} ${ecosystem.physicalOutputPolicy.fallback}`
   document.querySelector('#lineage-list').replaceChildren(...(ecosystem.relations.length
     ? ecosystem.relations.map(relationRow)
     : [element('p', 'empty', 'One seed work is present. Explicit lineage will appear after a bounded composition cycle uses an earlier work as context.')]))
+}
+
+function renderPhysicalBridge(bridge) {
+  document.querySelector('#physical-bridge-state').textContent = bridge.status
+  document.querySelector('#physical-bridge-revision').textContent = bridge.source ? String(bridge.source.revision) : 'invalid input'
+  document.querySelector('#physical-bridge-light').textContent = bridge.light.enabled
+    ? `${bridge.light.pattern} · ${bridge.light.intensityPercent}% · ${bridge.light.pulseBpm} BPM`
+    : 'quiet · 0%'
+  document.querySelector('#physical-bridge-sound').textContent = bridge.sound.enabled
+    ? `${bridge.sound.toneHz} Hz · ${bridge.sound.gainPercent}% · ${bridge.sound.pulseBpm} BPM`
+    : 'silence · 0%'
+  document.querySelector('#physical-bridge-boundary').textContent = `Hardware action: ${bridge.safety.hardwareAction ? 'enabled' : 'disabled'} · transport: ${bridge.safety.transport}.`
+  document.querySelector('#physical-bridge-evidence').textContent = bridge.evidence.validation === 'passed'
+    ? `Validated by ${bridge.evidence.mappingVersion}; input digest ${bridge.evidence.inputDigest}. This is a deterministic simulator frame, not evidence that a device rendered it.`
+    : `Validation failed: ${bridge.evidence.errors.join('; ')}`
+  document.querySelector('#physical-bridge-fallback').textContent = bridge.safety.fallback
 }
 
 const status = document.querySelector('#studio-status')
@@ -200,6 +218,7 @@ try {
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
   renderRuntime(state.runtime)
+  renderPhysicalBridge(state.physicalBridge)
   renderLifecycles(state.lifecycles)
   renderEcosystem(state.ecosystem)
   renderComputeLedger(state.compute)

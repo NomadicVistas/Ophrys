@@ -25,6 +25,7 @@ Work added from July 13, 2026 onward:
 - an identity-free public-field refractory interval that records refusal pressure only in aggregate, permits at most one repertoire revision per 60 seconds, and reports applied versus deferred outcomes without tracking a visitor.
 - an expiring hourly counter-signal ledger that coalesces refusal pressure into accepted/applied/deferred totals and a typed relation to the bounded runtime field without retaining request-level traces.
 - a bounded public lifecycle view connecting redacted aggregate observation, provisional interpretation, candidate, human decision and public/refused/revision outcome without creating a second mutable history.
+- a deterministic simulator-only light/sound bridge with strict score validation, capped outputs, stable input evidence, quiet fallback and no device transport or real hardware action.
 - four original image-assisted, browser-native artwork studies that turn the existing Threshold/Field/Residue/Counter-field concepts into runnable encounters while preserving explicit unpublished status and human approval.
 
 Git history is the canonical dated implementation record.

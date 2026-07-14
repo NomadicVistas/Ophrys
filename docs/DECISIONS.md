@@ -75,3 +75,7 @@ Approval, rejection and return-for-revision each require a rationale and write o
 ## D-019 · Public lifecycles are derived, redacted views
 
 An end-to-end public trace is derived from the existing cycle, artwork provenance and curatorial-decision ledgers rather than stored as a second mutable history. Each bounded trace connects a coarse aggregate observation, a labelled provisional interpretation, its Studio candidate, the latest human-gate decision and the resulting public, refused, revision or pending outcome. Observation inputs are combined by event kind; surfaces, request order, exact routes, provider response identifiers, raw errors and hidden model reasoning are omitted. A trace can report publication only when an append-only human approval exists.
+
+## D-020 · Physical output begins as a transport-free deterministic contract
+
+The first light/sound bridge consumes only the existing bounded field-score schema. It validates repertoire, phase, numeric limits, aggregate-count shape and source timestamp before mapping a score to capped light and sound values. The evidence packet carries a stable digest of the validated input, the mapping version and an explicit `hardwareAction: false` / `transport: none` boundary. Invalid or incomplete input returns a quiet frame with light and sound disabled instead of attempting recovery through a device. The current frame is a read projection connected to the runtime-field node; it is not evidence that physical hardware is present, live or rendered the output.

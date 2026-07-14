@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
+import { simulatePhysicalBridge } from './physical-bridge.mjs'
 
 const DEFAULT_SETTINGS = {
   systemMode: 'compose',
@@ -720,6 +721,34 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       createdAt: fieldScore.updatedAt,
       revision: fieldScore.revision,
     }
+    const physicalBridge = simulatePhysicalBridge(fieldScore)
+    const physicalOutputNode = {
+      id: physicalBridge.id,
+      nodeType: 'physical-output',
+      title: 'Simulated light / sound frame',
+      status: physicalBridge.status,
+      origin: 'deterministic-simulator',
+      cycleId: null,
+      createdAt: fieldScore.updatedAt,
+      output: {
+        light: physicalBridge.light,
+        sound: physicalBridge.sound,
+        inputDigest: physicalBridge.evidence.inputDigest,
+      },
+    }
+    const physicalOutputRelation = {
+      fromNodeId: runtimeFieldNode.id,
+      fromTitle: runtimeFieldNode.title,
+      fromStatus: runtimeFieldNode.status,
+      fromType: 'runtime-field',
+      toNodeId: physicalOutputNode.id,
+      toTitle: physicalOutputNode.title,
+      toStatus: physicalOutputNode.status,
+      toType: 'physical-output',
+      kind: 'simulated-as',
+      evidence: 'The validated bounded field score deterministically produced this simulator frame. Transport is disabled and no light, speaker, controller, or other hardware was contacted.',
+      createdAt: fieldScore.updatedAt,
+    }
     const counterSignals = listProjectedCounterSignals()
     const counterSignalNodes = counterSignals.map(signal => ({
       id: `counter-signal:${signal.bucket}`,
@@ -750,7 +779,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       createdAt: signal.bucket,
       expiresAt: signal.expiresAt,
     }))
-    const decisionLimit = Math.min(TOPOLOGY_DECISION_LIMIT, Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length))
+    const decisionLimit = Math.min(TOPOLOGY_DECISION_LIMIT, Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length - 1))
     const curatorialDecisions = listProjectedCuratorialDecisions(artworkIds, decisionLimit)
     const curatorialDecisionNodes = curatorialDecisions.map(decision => ({
       id: decision.id,
@@ -781,7 +810,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       evidence: `${decision.actorRole} recorded this bounded curatorial decision with rationale: ${decision.rationale} The record does not make comparison authoritative or prove reviewer identity.`,
       createdAt: decision.createdAt,
     }))
-    const artworkRelationLimit = Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length - curatorialDecisionRelations.length)
+    const artworkRelationLimit = Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length - curatorialDecisionRelations.length - 1)
     const artworkRelations = listProjectedArtworkRelations(artworkIds, artworkRelationLimit).map(relation => ({
       ...relation,
       fromNodeId: relation.fromArtworkId,
@@ -789,27 +818,27 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       toNodeId: relation.toArtworkId,
       toType: 'artwork',
     }))
-    const nodes = [runtimeFieldNode, ...counterSignalNodes, ...curatorialDecisionNodes, ...artworkNodes]
-    const relations = [...counterSignalRelations, ...curatorialDecisionRelations, ...artworkRelations]
+    const nodes = [runtimeFieldNode, physicalOutputNode, ...counterSignalNodes, ...curatorialDecisionNodes, ...artworkNodes]
+    const relations = [physicalOutputRelation, ...counterSignalRelations, ...curatorialDecisionRelations, ...artworkRelations]
     const totalArtworkNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count)
     const counterSignalCutoff = new Date(currentDate().getTime() - Number(getSettings().metricRetentionHours || 72) * 3600_000).toISOString()
     const totalCounterSignalNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM counter_signal_buckets WHERE bucket >= ?').get(counterSignalCutoff).count)
     const totalArtworkRelations = Number(db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count)
     const totalCuratorialDecisionNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions').get().count)
-    const totalRelations = totalArtworkRelations + totalCounterSignalNodes + totalCuratorialDecisionNodes
+    const totalRelations = 1 + totalArtworkRelations + totalCounterSignalNodes + totalCuratorialDecisionNodes
     const eligibleArtworkRelations = countProjectedArtworkRelations(artworkIds)
     const eligibleCounterSignalRelations = totalCounterSignalNodes
     const eligibleCuratorialDecisionRelations = countProjectedCuratorialDecisions(artworkIds)
-    const eligibleRelations = eligibleArtworkRelations + eligibleCounterSignalRelations + eligibleCuratorialDecisionRelations
-    const totalNodes = 1 + totalArtworkNodes + totalCounterSignalNodes + totalCuratorialDecisionNodes
+    const eligibleRelations = 1 + eligibleArtworkRelations + eligibleCounterSignalRelations + eligibleCuratorialDecisionRelations
+    const totalNodes = 2 + totalArtworkNodes + totalCounterSignalNodes + totalCuratorialDecisionNodes
     const statusCounts = { studio: 0, published: 0, archived: 0 }
     for (const node of artworkNodes) statusCounts[node.status] = (statusCounts[node.status] || 0) + 1
     return {
-      schemaVersion: 4,
+      schemaVersion: 5,
       nodes,
       relations,
       statusCounts,
-      nodeTypeCounts: { artwork: artworkNodes.length, runtimeField: 1, counterSignal: counterSignalNodes.length, curatorialDecision: curatorialDecisionNodes.length },
+      nodeTypeCounts: { artwork: artworkNodes.length, runtimeField: 1, physicalOutput: 1, counterSignal: counterSignalNodes.length, curatorialDecision: curatorialDecisionNodes.length },
       projection: {
         nodeLimit: TOPOLOGY_NODE_LIMIT,
         counterSignalNodeLimit: TOPOLOGY_COUNTER_SIGNAL_LIMIT,
@@ -823,7 +852,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
         eligibleRelations,
         nodesTruncated: totalArtworkNodes > artworkNodes.length || totalCounterSignalNodes > counterSignalNodes.length || totalCuratorialDecisionNodes > curatorialDecisionNodes.length,
         relationsTruncated: eligibleRelations > relations.length,
-        scope: 'The bounded runtime field, newest work nodes, newest retained hourly counter-signals, and newest eligible curatorial decisions are projected together. A relation appears only when both endpoint nodes are in this bounded projection.',
+        scope: 'The bounded runtime field, its current simulator-only physical output, newest work nodes, newest retained hourly counter-signals, and newest eligible curatorial decisions are projected together. A relation appears only when both endpoint nodes are in this bounded projection.',
       },
       counterSignalPolicy: {
         aggregation: 'At most one node per UTC hour. It contains accepted, applied, and deferred totals only.',
@@ -834,7 +863,12 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
         authority: 'New decisions are appended only inside the authenticated Operator status transaction and carry their rationale and Operator role. Existing non-pending provenance reviews are imported once as historical records.',
         limit: 'The record shows an Operator action, not proof of reviewer identity or deliberative quality. Selecting works for comparison creates no record and changes no artwork state.',
       },
-      boundary: 'Relations record explicit composition context, aggregate public counter-pressure, or a recorded curatorial decision. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
+      physicalOutputPolicy: {
+        contract: physicalBridge.contract,
+        boundary: 'This is a deterministic read projection with transport disabled. It records no sensor stream or visitor trace and performs no real hardware action.',
+        fallback: physicalBridge.safety.fallback,
+      },
+      boundary: 'Relations record explicit composition context, aggregate public counter-pressure, a recorded curatorial decision, or a simulator-only output. They do not claim aesthetic similarity, authorship, autonomous approval, hardware liveness, or knowledge about a visitor.',
     }
   }
 
@@ -1091,9 +1125,10 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function studioState() {
     const settings = getSettings()
+    const fieldScore = getFieldScore()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      runtime: getRuntimeContinuity(), fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(), lifecycles: getPublicTraceLifecycles(),
+      runtime: getRuntimeContinuity(), fieldScore, physicalBridge: simulatePhysicalBridge(fieldScore), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(), lifecycles: getPublicTraceLifecycles(),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }

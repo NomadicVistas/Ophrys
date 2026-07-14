@@ -55,7 +55,7 @@ See [docs/HACKATHON.md](docs/HACKATHON.md) for the build brief and [docs/ETHICS.
 The Build Week implementation is one small Node 24 service with three deliberately different surfaces:
 
 - `/` — public exhibition and artwork field;
-- `/studio` — public evidence ledger for runtime freshness, aggregate inputs, redacted candidate lifecycles, cycles, tactics and counter-readings;
+- `/studio` — public evidence ledger for runtime freshness, aggregate inputs, redacted candidate lifecycles, cycles, tactics, counter-readings and the simulator-only light/sound bridge;
 - `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
 - `/works/<slug>` — four responsive artwork studies linked from Studio and labelled unpublished until explicit human approval.
 
@@ -81,6 +81,8 @@ npm run cycle
 Without an API key, the public and Studio surfaces remain runnable with the human-authored seed work; only real GPT‑5.6 generation is unavailable.
 
 The coded quartet does not need an API key at runtime. Start the service, open `/studio#works`, and enter `Borrowed Weather`, `Choir of Almost`, `Afterimage Commons`, or `The Unchosen Signal`. The studies use original local visual sources and browser-native interaction; they do not bypass the curatorial publication gate.
+
+The physical bridge is also local and deterministic. It validates the bounded public field score and exposes one inspectable simulated light/sound frame in Studio and the ecosystem topology. Its transport is fixed to `none`: it cannot contact a lamp, speaker, controller or other hardware, and malformed input produces zero light and zero sound.
 
 ## Build Week status
 
