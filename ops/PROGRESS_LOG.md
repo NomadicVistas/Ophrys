@@ -142,3 +142,14 @@ Next: implement OPH-018 as typed curatorial decision relations while preserving 
 - Kept all four candidates explicitly `studio` / unpublished. Studio links expose prototypes for review without changing publication state or making a museum-approval claim.
 - Added accessible textual descriptions, native controls, reduced-motion handling, page-visibility pausing, capped pixel density, optional gesture-gated local synthesis and an explicit no-storage trace boundary.
 - Recorded the complete artwork, implementation and image-prompt rationale in `docs/ARTWORK_QUARTET.md` and added deterministic route, asset-budget, privacy and publication-boundary coverage.
+
+## 2026-07-14 — append-only curatorial governance
+
+- Completed OPH-018 with append-only decision records for approval, rejection and return-for-revision, each carrying prior/resulting status, rationale, Operator role and time.
+- Made the decision append atomic with the artwork status and latest provenance review; deterministic restart coverage proves existing non-pending provenance reviews import once without duplicating history.
+- Added bounded curatorial decision nodes and governance edges to the graph-closed public ecosystem projection, with exact totals, truncation metadata and an explicit limit that Operator attribution does not prove reviewer identity or deliberative quality.
+- Added an explicit return-for-revision action to the protected comparison workspace. Selecting works remains reversible browser-only state and cannot create a decision, publish a work or change its status.
+- Preserved the visitor privacy boundary: decision records contain artwork governance only and no visitor event, identifier, profile, route or inferred trait.
+- Verified the targeted migration/provenance tests, `npm run check`, all 15 tests and `npm run judge:smoke`.
+
+Next: implement OPH-019 as one redacted end-to-end trace from aggregate observation through provisional interpretation, candidate and curatorial decision to a public or refused outcome.

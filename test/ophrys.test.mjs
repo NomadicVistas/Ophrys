@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
-import { readFileSync, statSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
 import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
@@ -52,14 +54,17 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.js'), /Runtime record loaded:/)
   assert.match(publicFile('studio.html'), /PROJECTED \/ TOTAL NODES[\s\S]*PROJECTED \/ TOTAL RELATIONS[\s\S]*id="lineage-projection"/)
   assert.match(publicFile('studio.html'), /PROJECTED COUNTER-SIGNALS[\s\S]*id="counter-signal-policy"/)
+  assert.match(publicFile('studio.html'), /PROJECTED DECISIONS[\s\S]*id="curatorial-decision-policy"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
   assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
   assert.match(publicFile('studio.js'), /ecosystem\.counterSignalPolicy\.privacyLimit/)
+  assert.match(publicFile('studio.js'), /ecosystem\.curatorialDecisionPolicy\.limit/)
   assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
   assert.match(publicFile('admin.html'), /name="dailyCycleLimit"[\s\S]*name="maxOutputTokens"[\s\S]*id="operator-compute-heading"/)
   assert.match(publicFile('admin.html'), /id="candidate-comparison"/)
   assert.match(publicFile('admin.js'), /selectedCandidateIds\.size < 2/)
   assert.match(publicFile('admin.js'), /Curatorial rationale/)
+  assert.match(publicFile('admin.js'), /Return for revision/)
   assert.match(publicFile('comparison.css'), /@media \(max-width: 1050px\)[\s\S]*\.candidate-comparison[\s\S]*grid-template-columns: 1fr/)
   assert.match(publicFile('works.css'), /@media \(prefers-reduced-motion: reduce\)/)
 })
@@ -184,13 +189,36 @@ test('the curatorial quartet enters the Studio without bypassing human publicati
   assert.deepEqual(store.listArtworks({ publicOnly: true, limit: 10 }).map(work => work.id), ['seed-false-spring'])
   const topology = store.getEcosystemTopology()
   assert.deepEqual(topology.statusCounts, { studio: 4, published: 1, archived: 0 })
-  assert.equal(topology.relations.length, 4)
+  assert.equal(topology.relations.length, 5)
+  assert.equal(topology.nodeTypeCounts.curatorialDecision, 1)
   const nodeIds = new Set(topology.nodes.map(node => node.id))
   for (const relation of topology.relations) {
-    assert.ok(nodeIds.has(relation.fromArtworkId))
-    assert.ok(nodeIds.has(relation.toArtworkId))
+    assert.ok(nodeIds.has(relation.fromNodeId))
+    assert.ok(nodeIds.has(relation.toNodeId))
   }
   store.close()
+})
+
+test('curatorial decision migration is idempotent across store restarts', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'ophrys-decisions-'))
+  const path = join(directory, 'ophrys.sqlite')
+  const at = new Date('2026-07-14T17:30:00.000Z')
+  try {
+    const first = createOphrysStore(path, { now: () => at })
+    assert.equal(first.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions').get().count, 1)
+    first.setArtworkStatus('study-borrowed-weather', 'archived', {
+      reason: 'The atmospheric threshold requires a more explicit public reset before it can enter publication.',
+    })
+    assert.equal(first.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions').get().count, 2)
+    first.close()
+
+    const reopened = createOphrysStore(path, { now: () => at })
+    assert.equal(reopened.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions').get().count, 2)
+    assert.equal(reopened.getEcosystemTopology().nodeTypeCounts.curatorialDecision, 2)
+    reopened.close()
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
 })
 
 test('ecosystem topology projection stays closed when older relation endpoints fall outside its node limit', () => {
@@ -239,11 +267,13 @@ test('ecosystem topology projection stays closed when older relation endpoints f
   assert.deepEqual(topology.projection, {
     nodeLimit: 40,
     counterSignalNodeLimit: 24,
+    curatorialDecisionNodeLimit: 40,
     relationLimit: 120,
-    totalNodes: 47,
+    totalNodes: 48,
     totalArtworkNodes: 46,
     totalCounterSignalNodes: 0,
-    totalRelations: 865,
+    totalCuratorialDecisionNodes: 1,
+    totalRelations: 866,
     eligibleRelations: 780,
     nodesTruncated: true,
     relationsTruncated: true,
@@ -251,8 +281,8 @@ test('ecosystem topology projection stays closed when older relation endpoints f
   })
   assert.match(topology.projection.scope, /both endpoint nodes are in this bounded projection/i)
   for (const relation of topology.relations) {
-    assert.ok(nodeIds.has(relation.fromArtworkId), `missing projected source ${relation.fromArtworkId}`)
-    assert.ok(nodeIds.has(relation.toArtworkId), `missing projected target ${relation.toArtworkId}`)
+    assert.ok(nodeIds.has(relation.fromNodeId), `missing projected source ${relation.fromNodeId}`)
+    assert.ok(nodeIds.has(relation.toNodeId), `missing projected target ${relation.toNodeId}`)
   }
   assert.equal(topology.relations.some(relation => relation.toArtworkId === 'seed-false-spring'), false)
   store.close()
@@ -412,8 +442,8 @@ test('public and protected server surfaces keep their boundary', async () => {
   const studioResponse = await fetch(`${origin}/api/studio/state`)
   assert.equal(studioResponse.status, 200)
   const studioState = await studioResponse.json()
-  assert.equal(studioState.ecosystem.nodes.length, 6)
-  assert.equal(studioState.ecosystem.relations.length, 4)
+  assert.equal(studioState.ecosystem.nodes.length, 7)
+  assert.equal(studioState.ecosystem.relations.length, 5)
   assert.match(studioState.ecosystem.boundary, /autonomous approval/i)
 
   for (const slug of ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']) {
@@ -457,6 +487,9 @@ test('public and protected server surfaces keep their boundary', async () => {
     body: JSON.stringify({ status: 'published', reason: 'The seed remains the clearest bounded public baseline.' }),
   })
   assert.equal(reasonedApproval.status, 200)
+  const approvalPayload = await reasonedApproval.json()
+  assert.equal(approvalPayload.decision.kind, 'approved')
+  assert.equal(approvalPayload.decision.actorRole, 'operator')
 
   server.close()
   await once(server, 'close')
@@ -568,9 +601,9 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
   const topology = store.getEcosystemTopology()
-  assert.equal(topology.nodes.length, 7)
+  assert.equal(topology.nodes.length, 8)
   assert.deepEqual(topology.statusCounts, { studio: 5, published: 1, archived: 0 })
-  assert.equal(topology.relations.length, 5)
+  assert.equal(topology.relations.length, 6)
   const generatedRelation = topology.relations.find(relation => relation.fromArtworkId === work.id)
   assert.ok(generatedRelation)
   assert.deepEqual({ ...generatedRelation }, {
@@ -605,5 +638,27 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(archived.status, 'archived')
   assert.equal(archived.provenance.review.decision, 'rejected')
   assert.equal(archived.provenance.review.rejectionReason, 'The packet needs a fuller counter-reading before publication.')
+  store.setArtworkStatus(work.id, 'studio', { reason: 'Return the material study for a clearer account of how its public trace can be refused.' })
+  const revised = store.listArtworks({ limit: 10 }).find(item => item.id === work.id)
+  assert.equal(revised.status, 'studio')
+  assert.equal(revised.provenance.review.decision, 'returned_for_revision')
+  const decisions = store.db.prepare(`SELECT decision_kind AS kind, previous_status AS previousStatus,
+    resulting_status AS resultingStatus, rationale, actor_role AS actorRole
+    FROM curatorial_decisions WHERE artwork_id = ? ORDER BY rowid`).all(work.id)
+  assert.deepEqual(decisions.map(decision => decision.kind), ['approved', 'rejected', 'returned_for_revision'])
+  assert.deepEqual(decisions.map(decision => [decision.previousStatus, decision.resultingStatus]), [
+    ['studio', 'published'], ['published', 'archived'], ['archived', 'studio'],
+  ])
+  assert.equal(decisions.every(decision => decision.actorRole === 'operator' && decision.rationale.length > 20), true)
+  const governedTopology = store.getEcosystemTopology()
+  const governedNodeIds = new Set(governedTopology.nodes.map(node => node.id))
+  const decisionNodes = governedTopology.nodes.filter(node => node.nodeType === 'curatorial-decision' && node.governance?.artworkId === work.id)
+  assert.equal(decisionNodes.length, 3)
+  assert.deepEqual(new Set(decisionNodes.map(node => node.status)), new Set(['approved', 'rejected', 'returned_for_revision']))
+  for (const relation of governedTopology.relations.filter(relation => relation.toNodeId === work.id && relation.fromType === 'curatorial-decision')) {
+    assert.ok(governedNodeIds.has(relation.fromNodeId))
+    assert.match(relation.evidence, /does not make comparison authoritative/i)
+  }
+  assert.match(governedTopology.curatorialDecisionPolicy.limit, /Selecting works for comparison creates no record/i)
   store.close()
 })

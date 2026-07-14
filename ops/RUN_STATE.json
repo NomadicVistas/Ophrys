@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T16:36:25Z",
-  "lastSelectedItem": "OPH-017 bounded aggregate counter-signal and erasure persistence",
+  "lastSuccessfulRun": "2026-07-14T17:38:12Z",
+  "lastSelectedItem": "OPH-018 typed curatorial decision relations",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-018 typed curatorial decision relations",
+  "nextBestSlice": "OPH-019 end-to-end public trace lifecycle",
   "deadline": "2026-07-22T00:00:00Z"
 }

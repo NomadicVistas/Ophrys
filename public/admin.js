@@ -72,26 +72,28 @@ function comparisonCard(work) {
   reason.value = review.rationale || review.rejectionReason || ''
   reason.setAttribute('aria-describedby', `decision-help-${work.id}`)
   label.append(reason)
-  const help = element('p', 'decision-help', 'Required for approval or rejection. This record becomes part of the candidate provenance packet.')
+  const help = element('p', 'decision-help', 'Required for approval, rejection, or return for revision. The status update and append-only governance record are written together.')
   help.id = `decision-help-${work.id}`
   const actions = element('div', 'candidate-decision-actions')
   const approve = element('button', 'button signal', 'Approve for publication')
   approve.type = 'submit'; approve.value = 'published'; approve.disabled = work.status === 'published'
   const reject = element('button', 'button', 'Reject and archive')
   reject.type = 'submit'; reject.value = 'archived'; reject.disabled = work.status === 'archived'
-  actions.append(approve, reject)
+  const revise = element('button', 'button', 'Return for revision')
+  revise.type = 'submit'; revise.value = 'studio'; revise.disabled = review.decision === 'returned_for_revision'
+  actions.append(approve, reject, revise)
   const result = element('p', '', '')
   result.setAttribute('role', 'status'); result.setAttribute('aria-live', 'polite')
   form.append(label, help, actions, result)
   form.addEventListener('submit', async event => {
     event.preventDefault()
     const status = event.submitter?.value
-    if (!['published', 'archived'].includes(status)) return
+    if (!['published', 'archived', 'studio'].includes(status)) return
     const rationale = reason.value.trim()
     if (!rationale) { result.textContent = 'Enter a curatorial rationale before deciding.'; reason.focus(); return }
-    approve.disabled = true; reject.disabled = true; result.textContent = 'Recording decision…'
+    approve.disabled = true; reject.disabled = true; revise.disabled = true; result.textContent = 'Recording decision…'
     try { await decideCandidate(work, status, rationale) }
-    catch (error) { result.textContent = error.message; approve.disabled = work.status === 'published'; reject.disabled = work.status === 'archived' }
+    catch (error) { result.textContent = error.message; approve.disabled = work.status === 'published'; reject.disabled = work.status === 'archived'; revise.disabled = review.decision === 'returned_for_revision' }
   })
   article.append(form)
   return article

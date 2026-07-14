@@ -1,4 +1,5 @@
 import { mkdirSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
@@ -23,6 +24,7 @@ const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
 const TOPOLOGY_NODE_LIMIT = 40
 const TOPOLOGY_RELATION_LIMIT = 120
 const TOPOLOGY_COUNTER_SIGNAL_LIMIT = 24
+const TOPOLOGY_DECISION_LIMIT = 40
 const RUNTIME_STALE_AFTER_MINUTES = 120
 const REFUSAL_REFRACTORY_MS = 60_000
 const CURATORIAL_QUARTET = [
@@ -190,7 +192,19 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       FOREIGN KEY (to_artwork_id) REFERENCES artworks(id),
       CHECK (from_artwork_id <> to_artwork_id)
     );
+    CREATE TABLE IF NOT EXISTS curatorial_decisions (
+      id TEXT PRIMARY KEY,
+      artwork_id TEXT NOT NULL,
+      decision_kind TEXT NOT NULL CHECK (decision_kind IN ('approved', 'rejected', 'returned_for_revision')),
+      previous_status TEXT CHECK (previous_status IS NULL OR previous_status IN ('studio', 'published', 'archived')),
+      resulting_status TEXT NOT NULL CHECK (resulting_status IN ('studio', 'published', 'archived')),
+      rationale TEXT NOT NULL,
+      actor_role TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (artwork_id) REFERENCES artworks(id)
+    );
     CREATE INDEX IF NOT EXISTS artwork_relations_to ON artwork_relations(to_artwork_id);
+    CREATE INDEX IF NOT EXISTS curatorial_decisions_artwork ON curatorial_decisions(artwork_id, created_at DESC);
     CREATE UNIQUE INDEX IF NOT EXISTS one_active_cycle ON cycles(status) WHERE status = 'running';
   `)
   const artworkColumns = db.prepare('PRAGMA table_info(artworks)').all().map(row => row.name)
@@ -291,6 +305,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     },
   ]
   for (const relation of quartetRelations) createArtworkRelation(relation)
+  backfillCuratorialDecisions()
   pruneMetrics()
 
   function getSettings() {
@@ -512,15 +527,39 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
+  function backfillCuratorialDecisions() {
+    const insert = db.prepare(`INSERT OR IGNORE INTO curatorial_decisions (
+      id, artwork_id, decision_kind, previous_status, resulting_status, rationale, actor_role, created_at
+    ) VALUES (?, ?, ?, NULL, ?, ?, ?, ?)`)
+    for (const row of db.prepare('SELECT id, status, provenance FROM artworks').all()) {
+      const review = parseObject(row.provenance).review || {}
+      const rationale = typeof review.rationale === 'string' ? review.rationale.trim() : ''
+      if (!['approved', 'rejected', 'returned_for_revision'].includes(review.decision) || !review.reviewedAt || !rationale) continue
+      const exists = db.prepare(`SELECT 1 FROM curatorial_decisions
+        WHERE artwork_id = ? AND decision_kind = ? AND created_at = ?`).get(row.id, review.decision, review.reviewedAt)
+      if (exists) continue
+      insert.run(
+        `curatorial-decision:provenance:${row.id}:${review.reviewedAt}`,
+        row.id,
+        review.decision,
+        row.status,
+        rationale,
+        typeof review.reviewedBy === 'string' && review.reviewedBy.trim() ? review.reviewedBy.trim().slice(0, 80) : 'operator',
+        review.reviewedAt,
+      )
+    }
+  }
+
   function setArtworkStatus(id, status, { reason = null, reviewedBy = 'operator' } = {}) {
     if (!ARTWORK_STATUSES.has(status)) throw new Error('Invalid artwork status')
-    const current = db.prepare('SELECT provenance FROM artworks WHERE id = ?').get(id)
+    const current = db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get(id)
     if (!current) throw new Error('Artwork not found')
     const provenance = parseObject(current.provenance)
     const normalizedReason = typeof reason === 'string' ? reason.trim() : ''
-    if (['published', 'archived'].includes(status) && !normalizedReason) {
-      throw new Error('Curatorial rationale required before approving or rejecting a candidate')
-    }
+    if (!normalizedReason) throw new Error('Curatorial rationale required before approving, rejecting, or returning a candidate for revision')
+    if (normalizedReason.length > 2000) throw new Error('Curatorial rationale must be 2,000 characters or fewer')
+    const actorRole = typeof reviewedBy === 'string' ? reviewedBy.trim() : ''
+    if (!actorRole || actorRole.length > 80) throw new Error('Invalid curatorial actor role')
     const decision = status === 'published' ? 'approved' : status === 'archived' ? 'rejected' : 'returned_for_revision'
     const reviewedAt = currentDate().toISOString()
     const updatedProvenance = {
@@ -532,11 +571,35 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
         rationale: normalizedReason || null,
         rejectionReason: status === 'archived' ? normalizedReason : null,
         reviewedAt,
-        reviewedBy,
+        reviewedBy: actorRole,
       },
     }
-    const result = db.prepare('UPDATE artworks SET status = ?, provenance = ? WHERE id = ?').run(status, JSON.stringify(updatedProvenance), id)
-    if (result.changes !== 1) throw new Error('Artwork not found')
+    const record = {
+      id: `curatorial-decision:${randomUUID()}`,
+      artworkId: id,
+      kind: decision,
+      previousStatus: current.status,
+      resultingStatus: status,
+      rationale: normalizedReason,
+      actorRole,
+      createdAt: reviewedAt,
+    }
+    db.exec('BEGIN IMMEDIATE')
+    try {
+      const result = db.prepare('UPDATE artworks SET status = ?, provenance = ? WHERE id = ?').run(status, JSON.stringify(updatedProvenance), id)
+      if (result.changes !== 1) throw new Error('Artwork not found')
+      db.prepare(`INSERT INTO curatorial_decisions (
+        id, artwork_id, decision_kind, previous_status, resulting_status, rationale, actor_role, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
+        record.id, record.artworkId, record.kind, record.previousStatus, record.resultingStatus,
+        record.rationale, record.actorRole, record.createdAt,
+      )
+      db.exec('COMMIT')
+      return record
+    } catch (error) {
+      db.exec('ROLLBACK')
+      throw error
+    }
   }
 
   function listArtworks({ publicOnly = false, limit = 30 } = {}) {
@@ -586,6 +649,27 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return Number(db.prepare(`SELECT COUNT(*) AS count FROM artwork_relations
       WHERE from_artwork_id IN (${placeholders})
         AND to_artwork_id IN (${placeholders})`).get(...artworkIds, ...artworkIds).count)
+  }
+
+  function listProjectedCuratorialDecisions(artworkIds, limit = TOPOLOGY_DECISION_LIMIT) {
+    if (!artworkIds.length || limit <= 0) return []
+    const placeholders = artworkIds.map(() => '?').join(', ')
+    return db.prepare(`SELECT decision.id, decision.artwork_id AS artworkId,
+      artwork.title AS artworkTitle, artwork.status AS artworkStatus,
+      decision.decision_kind AS kind, decision.previous_status AS previousStatus,
+      decision.resulting_status AS resultingStatus, decision.rationale,
+      decision.actor_role AS actorRole, decision.created_at AS createdAt
+      FROM curatorial_decisions decision
+      JOIN artworks artwork ON artwork.id = decision.artwork_id
+      WHERE decision.artwork_id IN (${placeholders})
+      ORDER BY decision.created_at DESC, decision.id DESC LIMIT ?`).all(...artworkIds, limit)
+  }
+
+  function countProjectedCuratorialDecisions(artworkIds) {
+    if (!artworkIds.length) return 0
+    const placeholders = artworkIds.map(() => '?').join(', ')
+    return Number(db.prepare(`SELECT COUNT(*) AS count FROM curatorial_decisions
+      WHERE artwork_id IN (${placeholders})`).get(...artworkIds).count)
   }
 
   function listProjectedCounterSignals(limit = TOPOLOGY_COUNTER_SIGNAL_LIMIT) {
@@ -654,7 +738,38 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       createdAt: signal.bucket,
       expiresAt: signal.expiresAt,
     }))
-    const artworkRelationLimit = Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length)
+    const decisionLimit = Math.min(TOPOLOGY_DECISION_LIMIT, Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length))
+    const curatorialDecisions = listProjectedCuratorialDecisions(artworkIds, decisionLimit)
+    const curatorialDecisionNodes = curatorialDecisions.map(decision => ({
+      id: decision.id,
+      nodeType: 'curatorial-decision',
+      title: `Curatorial ${decision.kind.replaceAll('_', ' ')} · ${decision.artworkTitle}`,
+      status: decision.kind,
+      origin: decision.id.startsWith('curatorial-decision:provenance:') ? 'provenance-import' : 'operator-curatorial-gate',
+      cycleId: null,
+      createdAt: decision.createdAt,
+      governance: {
+        artworkId: decision.artworkId,
+        previousStatus: decision.previousStatus,
+        resultingStatus: decision.resultingStatus,
+        actorRole: decision.actorRole,
+        rationale: decision.rationale,
+      },
+    }))
+    const curatorialDecisionRelations = curatorialDecisions.map(decision => ({
+      fromNodeId: decision.id,
+      fromTitle: `Curatorial ${decision.kind.replaceAll('_', ' ')}`,
+      fromStatus: decision.kind,
+      fromType: 'curatorial-decision',
+      toNodeId: decision.artworkId,
+      toTitle: decision.artworkTitle,
+      toStatus: decision.artworkStatus,
+      toType: 'artwork',
+      kind: decision.kind.replaceAll('_', '-'),
+      evidence: `${decision.actorRole} recorded this bounded curatorial decision with rationale: ${decision.rationale} The record does not make comparison authoritative or prove reviewer identity.`,
+      createdAt: decision.createdAt,
+    }))
+    const artworkRelationLimit = Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length - curatorialDecisionRelations.length)
     const artworkRelations = listProjectedArtworkRelations(artworkIds, artworkRelationLimit).map(relation => ({
       ...relation,
       fromNodeId: relation.fromArtworkId,
@@ -662,44 +777,52 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       toNodeId: relation.toArtworkId,
       toType: 'artwork',
     }))
-    const nodes = [runtimeFieldNode, ...counterSignalNodes, ...artworkNodes]
-    const relations = [...counterSignalRelations, ...artworkRelations]
+    const nodes = [runtimeFieldNode, ...counterSignalNodes, ...curatorialDecisionNodes, ...artworkNodes]
+    const relations = [...counterSignalRelations, ...curatorialDecisionRelations, ...artworkRelations]
     const totalArtworkNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count)
     const counterSignalCutoff = new Date(currentDate().getTime() - Number(getSettings().metricRetentionHours || 72) * 3600_000).toISOString()
     const totalCounterSignalNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM counter_signal_buckets WHERE bucket >= ?').get(counterSignalCutoff).count)
     const totalArtworkRelations = Number(db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count)
-    const totalRelations = totalArtworkRelations + totalCounterSignalNodes
+    const totalCuratorialDecisionNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions').get().count)
+    const totalRelations = totalArtworkRelations + totalCounterSignalNodes + totalCuratorialDecisionNodes
     const eligibleArtworkRelations = countProjectedArtworkRelations(artworkIds)
     const eligibleCounterSignalRelations = totalCounterSignalNodes
-    const eligibleRelations = eligibleArtworkRelations + eligibleCounterSignalRelations
-    const totalNodes = 1 + totalArtworkNodes + totalCounterSignalNodes
+    const eligibleCuratorialDecisionRelations = countProjectedCuratorialDecisions(artworkIds)
+    const eligibleRelations = eligibleArtworkRelations + eligibleCounterSignalRelations + eligibleCuratorialDecisionRelations
+    const totalNodes = 1 + totalArtworkNodes + totalCounterSignalNodes + totalCuratorialDecisionNodes
     const statusCounts = { studio: 0, published: 0, archived: 0 }
     for (const node of artworkNodes) statusCounts[node.status] = (statusCounts[node.status] || 0) + 1
     return {
-      schemaVersion: 3,
+      schemaVersion: 4,
       nodes,
       relations,
       statusCounts,
-      nodeTypeCounts: { artwork: artworkNodes.length, runtimeField: 1, counterSignal: counterSignalNodes.length },
+      nodeTypeCounts: { artwork: artworkNodes.length, runtimeField: 1, counterSignal: counterSignalNodes.length, curatorialDecision: curatorialDecisionNodes.length },
       projection: {
         nodeLimit: TOPOLOGY_NODE_LIMIT,
         counterSignalNodeLimit: TOPOLOGY_COUNTER_SIGNAL_LIMIT,
+        curatorialDecisionNodeLimit: TOPOLOGY_DECISION_LIMIT,
         relationLimit: TOPOLOGY_RELATION_LIMIT,
         totalNodes,
         totalArtworkNodes,
         totalCounterSignalNodes,
+        totalCuratorialDecisionNodes,
         totalRelations,
         eligibleRelations,
-        nodesTruncated: totalArtworkNodes > artworkNodes.length || totalCounterSignalNodes > counterSignalNodes.length,
+        nodesTruncated: totalArtworkNodes > artworkNodes.length || totalCounterSignalNodes > counterSignalNodes.length || totalCuratorialDecisionNodes > curatorialDecisionNodes.length,
         relationsTruncated: eligibleRelations > relations.length,
-        scope: 'The bounded runtime field, newest work nodes, and newest retained hourly counter-signals are projected together. A relation appears only when both endpoint nodes are in this bounded projection.',
+        scope: 'The bounded runtime field, newest work nodes, newest retained hourly counter-signals, and newest eligible curatorial decisions are projected together. A relation appears only when both endpoint nodes are in this bounded projection.',
       },
       counterSignalPolicy: {
         aggregation: 'At most one node per UTC hour. It contains accepted, applied, and deferred totals only.',
         retentionHours: Number(getSettings().metricRetentionHours || 72),
         privacyLimit: 'No request timestamp, sequence, surface, IP address, cookie, fingerprint, free text, visitor identifier, or inferred trait is stored in this ledger.',
       },
-      boundary: 'Relations record explicit composition context or aggregate public counter-pressure only. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
+      curatorialDecisionPolicy: {
+        authority: 'New decisions are appended only inside the authenticated Operator status transaction and carry their rationale and Operator role. Existing non-pending provenance reviews are imported once as historical records.',
+        limit: 'The record shows an Operator action, not proof of reviewer identity or deliberative quality. Selecting works for comparison creates no record and changes no artwork state.',
+      },
+      boundary: 'Relations record explicit composition context, aggregate public counter-pressure, or a recorded curatorial decision. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
     }
   }
 

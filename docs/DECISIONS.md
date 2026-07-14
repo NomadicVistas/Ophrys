@@ -67,3 +67,7 @@ Every accepted refusal increments one anonymous hourly aggregate, but the shared
 ## D-017 · Counter-signals are hourly ecosystem nodes, not request histories
 
 The same refusal transaction upserts at most one counter-signal node per UTC hour. Its complete durable payload is the hour bucket plus accepted, applied and deferred aggregate totals; it stores no request timestamp, order, surface, technical marker, free text or visitor reference. Each node has a `counter-to` relation to the bounded runtime-field node rather than to an artwork the action did not specifically address. Counter-signals use the configured aggregate-retention period, are capped to 24 nodes in the public projection, and cannot publish, approve or alter an artwork record.
+
+## D-018 · Curatorial decisions are append-only governance nodes
+
+Approval, rejection and return-for-revision each require a rationale and write one append-only curatorial decision in the same database transaction as the artwork status and provenance update. The bounded public topology connects that decision node to its artwork with the resulting governance edge and Operator-role attribution. Existing non-pending provenance reviews are imported idempotently as historical decisions. A decision edge cannot create itself, comparison selection remains browser-only reversible state, and the public record does not claim to prove reviewer identity or deliberative quality.

@@ -10,6 +10,7 @@ Ophrys uses minimal aggregate events to compose an artwork about the limits of b
 - one hourly counter-signal aggregate containing accepted refusal, applied revision and deferred revision totals;
 - the public surface on which the event occurred;
 - system and artwork-cycle operational records.
+- append-only curatorial governance records containing artwork ID, approve/reject/revise outcome, prior/resulting status, rationale, Operator role and timestamp.
 
 ## Not collected
 
@@ -23,6 +24,7 @@ Ophrys uses minimal aggregate events to compose an artwork about the limits of b
 - Browser events increment coarse hourly counters only.
 - Counters expire automatically after the configured retention period (72 hours by default).
 - Counter-signal nodes expire under the same policy and project only as a relation to the shared runtime field; they cannot change publication or curator review state.
+- Curatorial decision records are created only by the protected status transaction. They contain no visitor data and selecting candidates for comparison creates no durable record.
 - Aggregate summaries may enter a server-side GPT‑5.6 composition request.
 - OpenAI requests use `store:false` and a stable system-level safety identifier.
 - Raw API keys and Operator tokens remain server-side.
