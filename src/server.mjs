@@ -129,7 +129,8 @@ export function createOphrysServer({ store = createOphrysStore(), adminToken = p
       return json(response, 404, { error: 'Not found' })
     } catch (error) {
       const message = String(error?.message || error).replace(/sk-[A-Za-z0-9_-]+/g, '[redacted]').slice(0, 600)
-      return json(response, message === 'Unauthorized' ? 401 : 400, { error: message })
+      const status = message === 'Unauthorized' ? 401 : error?.statusCode === 409 ? 409 : 400
+      return json(response, status, { error: message, ...(error?.code ? { code: error.code } : {}) })
     }
   })
   server.on('close', () => store.close())

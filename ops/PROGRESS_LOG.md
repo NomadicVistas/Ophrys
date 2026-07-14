@@ -164,3 +164,14 @@ Next: implement OPH-019 as one redacted end-to-end trace from aggregate observat
 - Verified the targeted lifecycle/accessibility tests, `npm run check`, all 16 tests and `npm run judge:smoke`.
 
 Next: implement OPH-020 as a deterministic simulated light/sound bridge with strict score validation and a safe quiet fallback; do not contact real hardware.
+
+## 2026-07-14 — curatorial transition invariant
+
+- Resolved the integration reviewer’s P1 governance finding: a request for an artwork’s existing status is now rejected at the store boundary instead of manufacturing an approve/reject/revise record.
+- Added the stable `ARTWORK_STATUS_UNCHANGED` error and authenticated HTTP `409` response while leaving the artwork status, provenance JSON and append-only decision count unchanged.
+- Preserved valid governance: one real status transition still updates provenance and appends exactly one rationale-bearing Operator decision atomically.
+- Replaced the HTTP fixture that re-approved the published seed with a real Studio-to-published transition and added deterministic store/API regression evidence.
+- No artwork was published, deployed or changed outside isolated in-memory tests.
+- Verified the targeted transition/API tests, `npm run check`, all 17 tests and `npm run judge:smoke`.
+
+Next: OPH-020 remains the best bounded slice: a deterministic simulated light/sound bridge with strict score validation and a safe quiet fallback, without contacting real hardware.

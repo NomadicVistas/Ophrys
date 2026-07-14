@@ -231,6 +231,31 @@ test('curatorial decision migration is idempotent across store restarts', () => 
   }
 })
 
+test('curatorial decisions require an actual artwork status transition', () => {
+  const at = new Date('2026-07-14T18:45:00.000Z')
+  const store = createOphrysStore(':memory:', { now: () => at })
+  const before = store.db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get('seed-false-spring')
+  const decisionCount = store.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions WHERE artwork_id = ?').get('seed-false-spring').count
+
+  assert.throws(
+    () => store.setArtworkStatus('seed-false-spring', 'published', {
+      reason: 'A reaffirmation must not masquerade as a publication transition.',
+    }),
+    error => error?.code === 'ARTWORK_STATUS_UNCHANGED' && error?.statusCode === 409,
+  )
+
+  const unchanged = store.db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get('seed-false-spring')
+  assert.deepEqual(unchanged, before)
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions WHERE artwork_id = ?').get('seed-false-spring').count, decisionCount)
+
+  const decision = store.setArtworkStatus('seed-false-spring', 'archived', {
+    reason: 'The seed is withdrawn in this isolated fixture to prove a real transition writes exactly one decision.',
+  })
+  assert.deepEqual([decision.previousStatus, decision.resultingStatus], ['published', 'archived'])
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions WHERE artwork_id = ?').get('seed-false-spring').count, decisionCount + 1)
+  store.close()
+})
+
 test('public trace lifecycles connect redacted aggregate observation to a human-gated outcome', () => {
   let at = new Date('2026-07-14T12:00:00.000Z')
   const store = createOphrysStore(':memory:', { now: () => at })
@@ -550,7 +575,22 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal(adminState.compute.budget.dailyCycleLimit, 4)
   assert.equal(adminState.compute.budget.maxOutputTokensPerCycle, 2600)
 
-  const missingRationale = await fetch(`${origin}/api/admin/artworks/seed-false-spring/status`, {
+  const beforeNoOp = store.db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get('seed-false-spring')
+  const beforeNoOpDecisions = store.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions WHERE artwork_id = ?').get('seed-false-spring').count
+  const noOpDecision = await fetch(`${origin}/api/admin/artworks/seed-false-spring/status`, {
+    method: 'PATCH',
+    headers: { authorization: 'Bearer test-operator-token', 'content-type': 'application/json' },
+    body: JSON.stringify({ status: 'published', reason: 'The current publication state is unchanged.' }),
+  })
+  assert.equal(noOpDecision.status, 409)
+  assert.deepEqual(await noOpDecision.json(), {
+    error: 'Artwork already has status published; curatorial decisions require a status transition',
+    code: 'ARTWORK_STATUS_UNCHANGED',
+  })
+  assert.deepEqual(store.db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get('seed-false-spring'), beforeNoOp)
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions WHERE artwork_id = ?').get('seed-false-spring').count, beforeNoOpDecisions)
+
+  const missingRationale = await fetch(`${origin}/api/admin/artworks/study-borrowed-weather/status`, {
     method: 'PATCH',
     headers: { authorization: 'Bearer test-operator-token', 'content-type': 'application/json' },
     body: JSON.stringify({ status: 'published', reason: '' }),
@@ -558,10 +598,10 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal(missingRationale.status, 400)
   assert.match((await missingRationale.json()).error, /Curatorial rationale required/i)
 
-  const reasonedApproval = await fetch(`${origin}/api/admin/artworks/seed-false-spring/status`, {
+  const reasonedApproval = await fetch(`${origin}/api/admin/artworks/study-borrowed-weather/status`, {
     method: 'PATCH',
     headers: { authorization: 'Bearer test-operator-token', 'content-type': 'application/json' },
-    body: JSON.stringify({ status: 'published', reason: 'The seed remains the clearest bounded public baseline.' }),
+    body: JSON.stringify({ status: 'published', reason: 'The threshold study is sufficiently bounded for this isolated governance test.' }),
   })
   assert.equal(reasonedApproval.status, 200)
   const approvalPayload = await reasonedApproval.json()

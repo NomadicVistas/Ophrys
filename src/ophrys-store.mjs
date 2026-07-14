@@ -28,6 +28,16 @@ const TOPOLOGY_DECISION_LIMIT = 40
 const PUBLIC_TRACE_LIMIT = 12
 const RUNTIME_STALE_AFTER_MINUTES = 120
 const REFUSAL_REFRACTORY_MS = 60_000
+
+export class ArtworkStatusConflictError extends Error {
+  constructor(status) {
+    super(`Artwork already has status ${status}; curatorial decisions require a status transition`)
+    this.name = 'ArtworkStatusConflictError'
+    this.code = 'ARTWORK_STATUS_UNCHANGED'
+    this.statusCode = 409
+  }
+}
+
 const CURATORIAL_QUARTET = [
   {
     id: 'study-borrowed-weather',
@@ -553,40 +563,41 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function setArtworkStatus(id, status, { reason = null, reviewedBy = 'operator' } = {}) {
     if (!ARTWORK_STATUSES.has(status)) throw new Error('Invalid artwork status')
-    const current = db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get(id)
-    if (!current) throw new Error('Artwork not found')
-    const provenance = parseObject(current.provenance)
-    const normalizedReason = typeof reason === 'string' ? reason.trim() : ''
-    if (!normalizedReason) throw new Error('Curatorial rationale required before approving, rejecting, or returning a candidate for revision')
-    if (normalizedReason.length > 2000) throw new Error('Curatorial rationale must be 2,000 characters or fewer')
-    const actorRole = typeof reviewedBy === 'string' ? reviewedBy.trim() : ''
-    if (!actorRole || actorRole.length > 80) throw new Error('Invalid curatorial actor role')
-    const decision = status === 'published' ? 'approved' : status === 'archived' ? 'rejected' : 'returned_for_revision'
-    const reviewedAt = currentDate().toISOString()
-    const updatedProvenance = {
-      ...provenance,
-      review: {
-        ...(provenance.review || {}),
-        status,
-        decision,
-        rationale: normalizedReason || null,
-        rejectionReason: status === 'archived' ? normalizedReason : null,
-        reviewedAt,
-        reviewedBy: actorRole,
-      },
-    }
-    const record = {
-      id: `curatorial-decision:${randomUUID()}`,
-      artworkId: id,
-      kind: decision,
-      previousStatus: current.status,
-      resultingStatus: status,
-      rationale: normalizedReason,
-      actorRole,
-      createdAt: reviewedAt,
-    }
     db.exec('BEGIN IMMEDIATE')
     try {
+      const current = db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get(id)
+      if (!current) throw new Error('Artwork not found')
+      if (current.status === status) throw new ArtworkStatusConflictError(status)
+      const provenance = parseObject(current.provenance)
+      const normalizedReason = typeof reason === 'string' ? reason.trim() : ''
+      if (!normalizedReason) throw new Error('Curatorial rationale required before approving, rejecting, or returning a candidate for revision')
+      if (normalizedReason.length > 2000) throw new Error('Curatorial rationale must be 2,000 characters or fewer')
+      const actorRole = typeof reviewedBy === 'string' ? reviewedBy.trim() : ''
+      if (!actorRole || actorRole.length > 80) throw new Error('Invalid curatorial actor role')
+      const decision = status === 'published' ? 'approved' : status === 'archived' ? 'rejected' : 'returned_for_revision'
+      const reviewedAt = currentDate().toISOString()
+      const updatedProvenance = {
+        ...provenance,
+        review: {
+          ...(provenance.review || {}),
+          status,
+          decision,
+          rationale: normalizedReason || null,
+          rejectionReason: status === 'archived' ? normalizedReason : null,
+          reviewedAt,
+          reviewedBy: actorRole,
+        },
+      }
+      const record = {
+        id: `curatorial-decision:${randomUUID()}`,
+        artworkId: id,
+        kind: decision,
+        previousStatus: current.status,
+        resultingStatus: status,
+        rationale: normalizedReason,
+        actorRole,
+        createdAt: reviewedAt,
+      }
       const result = db.prepare('UPDATE artworks SET status = ?, provenance = ? WHERE id = ?').run(status, JSON.stringify(updatedProvenance), id)
       if (result.changes !== 1) throw new Error('Artwork not found')
       db.prepare(`INSERT INTO curatorial_decisions (
