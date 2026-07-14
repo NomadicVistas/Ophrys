@@ -21,11 +21,18 @@
           <label>Exploration rate<input name="explorationRate" type="number" min="0" max="1" step="0.01"></label>
           <label>Metric window (hours)<input name="metricWindowHours" type="number" min="1" max="168" step="1"></label>
           <label>Metric retention (hours)<input name="metricRetentionHours" type="number" min="24" max="720" step="1"></label>
+          <label>Daily cycle limit (UTC)<input name="dailyCycleLimit" type="number" min="1" max="24" step="1"></label>
+          <label>Output token limit per cycle<input name="maxOutputTokens" type="number" min="400" max="5000" step="100"></label>
           <label>Curatorial directive<textarea name="curatorialDirective" rows="8"></textarea></label>
           <button class="button" type="submit">Save settings</button><span id="settings-status" role="status" aria-live="polite"></span>
         </form>
         <section class="control-panel cycle-control"><h2>Composition organ</h2><p>Run one GPT‑5.6 cycle now. In curated mode, the resulting work enters Studio until approved.</p><button id="run-cycle" class="button signal" type="button">Generate artwork</button><pre id="cycle-result" role="status" aria-live="polite">Awaiting instruction.</pre></section>
       </div>
+      <section class="control-panel compute-panel" aria-labelledby="operator-compute-heading"><p class="eyebrow">Current UTC day</p><h2 id="operator-compute-heading">Cost and compute ledger</h2><p id="operator-compute-basis">Exact returned usage, measured latency and enforced request limits.</p>
+        <div class="telemetry-grid compute-grid" aria-live="polite">
+          <article><span>ATTEMPTS</span><strong id="operator-compute-attempts">—</strong></article><article><span>REMAINING</span><strong id="operator-compute-remaining">—</strong></article><article><span>INPUT TOKENS</span><strong id="operator-input-tokens">—</strong></article><article><span>OUTPUT TOKENS</span><strong id="operator-output-tokens">—</strong></article><article><span>TOTAL TOKENS</span><strong id="operator-total-tokens">—</strong></article><article><span>AVG LATENCY</span><strong id="operator-compute-latency">—</strong></article><article><span>MODEL TRACE</span><strong id="operator-compute-models">—</strong></article><article><span>OUTPUT LIMIT / CYCLE</span><strong id="operator-output-limit">—</strong></article>
+        </div>
+      </section>
       <section class="control-panel comparison-panel" aria-labelledby="comparison-heading">
         <header><div><p class="eyebrow">Bounded human review</p><h2 id="comparison-heading">Candidate comparison</h2></div><p>Select up to two works from the queue. Compare their propositions, visitor relations, lure/counter-read pair and provenance before making a decision.</p></header>
         <p id="comparison-selection-status" class="surface-status" role="status" aria-live="polite">Select candidates from the queue below.</p>

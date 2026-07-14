@@ -24,7 +24,12 @@ function cycleRow(cycle) {
   const row = element('article', `cycle-row ${cycle.status}`)
   const index = element('span', 'cycle-state', cycle.status)
   const body = element('div')
-  body.append(element('h3', '', cycle.summary || 'Composition in progress'), element('p', '', `${cycle.trigger} / ${cycle.model} / ${date(cycle.startedAt)}`))
+  const usage = cycle.usage?.total_tokens
+  const compute = [cycle.trigger, cycle.model, date(cycle.startedAt)]
+  if (Number.isInteger(cycle.latencyMs)) compute.push(`${cycle.latencyMs} ms`)
+  if (Number.isFinite(usage)) compute.push(`${usage} tokens`)
+  compute.push(`${cycle.outputTokenBudget} output max`)
+  body.append(element('h3', '', cycle.summary || 'Composition in progress'), element('p', '', compute.join(' / ')))
   if (cycle.error) body.append(element('p', 'error', cycle.error))
   row.append(index, body)
   return row
@@ -64,6 +69,16 @@ function artworkRow(work) {
 
 const status = document.querySelector('#studio-status')
 
+function renderComputeLedger(compute) {
+  document.querySelector('#compute-attempts').textContent = `${compute.attempts} / ${compute.budget.dailyCycleLimit}`
+  document.querySelector('#compute-remaining').textContent = String(compute.budget.remainingCycles)
+  document.querySelector('#compute-tokens').textContent = compute.usage.recordedCycles ? String(compute.usage.totalTokens) : 'not returned'
+  document.querySelector('#compute-latency').textContent = compute.latency.averageMs === null ? 'not recorded' : `${compute.latency.averageMs} ms`
+  document.querySelector('#compute-models').textContent = compute.models.length ? compute.models.map(item => `${item.model} × ${item.count}`).join(', ') : document.querySelector('#model').textContent
+  document.querySelector('#compute-output-limit').textContent = `${compute.budget.maxOutputTokensPerCycle} tokens`
+  document.querySelector('#compute-basis').textContent = compute.costBasis
+}
+
 try {
   const response = await fetch('/api/studio/state')
   if (!response.ok) throw new Error(`Studio state failed (${response.status})`)
@@ -73,6 +88,7 @@ try {
   document.querySelector('#cycle-count').textContent = state.cycles.length
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
+  renderComputeLedger(state.compute)
   const max = Math.max(1, ...state.metrics.map(item => Number(item.count)))
   document.querySelector('#metrics').replaceChildren(...(state.metrics.length ? state.metrics.map(item => metricRow(item, max)) : [element('p', 'empty', 'No aggregate public events yet.')]))
   document.querySelector('#cycles-list').replaceChildren(...(state.cycles.length ? state.cycles.map(cycleRow) : [element('p', 'empty', 'The first GPT‑5.6 cycle has not run yet.')]))

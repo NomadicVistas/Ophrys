@@ -38,6 +38,7 @@ export async function generateArtwork({ settings, metrics, recentArtworks, apiKe
       reasoningEffort: settings.reasoningEffort,
       explorationRate: settings.explorationRate,
       metricWindowHours: settings.metricWindowHours,
+      maxOutputTokens: settings.maxOutputTokens,
     },
     aggregateEventSummary,
     recentArtworkSummary,
@@ -74,7 +75,7 @@ Produce a precise artwork, not an essay, chatbot, dashboard, or generic interact
       safety_identifier: 'ophrys-composition-organ-v1',
       reasoning: { effort: settings.reasoningEffort || 'high', context: 'current_turn' },
       text: { verbosity: 'medium', format: { type: 'json_schema', name: 'ophrys_artwork', strict: true, schema: ARTWORK_SCHEMA } },
-      max_output_tokens: 2600,
+      max_output_tokens: settings.maxOutputTokens || 2600,
     }), signal: AbortSignal.timeout(Number(process.env.OPHRYS_OPENAI_TIMEOUT_MS || 120_000)),
   })
 

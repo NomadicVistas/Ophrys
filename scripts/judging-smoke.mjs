@@ -48,6 +48,8 @@ try {
   assert.equal(studio.response.status, 200)
   assert.equal(studio.payload.metrics.some(metric => metric.kind === 'refusal' && metric.count === 1), true)
   assert.equal(studio.payload.fieldScore.phase, 'counter-read')
+  assert.equal(studio.payload.compute.budget.dailyCycleLimit, 4)
+  assert.equal(studio.payload.compute.budget.maxOutputTokensPerCycle, 2600)
 
   const denied = await json('/api/admin/state')
   assert.equal(denied.response.status, 401)
@@ -58,10 +60,11 @@ try {
   })
   assert.equal(operator.response.status, 200)
   assert.equal(operator.payload.system.publicationMode, 'curated')
+  assert.equal(operator.payload.compute.budget.remainingCycles, 4)
 
   console.log('Ophrys judging smoke: PASS')
   console.log(`refusal: ${initial.payload.fieldScore.activeLure} -> ${refusal.payload.fieldScore.activeLure}; revision ${refusal.payload.fieldScore.revision}`)
-  console.log('boundaries: aggregate public trace; Operator denied by default; publication mode curated')
+  console.log('boundaries: aggregate public trace; Operator denied by default; publication curated; compute budget visible')
 } finally {
   server.close()
   await once(server, 'close')

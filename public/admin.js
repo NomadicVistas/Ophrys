@@ -110,6 +110,19 @@ function renderComparison() {
   if (selected.length === 0) workspace.append(element('p', 'empty', 'No candidates selected.'))
 }
 
+function renderComputeLedger(compute) {
+  const usageAvailable = compute.usage.recordedCycles > 0
+  document.querySelector('#operator-compute-attempts').textContent = `${compute.attempts} / ${compute.budget.dailyCycleLimit}`
+  document.querySelector('#operator-compute-remaining').textContent = String(compute.budget.remainingCycles)
+  document.querySelector('#operator-input-tokens').textContent = usageAvailable ? String(compute.usage.inputTokens) : 'not returned'
+  document.querySelector('#operator-output-tokens').textContent = usageAvailable ? String(compute.usage.outputTokens) : 'not returned'
+  document.querySelector('#operator-total-tokens').textContent = usageAvailable ? String(compute.usage.totalTokens) : 'not returned'
+  document.querySelector('#operator-compute-latency').textContent = compute.latency.averageMs === null ? 'not recorded' : `${compute.latency.averageMs} ms`
+  document.querySelector('#operator-compute-models').textContent = compute.models.length ? compute.models.map(item => `${item.model} × ${item.count}`).join(', ') : state.system.model
+  document.querySelector('#operator-output-limit').textContent = `${compute.budget.maxOutputTokensPerCycle} tokens`
+  document.querySelector('#operator-compute-basis').textContent = `${compute.costBasis} Maximum ${compute.budget.maxOutputTokensPerCycle} output tokens per attempt.`
+}
+
 function artworkControl(work) {
   const row = element('article', 'admin-work')
   const provenance = work.provenance || {}
@@ -143,6 +156,7 @@ async function load() {
   for (const id of selectedCandidateIds) if (!state.artworks.some(work => work.id === id)) selectedCandidateIds.delete(id)
   loginPanel.hidden = true; adminPanel.hidden = false
   setForm(state.system)
+  renderComputeLedger(state.compute)
   document.querySelector('#admin-artworks').replaceChildren(...state.artworks.map(artworkControl))
   renderComparison()
 }
@@ -158,6 +172,7 @@ settingsForm.addEventListener('submit', async event => {
   const values = Object.fromEntries(new FormData(settingsForm))
   values.cycleEnabled = settingsForm.elements.cycleEnabled.checked
   values.explorationRate = Number(values.explorationRate); values.metricWindowHours = Number(values.metricWindowHours); values.metricRetentionHours = Number(values.metricRetentionHours)
+  values.dailyCycleLimit = Number(values.dailyCycleLimit); values.maxOutputTokens = Number(values.maxOutputTokens)
   const status = document.querySelector('#settings-status')
   try { await api('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(values) }); status.textContent = 'Saved.'; await load() }
   catch (error) { status.textContent = error.message }

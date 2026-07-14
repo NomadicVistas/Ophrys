@@ -11,6 +11,8 @@ const DEFAULT_SETTINGS = {
   metricWindowHours: 24,
   metricRetentionHours: 72,
   explorationRate: 0.32,
+  maxOutputTokens: 2600,
+  dailyCycleLimit: 4,
   curatorialDirective: 'Make attraction perceptible without confusing prediction with understanding. Preserve ambiguity, refusal, repairability, and public agency.',
 }
 
@@ -75,6 +77,9 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       summary TEXT NOT NULL DEFAULT '',
       response_id TEXT,
       error TEXT,
+      usage TEXT NOT NULL DEFAULT '{}',
+      latency_ms INTEGER,
+      output_token_budget INTEGER NOT NULL DEFAULT 2600,
       started_at TEXT NOT NULL,
       completed_at TEXT
     );
@@ -101,6 +106,10 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   `)
   const artworkColumns = db.prepare('PRAGMA table_info(artworks)').all().map(row => row.name)
   if (!artworkColumns.includes('provenance')) db.exec("ALTER TABLE artworks ADD COLUMN provenance TEXT NOT NULL DEFAULT '{}'")
+  const cycleColumns = db.prepare('PRAGMA table_info(cycles)').all().map(row => row.name)
+  if (!cycleColumns.includes('usage')) db.exec("ALTER TABLE cycles ADD COLUMN usage TEXT NOT NULL DEFAULT '{}'")
+  if (!cycleColumns.includes('latency_ms')) db.exec('ALTER TABLE cycles ADD COLUMN latency_ms INTEGER')
+  if (!cycleColumns.includes('output_token_budget')) db.exec('ALTER TABLE cycles ADD COLUMN output_token_budget INTEGER NOT NULL DEFAULT 2600')
   db.prepare("UPDATE cycles SET status = 'abandoned', summary = 'Cycle expired before completion.', completed_at = ? WHERE status = 'running' AND started_at < ?")
     .run(new Date().toISOString(), new Date(Date.now() - 2 * 3600_000).toISOString())
 
@@ -156,6 +165,8 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       if (key === 'metricWindowHours' && (!Number.isInteger(value) || value < 1 || value > 168)) throw new Error('Invalid metric window')
       if (key === 'metricRetentionHours' && (!Number.isInteger(value) || value < 24 || value > 720)) throw new Error('Invalid metric retention')
       if (key === 'explorationRate' && (typeof value !== 'number' || value < 0 || value > 1)) throw new Error('Invalid exploration rate')
+      if (key === 'maxOutputTokens' && (!Number.isInteger(value) || value < 400 || value > 5000)) throw new Error('Invalid output token budget')
+      if (key === 'dailyCycleLimit' && (!Number.isInteger(value) || value < 1 || value > 24)) throw new Error('Invalid daily cycle limit')
       if (key === 'cycleEnabled' && typeof value !== 'boolean') throw new Error('Invalid cycle state')
       if (key === 'model' && !['gpt-5.6', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna'].includes(value)) throw new Error('Invalid model')
       if (key === 'curatorialDirective' && (typeof value !== 'string' || value.length < 20 || value.length > 2000)) throw new Error('Invalid curatorial directive')
@@ -235,14 +246,20 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return getFieldScore()
   }
 
-  function createCycle({ id, trigger, status = 'running', model, startedAt = new Date().toISOString() }) {
-    db.prepare('INSERT INTO cycles (id, trigger, status, model, started_at) VALUES (?, ?, ?, ?, ?)').run(id, trigger, status, model, startedAt)
+  function createCycle({ id, trigger, status = 'running', model, outputTokenBudget = getSettings().maxOutputTokens, startedAt = new Date().toISOString() }) {
+    const dailyCycleLimit = Number(getSettings().dailyCycleLimit)
+    const dayStart = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`
+    const attemptsToday = Number(db.prepare('SELECT COUNT(*) AS count FROM cycles WHERE started_at >= ?').get(dayStart).count)
+    if (attemptsToday >= dailyCycleLimit) throw new Error(`Daily cycle budget exhausted (${dailyCycleLimit} attempts per UTC day)`)
+    db.prepare(`INSERT INTO cycles (
+      id, trigger, status, model, usage, latency_ms, output_token_budget, started_at
+    ) VALUES (?, ?, ?, ?, '{}', NULL, ?, ?)`).run(id, trigger, status, model, outputTokenBudget, startedAt)
     return id
   }
 
-  function completeCycle(id, { status, summary = '', responseId = null, error = null }) {
-    db.prepare('UPDATE cycles SET status = ?, summary = ?, response_id = ?, error = ?, completed_at = ? WHERE id = ?')
-      .run(status, summary, responseId, error, new Date().toISOString(), id)
+  function completeCycle(id, { status, summary = '', responseId = null, error = null, usage = null, latencyMs = null }) {
+    db.prepare('UPDATE cycles SET status = ?, summary = ?, response_id = ?, error = ?, usage = ?, latency_ms = ?, completed_at = ? WHERE id = ?')
+      .run(status, summary, responseId, error, JSON.stringify(usage || {}), latencyMs, new Date().toISOString(), id)
   }
 
   function createArtwork(input) {
@@ -258,11 +275,11 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return input.id
   }
 
-  function commitArtworkCycle(cycleId, input, { summary, responseId = null }) {
+  function commitArtworkCycle(cycleId, input, { summary, responseId = null, usage = null, latencyMs = null }) {
     db.exec('BEGIN IMMEDIATE')
     try {
       createArtwork({ ...input, cycleId })
-      completeCycle(cycleId, { status: 'completed', summary, responseId })
+      completeCycle(cycleId, { status: 'completed', summary, responseId, usage, latencyMs })
       db.exec('COMMIT')
     } catch (error) {
       db.exec('ROLLBACK')
@@ -313,7 +330,48 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function listCycles(limit = 20) {
     return db.prepare(`SELECT id, trigger, status, model, summary, response_id AS responseId,
-      error, started_at AS startedAt, completed_at AS completedAt FROM cycles ORDER BY started_at DESC LIMIT ?`).all(limit)
+      error, usage, latency_ms AS latencyMs, output_token_budget AS outputTokenBudget,
+      started_at AS startedAt, completed_at AS completedAt FROM cycles ORDER BY started_at DESC LIMIT ?`).all(limit)
+      .map(cycle => ({ ...cycle, usage: parseObject(cycle.usage) }))
+  }
+
+  function getComputeLedger() {
+    const settings = getSettings()
+    const periodStart = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`
+    const cycles = db.prepare(`SELECT status, model, usage, latency_ms AS latencyMs
+      FROM cycles WHERE started_at >= ? ORDER BY started_at`).all(periodStart)
+    const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0, recordedCycles: 0 }
+    const models = {}
+    const latencies = []
+    for (const cycle of cycles) {
+      models[cycle.model] = (models[cycle.model] || 0) + 1
+      const recorded = parseObject(cycle.usage)
+      if (Object.keys(recorded).length) usage.recordedCycles += 1
+      usage.inputTokens += Number(recorded.input_tokens || 0)
+      usage.outputTokens += Number(recorded.output_tokens || 0)
+      usage.totalTokens += Number(recorded.total_tokens || 0)
+      if (Number.isInteger(cycle.latencyMs) && cycle.latencyMs >= 0) latencies.push(cycle.latencyMs)
+    }
+    const attempts = cycles.length
+    return {
+      periodStart,
+      attempts,
+      completed: cycles.filter(cycle => cycle.status === 'completed').length,
+      failed: cycles.filter(cycle => ['failed', 'abandoned'].includes(cycle.status)).length,
+      running: cycles.filter(cycle => cycle.status === 'running').length,
+      models: Object.entries(models).map(([model, count]) => ({ model, count })),
+      usage,
+      latency: {
+        recordedCycles: latencies.length,
+        averageMs: latencies.length ? Math.round(latencies.reduce((sum, value) => sum + value, 0) / latencies.length) : null,
+      },
+      budget: {
+        dailyCycleLimit: settings.dailyCycleLimit,
+        remainingCycles: Math.max(0, settings.dailyCycleLimit - attempts),
+        maxOutputTokensPerCycle: settings.maxOutputTokens,
+      },
+      costBasis: 'Token usage is exact when returned by the provider. Currency cost is not estimated because external model pricing may change.',
+    }
   }
 
   function publicState() {
@@ -330,7 +388,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const settings = getSettings()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30),
+      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }
@@ -350,5 +408,5 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, commitArtworkCycle, setArtworkStatus, listArtworks, listCycles, publicState, studioState, publicStudioState, close: () => db.close() }
+  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, commitArtworkCycle, setArtworkStatus, listArtworks, listCycles, getComputeLedger, publicState, studioState, publicStudioState, close: () => db.close() }
 }

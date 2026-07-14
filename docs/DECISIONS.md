@@ -39,3 +39,7 @@ Candidate selection is reversible Operator-interface state and never changes a c
 ## D-010 · Education is enacted through the live state
 
 The public AI-literacy protocol uses the same bounded field score and refusal transaction as the artwork rather than a simulated lesson. Lure precedes explanation; Reveal labels observation, provisional interpretation, uncertainty, artistic choice and human responsibility separately; Counter-read suppresses the active lure and exposes the next collective revision. The learning outcome is the ability to distinguish counting from interpretation and verify agency without requiring personal disclosure.
+
+## D-011 · Compute accounting uses enforceable units
+
+Each composition attempt stores its requested and returned model, provider-returned token usage, measured latency and active output-token cap. A validated UTC daily attempt limit is enforced even for manual Operator cycles. Studio and Operator show the same compute boundary; they do not convert tokens into a speculative currency amount because provider pricing is external and may change. Provider billing controls remain an additional external safeguard, not a substitute for application limits.

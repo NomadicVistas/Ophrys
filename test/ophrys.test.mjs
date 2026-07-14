@@ -44,7 +44,9 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicScript, /article\.href = '\/studio#works'/)
   assert.doesNotMatch(publicScript, /article\.tabIndex/)
   assert.match(publicFile('studio.js'), /The public trace could not be loaded\. No system state is being claimed\./)
+  assert.match(publicFile('studio.html'), /id="compute"[\s\S]*Cost and compute ledger[\s\S]*id="compute-output-limit"/)
   assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
+  assert.match(publicFile('admin.html'), /name="dailyCycleLimit"[\s\S]*name="maxOutputTokens"[\s\S]*id="operator-compute-heading"/)
   assert.match(publicFile('admin.html'), /id="candidate-comparison"/)
   assert.match(publicFile('admin.js'), /selectedCandidateIds\.size < 2/)
   assert.match(publicFile('admin.js'), /Curatorial rationale/)
@@ -130,7 +132,10 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal((await fetch(`${origin}/api/admin/state`)).status, 401)
   const adminResponse = await fetch(`${origin}/api/admin/state`, { headers: { authorization: 'Bearer test-operator-token' } })
   assert.equal(adminResponse.status, 200)
-  assert.equal((await adminResponse.json()).system.model, 'gpt-5.6-sol')
+  const adminState = await adminResponse.json()
+  assert.equal(adminState.system.model, 'gpt-5.6-sol')
+  assert.equal(adminState.compute.budget.dailyCycleLimit, 4)
+  assert.equal(adminState.compute.budget.maxOutputTokensPerCycle, 2600)
 
   const missingRationale = await fetch(`${origin}/api/admin/artworks/seed-false-spring/status`, {
     method: 'PATCH',
@@ -168,16 +173,44 @@ test('GPT-5.6 generation uses Responses structured output without storing the re
     request = JSON.parse(options.body)
     return { ok: true, status: 200, json: async () => ({ id: 'resp_test', model: 'gpt-5.6-sol', usage: { input_tokens: 111, output_tokens: 222, total_tokens: 333 }, output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(expected) }] }] }) }
   }
-  const result = await generateArtwork({ settings: { model: 'gpt-5.6-sol', reasoningEffort: 'high', systemMode: 'compose', explorationRate: .3, curatorialDirective: 'Keep attraction visible, uncertain, and contestable.' }, metrics: [], recentArtworks: [], apiKey: 'test', fetchImpl })
+  const result = await generateArtwork({ settings: { model: 'gpt-5.6-sol', reasoningEffort: 'high', systemMode: 'compose', explorationRate: .3, maxOutputTokens: 900, curatorialDirective: 'Keep attraction visible, uncertain, and contestable.' }, metrics: [], recentArtworks: [], apiKey: 'test', fetchImpl })
   assert.equal(result.artwork.title, 'Mimic Field')
   assert.equal(request.model, 'gpt-5.6-sol')
   assert.equal(request.store, false)
   assert.equal(request.reasoning.effort, 'high')
+  assert.equal(request.max_output_tokens, 900)
   assert.equal(request.text.format.type, 'json_schema')
   assert.equal(result.usage.total_tokens, 333)
   assert.equal(result.provenance.promptVersion, 'ophrys-composition-v1')
   assert.deepEqual(result.provenance.response.usage.total_tokens, 333)
   assert.match(result.provenance.rightsBasis, /aggregate public events/i)
+})
+
+test('compute ledger records exact returned usage, latency and enforces the UTC attempt budget', () => {
+  const store = createOphrysStore(':memory:')
+  store.updateSettings({ dailyCycleLimit: 1, maxOutputTokens: 900 })
+  store.createCycle({ id: 'ledger-cycle', trigger: 'test', model: 'gpt-5.6-sol', outputTokenBudget: 900 })
+  store.completeCycle('ledger-cycle', {
+    status: 'completed',
+    summary: 'Ledger fixture completed.',
+    responseId: 'resp_ledger',
+    usage: { input_tokens: 120, output_tokens: 80, total_tokens: 200 },
+    latencyMs: 125,
+  })
+
+  const ledger = store.getComputeLedger()
+  assert.equal(ledger.attempts, 1)
+  assert.equal(ledger.completed, 1)
+  assert.deepEqual(ledger.usage, { inputTokens: 120, outputTokens: 80, totalTokens: 200, recordedCycles: 1 })
+  assert.equal(ledger.latency.averageMs, 125)
+  assert.deepEqual(ledger.budget, { dailyCycleLimit: 1, remainingCycles: 0, maxOutputTokensPerCycle: 900 })
+  assert.match(ledger.costBasis, /Currency cost is not estimated/)
+  const [cycle] = store.listCycles()
+  assert.equal(cycle.usage.total_tokens, 200)
+  assert.equal(cycle.latencyMs, 125)
+  assert.equal(cycle.outputTokenBudget, 900)
+  assert.throws(() => store.createCycle({ id: 'over-budget', trigger: 'test', model: 'gpt-5.6-sol' }), /Daily cycle budget exhausted/)
+  store.close()
 })
 
 test('artwork provenance packets store the composition packet and curator decision', async () => {
@@ -228,6 +261,10 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.promptVersion, 'ophrys-composition-v1')
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
+  const [cycle] = store.listCycles()
+  assert.equal(cycle.usage.total_tokens, 232)
+  assert.ok(Number.isInteger(cycle.latencyMs) && cycle.latencyMs >= 0)
+  assert.equal(cycle.outputTokenBudget, 2600)
   assert.throws(() => store.setArtworkStatus(work.id, 'published'), /Curatorial rationale required/i)
   assert.throws(() => store.setArtworkStatus(work.id, 'archived'), /Curatorial rationale required/i)
   store.setArtworkStatus(work.id, 'published', { reason: 'The proposition and counter-reading are sufficiently precise for public review.' })

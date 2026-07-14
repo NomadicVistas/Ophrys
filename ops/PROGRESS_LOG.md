@@ -60,3 +60,10 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Kept observation, provisional interpretation, uncertainty, bounded artistic choice and human curatorial responsibility separately labelled; the explicit learning outcome asks visitors to distinguish counting from interpretation and verify agency without personal disclosure.
 - Added a five-minute facilitation protocol with observable completion evidence, optional participation and reduced-motion/keyboard boundaries.
 - Extended deterministic coverage and the judging smoke to protect the encounter structure and live repertoire transition. `npm run check`, all seven tests, the judging smoke and Chromium 149 desktop/reduced-motion mobile render checks pass.
+
+## 2026-07-14 — cost and compute ledger
+
+- Completed OPH-012 with per-cycle records for requested/returned model, exact provider-returned token usage, measured request latency and the output-token limit active for that attempt.
+- Added two enforced cost boundaries: at most four composition attempts per UTC day by default and at most 2,600 output tokens per request by default. Operator may adjust only within validated ranges; forcing a manual cycle does not bypass the daily limit.
+- Exposed the same bounded ledger in public Studio and protected Operator views, including attempts remaining, usage availability and average latency. Currency cost is deliberately not estimated from potentially changing external prices.
+- Verified `npm run check`, all eight deterministic tests and the credential-free judging smoke.

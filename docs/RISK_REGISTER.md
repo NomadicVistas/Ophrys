@@ -8,7 +8,7 @@
 | Public Studio leaks secrets or provider details | High | Separate projection; redacted errors; server-only credentials | Active |
 | Concurrent cycles corrupt state or duplicate work | High | SQLite WAL, busy timeout, one-running-cycle index, transactional completion | Active |
 | Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 implemented |
-| API cost or runaway generation | High | One bounded cycle, output limit, timeout, Operator control; budget still required | Human decision [!] |
+| API cost or runaway generation | High | Single-flight cycle, timeout, validated 400–5,000 output-token cap and enforced 1–24 attempt UTC daily limit; default 2,600 tokens and four attempts | OPH-012 tested; provider account cap remains external [!] |
 | OpenAI API quota blocks live judging evidence | High | Deterministic contract test remains runnable; add project quota and capture one redacted successful cycle | Blocked [!] |
 | Domain or TLS fails during judging | High | Loopback service, Caddy runbook, readiness probes, deployment receipt | Blocked [!] |
 | Host disk exhaustion prevents build/deploy | Critical | No image builds until safe cleanup is approved | Blocked [!] |
