@@ -15,5 +15,8 @@
   "lastSelectedItem": "OPH-012",
   "blockerStreak": 0,
   "complete": false,
+  "stopped": true,
+  "stoppedAt": "2026-07-14T02:30:09Z",
+  "stopReason": "No honest READY or ACTIVE P0/P1 improvement remains; unfinished P0 items require human authority or external quota, deployment, feedback, video, or submission state.",
   "stopMarker": "ops/AUTONOMY_STOP"
 }

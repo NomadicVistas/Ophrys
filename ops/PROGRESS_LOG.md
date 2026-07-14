@@ -67,3 +67,9 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Added two enforced cost boundaries: at most four composition attempts per UTC day by default and at most 2,600 output tokens per request by default. Operator may adjust only within validated ranges; forcing a manual cycle does not bypass the daily limit.
 - Exposed the same bounded ledger in public Studio and protected Operator views, including attempts remaining, usage availability and average latency. Currency cost is deliberately not estimated from potentially changing external prices.
 - Verified `npm run check`, all eight deterministic tests and the credential-free judging smoke.
+
+## 2026-07-14 — hourly builder stopped
+
+- Stopped the bounded hourly builder because no honest READY or ACTIVE P0/P1 implementation item remains.
+- Left the project completion flag false: OPH-007, OPH-008, OPH-009 and OPH-014 still depend on human authority or external deployment, feedback, recording, submission or API-quota state.
+- Removed only the current hourly job; no additional automation was created.
