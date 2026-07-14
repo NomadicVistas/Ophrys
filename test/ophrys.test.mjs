@@ -3,6 +3,7 @@ import { once } from 'node:events'
 import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
 import test from 'node:test'
 import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
@@ -281,6 +282,83 @@ test('curatorial decision migration is idempotent across store restarts', () => 
     assert.equal(reopened.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions').get().count, 2)
     assert.equal(reopened.getEcosystemTopology().nodeTypeCounts.curatorialDecision, 2)
     reopened.close()
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('store migration rolls back incompatible schemas without partially upgrading them', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'ophrys-migration-failure-'))
+  const path = join(directory, 'ophrys.sqlite')
+  try {
+    const legacy = new DatabaseSync(path)
+    legacy.exec('CREATE TABLE cycles (id TEXT PRIMARY KEY)')
+    legacy.close()
+
+    assert.throws(
+      () => createOphrysStore(path),
+      error => error?.code === 'STORE_MIGRATION_FAILED' && /no schema changes were committed/i.test(error.message),
+    )
+
+    const inspected = new DatabaseSync(path)
+    assert.deepEqual(inspected.prepare('PRAGMA table_info(cycles)').all().map(row => row.name), ['id'])
+    assert.equal(inspected.prepare('PRAGMA user_version').get().user_version, 0)
+    assert.deepEqual(inspected.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all().map(row => row.name), ['cycles'])
+    inspected.close()
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('artwork relations fail closed at insertion and when a stored ledger is malformed', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'ophrys-relation-integrity-'))
+  const path = join(directory, 'ophrys.sqlite')
+  try {
+    const store = createOphrysStore(path)
+    const relationCount = store.db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count
+    assert.throws(
+      () => store.createArtworkRelation({
+        fromArtworkId: 'study-borrowed-weather',
+        toArtworkId: 'missing-work',
+        kind: 'counter-to',
+        evidence: 'This relation must not enter the ledger without both inspectable endpoint works.',
+      }),
+      /endpoints must both exist/i,
+    )
+    assert.throws(
+      () => store.createArtworkRelation({
+        fromArtworkId: 'study-borrowed-weather',
+        toArtworkId: 'seed-false-spring',
+        kind: 'counter-to',
+        evidence: 'This relation must not enter the ledger with a non-canonical timestamp.',
+        createdAt: '14 July 2026',
+      }),
+      /canonical UTC creation time/i,
+    )
+    assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count, relationCount)
+    store.close()
+
+    const corrupted = new DatabaseSync(path)
+    corrupted.exec('PRAGMA foreign_keys = OFF')
+    corrupted.prepare(`INSERT INTO artwork_relations (
+      from_artwork_id, to_artwork_id, relation_kind, evidence, created_at
+    ) VALUES (?, ?, ?, ?, ?)`).run(
+      'study-borrowed-weather',
+      'seed-false-spring',
+      'secret-influence',
+      'This deliberately malformed fixture must never enter the public topology projection.',
+      '2026-07-14T12:00:00.000Z',
+    )
+    corrupted.close()
+
+    assert.throws(
+      () => createOphrysStore(path),
+      error => error?.code === 'STORE_INTEGRITY_FAILED' && /initialization stopped before exposing a partial graph/i.test(error.message),
+    )
+
+    const inspected = new DatabaseSync(path)
+    assert.equal(inspected.prepare("SELECT COUNT(*) AS count FROM artwork_relations WHERE relation_kind = 'secret-influence'").get().count, 1)
+    inspected.close()
   } finally {
     rmSync(directory, { recursive: true, force: true })
   }

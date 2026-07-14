@@ -208,3 +208,14 @@ Next: OPH-022 phase-two reliability, accessibility, privacy and reproducible jud
 - Verified `npm run test:accessibility`, `npm run check`, all 19 tests and `npm run judge:smoke`.
 
 Next: audit malformed relation and migration failure handling as the next bounded OPH-022 slice.
+
+## 2026-07-14 — transactional migration and relation-ledger integrity
+
+- Continued OPH-022 with two reproducible failure boundaries: additive schema changes could survive a later incompatible-schema failure, while a directly corrupted relation row could disappear from joined projections but remain in total counts.
+- Added explicit SQLite schema version 1, transactional schema creation/additive upgrades and required-column validation. Unsupported future or incompatible schemas close the store; a deterministic fixture proves no added table, column or version marker survives failure.
+- Moved seed, quartet relation and curatorial-decision initialization into one transaction and added stored relation-ledger validation before committing or exposing public state.
+- New relations now require two existing distinct artwork endpoints, a declared relation type, concise trimmed evidence and a canonical UTC creation time. Existing malformed rows stop initialization with a stable integrity error and remain untouched for deliberate repair rather than being silently omitted or deleted.
+- This slice changes no visitor aggregation, artwork status, curatorial decision, publication, deployment, hardware transport, production database or scheduler state.
+- Verified the three focused migration/integrity tests, `npm run check`, all 21 tests and `npm run judge:smoke`.
+
+Next: audit the stale-state boundary as the next bounded OPH-022 slice; public-redaction and judge-reproducibility audits remain open.

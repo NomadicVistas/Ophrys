@@ -83,3 +83,7 @@ The first light/sound bridge consumes only the existing bounded field-score sche
 ## D-021 · Literacy evidence is not learner surveillance
 
 The public Studio names five distinct evidence types—node, declared relation, provisional interpretation, simulated output and recorded human decision—using current bounded projections and an explicit limit for each. Its automated rubric checks only whether inspectable technical evidence is present; it never asks for, stores or scores visitor answers or infers comprehension. A missing lifecycle interpretation is labelled absent rather than manufactured. Participation remains optional and the protocol is not presented as human-subject research or proof of educational effectiveness.
+
+## D-022 · Store upgrades and relation integrity fail closed
+
+The SQLite store carries an explicit schema version and applies schema creation, supported additive upgrades, and required-column validation in one transaction. An incompatible or future schema stops initialization and closes the database without committing a partial upgrade. Initialization also validates every stored artwork relation before exposing Studio state: both works must exist, the relation type must be declared, evidence must be concise and canonical, and its creation time must be canonical UTC. Invalid relation requests are rejected before insertion; an already malformed ledger remains untouched for operator-led repair and cannot be projected as a partial or misleading graph.

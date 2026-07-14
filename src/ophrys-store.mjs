@@ -29,6 +29,34 @@ const TOPOLOGY_DECISION_LIMIT = 40
 const PUBLIC_TRACE_LIMIT = 12
 const RUNTIME_STALE_AFTER_MINUTES = 120
 const REFUSAL_REFRACTORY_MS = 60_000
+const STORE_SCHEMA_VERSION = 1
+
+const REQUIRED_STORE_COLUMNS = {
+  settings: ['key', 'value', 'updated_at'],
+  visitor_metrics: ['bucket', 'surface', 'kind', 'count'],
+  field_state: ['id', 'active_lure', 'suppressed_lure', 'revision', 'updated_at', 'last_refusal_mutation_at'],
+  counter_signal_buckets: ['bucket', 'accepted_count', 'applied_count', 'deferred_count'],
+  cycles: ['id', 'trigger', 'status', 'model', 'summary', 'response_id', 'error', 'usage', 'latency_ms', 'output_token_budget', 'started_at', 'completed_at'],
+  artworks: ['id', 'cycle_id', 'title', 'medium', 'proposition', 'public_description', 'visitor_relation', 'exhibition_form', 'learning_question', 'lure_hypothesis', 'counter_reading', 'materials', 'model', 'status', 'provenance', 'created_at'],
+  artwork_relations: ['from_artwork_id', 'to_artwork_id', 'relation_kind', 'evidence', 'created_at'],
+  curatorial_decisions: ['id', 'artwork_id', 'decision_kind', 'previous_status', 'resulting_status', 'rationale', 'actor_role', 'created_at'],
+}
+
+export class StoreMigrationError extends Error {
+  constructor(message, options = {}) {
+    super(message, options)
+    this.name = 'StoreMigrationError'
+    this.code = 'STORE_MIGRATION_FAILED'
+  }
+}
+
+export class StoreIntegrityError extends Error {
+  constructor(message) {
+    super(message)
+    this.name = 'StoreIntegrityError'
+    this.code = 'STORE_INTEGRITY_FAILED'
+  }
+}
 
 export class ArtworkStatusConflictError extends Error {
   constructor(status) {
@@ -121,6 +149,132 @@ function ensureParent(path) {
   if (path !== ':memory:') mkdirSync(dirname(resolve(path)), { recursive: true })
 }
 
+function isCanonicalUtcTimestamp(value) {
+  if (typeof value !== 'string') return false
+  const parsed = new Date(value)
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value
+}
+
+function assertRequiredStoreColumns(db) {
+  for (const [table, requiredColumns] of Object.entries(REQUIRED_STORE_COLUMNS)) {
+    const columns = new Set(db.prepare(`PRAGMA table_info(${table})`).all().map(row => row.name))
+    const missing = requiredColumns.filter(column => !columns.has(column))
+    if (missing.length) throw new Error(`${table} is missing required columns: ${missing.join(', ')}`)
+  }
+}
+
+function migrateStoreSchema(db) {
+  const currentVersion = Number(db.prepare('PRAGMA user_version').get().user_version)
+  if (currentVersion > STORE_SCHEMA_VERSION) {
+    throw new StoreMigrationError(`Database schema version ${currentVersion} is newer than supported version ${STORE_SCHEMA_VERSION}`)
+  }
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS visitor_metrics (
+        bucket TEXT NOT NULL,
+        surface TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        count INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (bucket, surface, kind)
+      );
+      CREATE TABLE IF NOT EXISTS field_state (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        active_lure TEXT NOT NULL,
+        suppressed_lure TEXT,
+        revision INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL,
+        last_refusal_mutation_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS counter_signal_buckets (
+        bucket TEXT PRIMARY KEY,
+        accepted_count INTEGER NOT NULL CHECK (accepted_count > 0),
+        applied_count INTEGER NOT NULL CHECK (applied_count >= 0),
+        deferred_count INTEGER NOT NULL CHECK (deferred_count >= 0),
+        CHECK (accepted_count = applied_count + deferred_count)
+      );
+      CREATE TABLE IF NOT EXISTS cycles (
+        id TEXT PRIMARY KEY,
+        trigger TEXT NOT NULL,
+        status TEXT NOT NULL,
+        model TEXT NOT NULL,
+        summary TEXT NOT NULL DEFAULT '',
+        response_id TEXT,
+        error TEXT,
+        usage TEXT NOT NULL DEFAULT '{}',
+        latency_ms INTEGER,
+        output_token_budget INTEGER NOT NULL DEFAULT 2600,
+        started_at TEXT NOT NULL,
+        completed_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS artworks (
+        id TEXT PRIMARY KEY,
+        cycle_id TEXT,
+        title TEXT NOT NULL,
+        medium TEXT NOT NULL,
+        proposition TEXT NOT NULL,
+        public_description TEXT NOT NULL,
+        visitor_relation TEXT NOT NULL,
+        exhibition_form TEXT NOT NULL,
+        learning_question TEXT NOT NULL,
+        lure_hypothesis TEXT NOT NULL,
+        counter_reading TEXT NOT NULL,
+        materials TEXT NOT NULL,
+        model TEXT NOT NULL,
+        status TEXT NOT NULL,
+        provenance TEXT NOT NULL DEFAULT '{}',
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (cycle_id) REFERENCES cycles(id)
+      );
+      CREATE TABLE IF NOT EXISTS artwork_relations (
+        from_artwork_id TEXT NOT NULL,
+        to_artwork_id TEXT NOT NULL,
+        relation_kind TEXT NOT NULL,
+        evidence TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        PRIMARY KEY (from_artwork_id, to_artwork_id, relation_kind),
+        FOREIGN KEY (from_artwork_id) REFERENCES artworks(id),
+        FOREIGN KEY (to_artwork_id) REFERENCES artworks(id),
+        CHECK (from_artwork_id <> to_artwork_id)
+      );
+      CREATE TABLE IF NOT EXISTS curatorial_decisions (
+        id TEXT PRIMARY KEY,
+        artwork_id TEXT NOT NULL,
+        decision_kind TEXT NOT NULL CHECK (decision_kind IN ('approved', 'rejected', 'returned_for_revision')),
+        previous_status TEXT CHECK (previous_status IS NULL OR previous_status IN ('studio', 'published', 'archived')),
+        resulting_status TEXT NOT NULL CHECK (resulting_status IN ('studio', 'published', 'archived')),
+        rationale TEXT NOT NULL,
+        actor_role TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (artwork_id) REFERENCES artworks(id)
+      );
+      CREATE INDEX IF NOT EXISTS artwork_relations_to ON artwork_relations(to_artwork_id);
+      CREATE INDEX IF NOT EXISTS curatorial_decisions_artwork ON curatorial_decisions(artwork_id, created_at DESC);
+      CREATE UNIQUE INDEX IF NOT EXISTS one_active_cycle ON cycles(status) WHERE status = 'running';
+    `)
+    const artworkColumns = db.prepare('PRAGMA table_info(artworks)').all().map(row => row.name)
+    if (!artworkColumns.includes('provenance')) db.exec("ALTER TABLE artworks ADD COLUMN provenance TEXT NOT NULL DEFAULT '{}'")
+    const cycleColumns = db.prepare('PRAGMA table_info(cycles)').all().map(row => row.name)
+    if (!cycleColumns.includes('usage')) db.exec("ALTER TABLE cycles ADD COLUMN usage TEXT NOT NULL DEFAULT '{}'")
+    if (!cycleColumns.includes('latency_ms')) db.exec('ALTER TABLE cycles ADD COLUMN latency_ms INTEGER')
+    if (!cycleColumns.includes('output_token_budget')) db.exec('ALTER TABLE cycles ADD COLUMN output_token_budget INTEGER NOT NULL DEFAULT 2600')
+    const fieldColumns = db.prepare('PRAGMA table_info(field_state)').all().map(row => row.name)
+    if (!fieldColumns.includes('last_refusal_mutation_at')) db.exec('ALTER TABLE field_state ADD COLUMN last_refusal_mutation_at TEXT')
+    assertRequiredStoreColumns(db)
+    db.exec(`PRAGMA user_version = ${STORE_SCHEMA_VERSION}`)
+    db.exec('COMMIT')
+  } catch (error) {
+    db.exec('ROLLBACK')
+    if (error instanceof StoreMigrationError) throw error
+    throw new StoreMigrationError('Ophrys store migration failed; no schema changes were committed.', { cause: error })
+  }
+}
+
 export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophrys.sqlite', { now = () => new Date() } = {}) {
   const currentDate = () => {
     const value = new Date(now())
@@ -129,115 +283,26 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   }
   ensureParent(path)
   const db = new DatabaseSync(path)
-  db.exec(`
-    PRAGMA journal_mode = WAL;
-    PRAGMA busy_timeout = 5000;
-    PRAGMA foreign_keys = ON;
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS visitor_metrics (
-      bucket TEXT NOT NULL,
-      surface TEXT NOT NULL,
-      kind TEXT NOT NULL,
-      count INTEGER NOT NULL DEFAULT 0,
-      PRIMARY KEY (bucket, surface, kind)
-    );
-    CREATE TABLE IF NOT EXISTS field_state (
-      id INTEGER PRIMARY KEY CHECK (id = 1),
-      active_lure TEXT NOT NULL,
-      suppressed_lure TEXT,
-      revision INTEGER NOT NULL DEFAULT 0,
-      updated_at TEXT NOT NULL,
-      last_refusal_mutation_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS counter_signal_buckets (
-      bucket TEXT PRIMARY KEY,
-      accepted_count INTEGER NOT NULL CHECK (accepted_count > 0),
-      applied_count INTEGER NOT NULL CHECK (applied_count >= 0),
-      deferred_count INTEGER NOT NULL CHECK (deferred_count >= 0),
-      CHECK (accepted_count = applied_count + deferred_count)
-    );
-    CREATE TABLE IF NOT EXISTS cycles (
-      id TEXT PRIMARY KEY,
-      trigger TEXT NOT NULL,
-      status TEXT NOT NULL,
-      model TEXT NOT NULL,
-      summary TEXT NOT NULL DEFAULT '',
-      response_id TEXT,
-      error TEXT,
-      usage TEXT NOT NULL DEFAULT '{}',
-      latency_ms INTEGER,
-      output_token_budget INTEGER NOT NULL DEFAULT 2600,
-      started_at TEXT NOT NULL,
-      completed_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS artworks (
-      id TEXT PRIMARY KEY,
-      cycle_id TEXT,
-      title TEXT NOT NULL,
-      medium TEXT NOT NULL,
-      proposition TEXT NOT NULL,
-      public_description TEXT NOT NULL,
-      visitor_relation TEXT NOT NULL,
-      exhibition_form TEXT NOT NULL,
-      learning_question TEXT NOT NULL,
-      lure_hypothesis TEXT NOT NULL,
-      counter_reading TEXT NOT NULL,
-      materials TEXT NOT NULL,
-      model TEXT NOT NULL,
-      status TEXT NOT NULL,
-      provenance TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL,
-      FOREIGN KEY (cycle_id) REFERENCES cycles(id)
-    );
-    CREATE TABLE IF NOT EXISTS artwork_relations (
-      from_artwork_id TEXT NOT NULL,
-      to_artwork_id TEXT NOT NULL,
-      relation_kind TEXT NOT NULL,
-      evidence TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      PRIMARY KEY (from_artwork_id, to_artwork_id, relation_kind),
-      FOREIGN KEY (from_artwork_id) REFERENCES artworks(id),
-      FOREIGN KEY (to_artwork_id) REFERENCES artworks(id),
-      CHECK (from_artwork_id <> to_artwork_id)
-    );
-    CREATE TABLE IF NOT EXISTS curatorial_decisions (
-      id TEXT PRIMARY KEY,
-      artwork_id TEXT NOT NULL,
-      decision_kind TEXT NOT NULL CHECK (decision_kind IN ('approved', 'rejected', 'returned_for_revision')),
-      previous_status TEXT CHECK (previous_status IS NULL OR previous_status IN ('studio', 'published', 'archived')),
-      resulting_status TEXT NOT NULL CHECK (resulting_status IN ('studio', 'published', 'archived')),
-      rationale TEXT NOT NULL,
-      actor_role TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      FOREIGN KEY (artwork_id) REFERENCES artworks(id)
-    );
-    CREATE INDEX IF NOT EXISTS artwork_relations_to ON artwork_relations(to_artwork_id);
-    CREATE INDEX IF NOT EXISTS curatorial_decisions_artwork ON curatorial_decisions(artwork_id, created_at DESC);
-    CREATE UNIQUE INDEX IF NOT EXISTS one_active_cycle ON cycles(status) WHERE status = 'running';
-  `)
-  const artworkColumns = db.prepare('PRAGMA table_info(artworks)').all().map(row => row.name)
-  if (!artworkColumns.includes('provenance')) db.exec("ALTER TABLE artworks ADD COLUMN provenance TEXT NOT NULL DEFAULT '{}'")
-  const cycleColumns = db.prepare('PRAGMA table_info(cycles)').all().map(row => row.name)
-  if (!cycleColumns.includes('usage')) db.exec("ALTER TABLE cycles ADD COLUMN usage TEXT NOT NULL DEFAULT '{}'")
-  if (!cycleColumns.includes('latency_ms')) db.exec('ALTER TABLE cycles ADD COLUMN latency_ms INTEGER')
-  if (!cycleColumns.includes('output_token_budget')) db.exec('ALTER TABLE cycles ADD COLUMN output_token_budget INTEGER NOT NULL DEFAULT 2600')
-  const fieldColumns = db.prepare('PRAGMA table_info(field_state)').all().map(row => row.name)
-  if (!fieldColumns.includes('last_refusal_mutation_at')) db.exec('ALTER TABLE field_state ADD COLUMN last_refusal_mutation_at TEXT')
-  db.prepare("UPDATE cycles SET status = 'abandoned', summary = 'Cycle expired before completion.', completed_at = ? WHERE status = 'running' AND started_at < ?")
-    .run(currentDate().toISOString(), new Date(currentDate().getTime() - 2 * 3600_000).toISOString())
-
-  const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (?, ?, ?)')
+  try {
+    db.exec('PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000; PRAGMA foreign_keys = ON;')
+    migrateStoreSchema(db)
+  } catch (error) {
+    db.close()
+    throw error
+  }
   const initializedAt = currentDate().toISOString()
-  for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) insertSetting.run(key, JSON.stringify(value), initializedAt)
-  db.prepare('INSERT OR IGNORE INTO field_state (id, active_lure, suppressed_lure, revision, updated_at) VALUES (1, ?, NULL, 0, ?)')
-    .run(LURE_REPERTOIRE[0], initializedAt)
+  db.exec('BEGIN IMMEDIATE')
+  try {
+    db.prepare("UPDATE cycles SET status = 'abandoned', summary = 'Cycle expired before completion.', completed_at = ? WHERE status = 'running' AND started_at < ?")
+      .run(initializedAt, new Date(currentDate().getTime() - 2 * 3600_000).toISOString())
 
-  const count = db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count
-  if (count === 0) {
+    const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (?, ?, ?)')
+    for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) insertSetting.run(key, JSON.stringify(value), initializedAt)
+    db.prepare('INSERT OR IGNORE INTO field_state (id, active_lure, suppressed_lure, revision, updated_at) VALUES (1, ?, NULL, 0, ?)')
+      .run(LURE_REPERTOIRE[0], initializedAt)
+
+    const count = db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count
+    if (count === 0) {
     createArtwork({
       id: 'seed-false-spring', cycleId: null, title: 'False Spring', medium: 'Spatial light, directional sound, public trace',
       proposition: 'A room learns which incomplete signals make a public approach, then reveals that its success contains no knowledge of why anyone came closer.',
@@ -265,12 +330,12 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
         },
       },
     })
-  }
+    }
 
-  for (const [index, candidate] of CURATORIAL_QUARTET.entries()) {
-    const exists = db.prepare('SELECT 1 FROM artworks WHERE id = ?').get(candidate.id)
-    if (exists) continue
-    createArtwork({
+    for (const [index, candidate] of CURATORIAL_QUARTET.entries()) {
+      const exists = db.prepare('SELECT 1 FROM artworks WHERE id = ?').get(candidate.id)
+      if (exists) continue
+      createArtwork({
       ...candidate,
       cycleId: null,
       model: 'human curatorial study',
@@ -295,10 +360,10 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
           reviewedBy: null,
         },
       },
-    })
-  }
+      })
+    }
 
-  const quartetRelations = [
+    const quartetRelations = [
     {
       fromArtworkId: 'study-borrowed-weather', toArtworkId: 'seed-false-spring', kind: 'revision-of',
       evidence: 'Borrowed Weather revises the seed work’s threshold condition into an atmospheric address; the relation records a human curatorial proposition and does not confer publication approval.',
@@ -315,10 +380,22 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       fromArtworkId: 'study-unchosen-signal', toArtworkId: 'study-borrowed-weather', kind: 'counter-to',
       evidence: 'The Unchosen Signal counters the favoured threshold tactic by retaining discarded and refused alternatives as visible, reversible ecosystem states.',
     },
-  ]
-  for (const relation of quartetRelations) createArtworkRelation(relation)
-  backfillCuratorialDecisions()
-  pruneMetrics()
+    ]
+    for (const relation of quartetRelations) createArtworkRelation(relation)
+    backfillCuratorialDecisions()
+    validateArtworkRelationLedger()
+    db.exec('COMMIT')
+  } catch (error) {
+    db.exec('ROLLBACK')
+    db.close()
+    throw error
+  }
+  try {
+    pruneMetrics()
+  } catch (error) {
+    db.close()
+    throw error
+  }
 
   function getSettings() {
     return Object.fromEntries(db.prepare('SELECT key, value FROM settings ORDER BY key').all().map(row => [row.key, parseValue(row.value)]))
@@ -501,11 +578,34 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return input.id
   }
 
+  function validateArtworkRelationLedger() {
+    const rows = db.prepare(`SELECT relation.from_artwork_id AS fromArtworkId,
+      relation.to_artwork_id AS toArtworkId, relation.relation_kind AS kind,
+      relation.evidence, relation.created_at AS createdAt,
+      source.id AS sourceId, target.id AS targetId
+      FROM artwork_relations relation
+      LEFT JOIN artworks source ON source.id = relation.from_artwork_id
+      LEFT JOIN artworks target ON target.id = relation.to_artwork_id`).all()
+    const malformed = rows.filter(row => {
+      const evidence = typeof row.evidence === 'string' ? row.evidence.trim() : ''
+      return !row.sourceId || !row.targetId || row.fromArtworkId === row.toArtworkId
+        || !ARTWORK_RELATION_KINDS.has(row.kind)
+        || evidence !== row.evidence || evidence.length < 20 || evidence.length > 500
+        || !isCanonicalUtcTimestamp(row.createdAt)
+    })
+    if (malformed.length) {
+      throw new StoreIntegrityError(`Artwork relation ledger contains ${malformed.length} malformed record${malformed.length === 1 ? '' : 's'}; initialization stopped before exposing a partial graph.`)
+    }
+  }
+
   function createArtworkRelation({ fromArtworkId, toArtworkId, kind, evidence, createdAt = currentDate().toISOString() }) {
     if (!ARTWORK_RELATION_KINDS.has(kind)) throw new Error('Invalid artwork relation kind')
-    if (!fromArtworkId || !toArtworkId || fromArtworkId === toArtworkId) throw new Error('Artwork relation requires two distinct works')
+    if (typeof fromArtworkId !== 'string' || typeof toArtworkId !== 'string' || !fromArtworkId || !toArtworkId || fromArtworkId === toArtworkId) throw new Error('Artwork relation requires two distinct works')
     const normalizedEvidence = typeof evidence === 'string' ? evidence.trim() : ''
     if (normalizedEvidence.length < 20 || normalizedEvidence.length > 500) throw new Error('Artwork relation requires concise evidence')
+    if (!isCanonicalUtcTimestamp(createdAt)) throw new Error('Artwork relation requires a canonical UTC creation time')
+    const endpointCount = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks WHERE id IN (?, ?)').get(fromArtworkId, toArtworkId).count)
+    if (endpointCount !== 2) throw new Error('Artwork relation endpoints must both exist')
     db.prepare(`INSERT OR IGNORE INTO artwork_relations (
       from_artwork_id, to_artwork_id, relation_kind, evidence, created_at
     ) VALUES (?, ?, ?, ?, ?)`).run(fromArtworkId, toArtworkId, kind, normalizedEvidence, createdAt)

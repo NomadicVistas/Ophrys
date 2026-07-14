@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T22:30:49Z",
-  "lastSelectedItem": "OPH-022 reduced-motion semantics and 320px browser verification",
+  "lastSuccessfulRun": "2026-07-14T23:32:40Z",
+  "lastSelectedItem": "OPH-022 transactional migration and malformed-relation failure handling",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-022 malformed-relation and migration failure audit",
+  "nextBestSlice": "OPH-022 stale-state boundary audit",
   "deadline": "2026-07-22T00:00:00Z"
 }

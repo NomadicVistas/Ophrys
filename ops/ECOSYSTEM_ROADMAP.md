@@ -41,7 +41,7 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 4 | OPH-019 · Public trace lifecycle — **DONE** | OPH-016–018 | Observation, interpretation, candidate, decision and public/refused outcome can be followed end-to-end with redacted public projections |
 | 5 | OPH-020 · Simulated physical bridge contract — **DONE** | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
 | 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric — **DONE** | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
-| 7 | OPH-022 · Reliability/access/privacy/judge pass — **ACTIVE** | Each preceding slice | Reduced motion and 320px study controls are covered; migrations, malformed relations, stale state, redaction and judge reproducibility remain under audit |
+| 7 | OPH-022 · Reliability/access/privacy/judge pass — **ACTIVE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure and malformed-relation refusal are covered; stale state, redaction and judge reproducibility remain under audit |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
@@ -71,9 +71,11 @@ On 2026-07-14 OPH-021 added a bounded public literacy projection and Studio sequ
 
 ## Latest OPH-022 reliability slice
 
-On 2026-07-14 OPH-022 made reduced-motion counter-actions semantically honest across the coded quartet. A counter-state that cannot visibly time itself without a continuous animation loop now remains explicitly static instead of promising an unseen timed restoration. The interface exposes the locally read device preference, retains each work instruction, counter-action, notes and Studio evidence link, and stores no preference or visitor record. A dependency-free Chromium DevTools smoke checks all four studies at 320 × 700 CSS pixels and asserts no JavaScript animation loop, CSS motion, horizontal overflow or hidden control while requiring a non-empty static canvas alternative. Dynamic preference changes cancel or resume bounded rendering without losing the counter-state. The focused smoke, syntax checks, all 19 deterministic tests and credential-free judging smoke pass.
+On 2026-07-14 OPH-022 made reduced-motion counter-actions semantically honest across the coded quartet. A counter-state that cannot visibly time itself without a continuous animation loop now remains explicitly static instead of promising an unseen timed restoration. The interface exposes the locally read device preference, retains each work instruction, counter-action, notes and Studio evidence link, and stores no preference or visitor record. A dependency-free Chromium DevTools smoke checks all four studies at 320 × 700 CSS pixels and asserts no JavaScript animation loop, CSS motion, horizontal overflow or hidden control while requiring a non-empty static canvas alternative. Dynamic preference changes cancel or resume bounded rendering without losing the counter-state.
 
-Next: continue OPH-022 with a bounded malformed-relation and migration audit. Stale-state, public-redaction and judge reproducibility checks remain explicitly open; OPH-022 is not complete.
+The second OPH-022 slice gives SQLite schema and relation-ledger failures a fail-closed boundary. Store schema creation, supported additive upgrades, required-column checks and the explicit schema-version write now commit atomically; an incompatible fixture proves that added columns, tables and the version marker all roll back. Initialization seeds and backfills inside a second transaction, then validates every stored artwork relation before any public projection can be returned. New relations require existing distinct endpoints, a declared type, bounded trimmed evidence and canonical UTC time; a deliberately corrupted legacy relation stops initialization without deleting or projecting the row. Targeted failure probes, syntax checks, all 21 deterministic tests and the credential-free judging smoke pass.
+
+Next: continue OPH-022 with a bounded stale-state audit. Public-redaction and judge reproducibility checks remain explicitly open; OPH-022 is not complete.
 
 ## Slice discipline
 
