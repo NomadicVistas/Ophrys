@@ -42,6 +42,14 @@ OPHRYS_DB_PATH=:memory: OPHRYS_ADMIN_TOKEN=local-judging-token npm start
 4. Open `http://127.0.0.1:7799/admin`. An empty or incorrect token must fail. The local token above reveals protected controls; it is deliberately disposable and must never be used for deployment.
 5. Test keyboard navigation and, if available, reduced-motion mode. The recorded browser matrix and automated assertions are in `docs/ACCESSIBILITY.md`.
 
+When Chromium is installed, the reduced-motion and narrow-screen path is repeatable without a browser library:
+
+```bash
+npm run test:accessibility
+```
+
+This opens each coded study only on an ephemeral loopback server, emulates a 320 × 700 CSS-pixel reduced-motion viewport, and fails on an animation loop, CSS motion, horizontal overflow, hidden evidence/control path or missing static canvas alternative. It reads the device preference locally and stores no preference or visitor record.
+
 The human-authored `False Spring` seed keeps the encounter legible without cloud generation. Do not run `npm run cycle` for judging unless an authorised OpenAI project has quota: a live cycle is separately blocked as OPH-014, and every generated result remains a Studio candidate until a human decision.
 
 ## Dated implementation boundary

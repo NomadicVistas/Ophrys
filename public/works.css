@@ -259,6 +259,12 @@ button {
   text-transform: none;
 }
 
+.work-readout .work-motion-state {
+  margin-top: .45rem;
+  color: var(--work-accent);
+  font-size: .58rem;
+}
+
 .work-controls {
   display: flex;
   flex-wrap: wrap;
@@ -397,6 +403,10 @@ button {
     justify-content: start;
   }
 
+  .work-readout {
+    padding: .65rem .75rem;
+  }
+
   .work-button {
     min-height: 46px;
   }
@@ -414,5 +424,9 @@ button {
 
   .work-grain {
     display: none;
+  }
+
+  #work-canvas {
+    touch-action: manipulation;
   }
 }

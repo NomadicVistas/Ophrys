@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T21:35:55Z",
-  "lastSelectedItem": "OPH-021 ecosystem literacy protocol and evidence rubric",
+  "lastSuccessfulRun": "2026-07-14T22:30:49Z",
+  "lastSelectedItem": "OPH-022 reduced-motion semantics and 320px browser verification",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-022 phase-two reliability, accessibility, privacy and reproducible judge pass",
+  "nextBestSlice": "OPH-022 malformed-relation and migration failure audit",
   "deadline": "2026-07-22T00:00:00Z"
 }

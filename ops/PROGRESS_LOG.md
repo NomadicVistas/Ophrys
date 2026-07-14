@@ -197,3 +197,14 @@ Next: OPH-021 ecosystem literacy protocol and evidence rubric, including the dis
 - Verified the focused literacy/accessibility tests, `npm run check`, all 19 tests and `npm run judge:smoke`.
 
 Next: OPH-022 phase-two reliability, accessibility, privacy and reproducible judging audit; select one failure-backed vertical fix rather than broad cosmetic hardening.
+
+## 2026-07-14 — static reduced-motion semantics and 320px browser evidence
+
+- Began OPH-022 with the research observatory's reduced-motion acceptance boundary and found a concrete mismatch: the quartet stopped its animation loop but temporary counter-actions still promised a timed restoration that could not be redrawn.
+- Made reduced-motion counter-states explicitly static and labelled. Each work retains its lure instruction, native counter-action, notes and Studio link, and the device preference is read locally without storage or public-ledger projection.
+- Added dynamic preference handling that cancels continuous rendering on reduction and safely resumes bounded timed states when motion is re-enabled.
+- Added a dependency-free Chromium DevTools smoke across all four coded studies at 320 × 700 CSS pixels. It asserts no ongoing animation frame, CSS motion, horizontal overflow or hidden control and requires a rendered static canvas alternative.
+- No artwork status, curatorial decision, aggregate schema, production service, hardware or scheduler was changed. OPH-022 remains active: migration, malformed-relation, stale-state, redaction and judge-reproducibility audits are still open.
+- Verified `npm run test:accessibility`, `npm run check`, all 19 tests and `npm run judge:smoke`.
+
+Next: audit malformed relation and migration failure handling as the next bounded OPH-022 slice.

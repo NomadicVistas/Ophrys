@@ -10,6 +10,7 @@ const WORKS = {
     accent: '#dfff52',
     proposition: 'A luminous weather-front learns how to invite a crossing, then admits that its apparent forecast contains no knowledge of you.',
     instruction: 'Move sideways to bend the invitation. Approach the opening to intensify it.',
+    reducedInstruction: 'Move or press to reposition the static threshold; no automatic motion runs.',
     description: 'A pale front of translucent light gathers at an entrance and breaks apart under collective pressure. In this browser study, movement changes the aperture and density of the front without creating a visitor record.',
     question: 'When does an atmospheric invitation start to feel like a prediction about you?',
     counter: 'Clearing the forecast removes the seductive colour field for a neutral interval. Refusal changes the work instead of being counted as failed attention.',
@@ -27,6 +28,7 @@ const WORKS = {
     accent: '#ff765d',
     proposition: 'A dispersed chorus nearly resolves around your position, coordinating attention without ever knowing what anyone heard.',
     instruction: 'Move across the constellation. Press within the field to release an unfinished phrase.',
+    reducedInstruction: 'Move or press to reposition the static chorus; optional sound remains local and gesture-gated.',
     description: 'Suspended resonant forms exchange incomplete phrases across a dark room. Position changes spacing, light and—only when explicitly enabled—locally synthesised sound. No voice or microphone enters the work.',
     question: 'Can a system coordinate a crowd’s attention without knowing what anyone heard?',
     counter: 'Giving silence equal status interrupts the favoured phrase and holds the field quiet before any new resolution can be attempted.',
@@ -45,6 +47,7 @@ const WORKS = {
     accent: '#8feaff',
     proposition: 'A shared image accumulates from expiring traces, making its retention and its right to disappear part of what can be seen.',
     instruction: 'Move slowly to leave a sixty-second trace. Every layer expires in this view.',
+    reducedInstruction: 'Move or press to place a static local trace; its sixty-second expiry is reconciled on the next action and nothing is stored.',
     description: 'A phosphorescent wall carries anonymous afterimages as short-lived rings and stains. They are held only in this page’s working memory and decay visibly; nothing is written to browser storage.',
     question: 'What makes a collective memory accountable when it remembers no individual?',
     counter: 'Erasing the newest layer makes forgetting consequential and visible. It removes recent local traces without pretending that an individual record ever existed.',
@@ -62,6 +65,7 @@ const WORKS = {
     accent: '#ff4f36',
     proposition: 'The signal selected to attract you is forced to share the room with everything the system discarded.',
     instruction: 'Move the selection boundary. Press the field to interrupt its current certainty.',
+    reducedInstruction: 'Move or press to reposition the static selection boundary; the discarded signal remains visible.',
     description: 'Opposing luminous planes hold a favoured signal and its occluded alternatives. Moving mechanical slats exchange fragments between them so optimisation appears as a reversible choice, not an inevitable direction.',
     question: 'Who gains agency when an adaptive system must display what it rejected?',
     counter: 'Restoration gives the discarded field temporary priority without granting it approval or permanence. No signal disappears silently.',
@@ -183,7 +187,8 @@ class ArtworkRenderer {
     this.pulses = []
     this.lastTraceAt = 0
     this.lastStatusAt = 0
-    this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    this.motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    this.reducedMotion = this.motionPreference.matches
     this.choir = new LocalChoir()
     this.random = seededSequence(0x0f4a7 + config.index)
     this.points = Array.from({ length: 46 }, () => ({
@@ -197,6 +202,7 @@ class ArtworkRenderer {
       this.queueDraw()
     }).catch(() => this.setStatus('The visual source could not be decoded. The coded field remains available.'))
     this.canvas.setAttribute('aria-label', config.alt)
+    this.setMotionStatus()
 
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(canvas)
@@ -213,7 +219,31 @@ class ArtworkRenderer {
       if (document.hidden) cancelAnimationFrame(this.frame)
       else this.queueDraw()
     }, options)
+    this.motionPreference.addEventListener('change', event => {
+      const now = performance.now()
+      if (event.matches) {
+        if (this.neutralUntil > now) this.neutralUntil = Number.POSITIVE_INFINITY
+        if (this.silenceUntil > now) this.silenceUntil = Number.POSITIVE_INFINITY
+        if (this.restoredUntil > now) this.restoredUntil = Number.POSITIVE_INFINITY
+      } else {
+        if (!Number.isFinite(this.neutralUntil)) this.neutralUntil = now + 12_000
+        if (!Number.isFinite(this.silenceUntil)) this.silenceUntil = now + 10_000
+        if (!Number.isFinite(this.restoredUntil)) this.restoredUntil = now + 12_000
+      }
+      this.reducedMotion = event.matches
+      cancelAnimationFrame(this.frame)
+      this.setMotionStatus()
+      this.queueDraw()
+    }, options)
     window.addEventListener('pagehide', () => this.destroy(), { ...options, once: true })
+  }
+
+  setMotionStatus() {
+    const state = document.querySelector('#work-motion-state')
+    document.querySelector('#work-instruction').textContent = this.reducedMotion ? this.config.reducedInstruction : this.config.instruction
+    state.textContent = this.reducedMotion
+      ? `Reduced motion: static ${this.config.role.split('/')[1].trim().toLowerCase()} score. No continuous animation loop runs; the counter-action remains available. This preference is not stored.`
+      : 'Motion mode: responsive field. The device preference is read locally and is not stored.'
   }
 
   resize() {
@@ -428,12 +458,16 @@ class ArtworkRenderer {
     const now = performance.now()
     let message
     if (slug === 'borrowed-weather') {
-      this.neutralUntil = now + 12_000
-      message = 'Forecast cleared. A neutral threshold is held for twelve seconds.'
+      this.neutralUntil = this.reducedMotion ? Number.POSITIVE_INFINITY : now + 12_000
+      message = this.reducedMotion
+        ? 'Forecast cleared. The neutral threshold remains as the static reduced-motion state.'
+        : 'Forecast cleared. A neutral threshold is held for twelve seconds.'
     }
     if (slug === 'choir-of-almost') {
-      this.silenceUntil = now + 10_000
-      message = 'Silence now has equal status for ten seconds.'
+      this.silenceUntil = this.reducedMotion ? Number.POSITIVE_INFINITY : now + 10_000
+      message = this.reducedMotion
+        ? 'Silence now has equal status as the static reduced-motion state.'
+        : 'Silence now has equal status for ten seconds.'
     }
     if (slug === 'afterimage-commons') {
       const boundary = now - 15_000
@@ -442,9 +476,11 @@ class ArtworkRenderer {
       message = `${removed} recent local ${removed === 1 ? 'trace was' : 'traces were'} erased. No individual record existed.`
     }
     if (slug === 'unchosen-signal') {
-      this.restoredUntil = now + 12_000
+      this.restoredUntil = this.reducedMotion ? Number.POSITIVE_INFINITY : now + 12_000
       this.chosenSide = 'left'
-      message = 'The discarded field has priority for twelve seconds; restoration does not imply approval.'
+      message = this.reducedMotion
+        ? 'The discarded field has priority as the static reduced-motion state; restoration does not imply approval.'
+        : 'The discarded field has priority for twelve seconds; restoration does not imply approval.'
     }
     this.setStatus(message)
     this.queueDraw()

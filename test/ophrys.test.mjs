@@ -91,6 +91,7 @@ test('the coded quartet couples four original visual sources to bounded counter-
   assert.match(page, /Studio study · unpublished/)
   assert.match(page, /id="counter-action"/)
   assert.match(page, /id="work-canvas" role="img"/)
+  assert.match(page, /id="work-motion-state"/)
   assert.match(page, /This browser study does not identify you, retain a path, or infer a feeling/)
   for (const slug of slugs) {
     assert.match(script, new RegExp(`'${slug}'`))
@@ -103,6 +104,9 @@ test('the coded quartet couples four original visual sources to bounded counter-
   assert.match(script, /new ResizeObserver/)
   assert.match(script, /Math\.min\(2, window\.devicePixelRatio/)
   assert.match(script, /prefers-reduced-motion: reduce/)
+  assert.match(script, /this\.motionPreference\.addEventListener\('change'/)
+  assert.match(script, /this\.entered && !this\.reducedMotion/)
+  assert.match(script, /static reduced-motion state/)
   assert.match(script, /kind: 'refusal', surface: `study\/\$\{slug\}`/)
   assert.doesNotMatch(script, /localStorage|sessionStorage|getUserMedia|fingerprint/i)
 })

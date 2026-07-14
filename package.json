@@ -8,8 +8,9 @@
     "dev": "node --watch src/server.mjs",
     "start": "node src/server.mjs",
     "cycle": "node scripts/ophrys-cycle.mjs",
-    "check": "node --check src/server.mjs && node --check src/ophrys-store.mjs && node --check src/physical-bridge.mjs && node --check src/openai-artwork.mjs && node --check src/ophrys-cycle.mjs && node --check public/app.js && node --check public/studio.js && node --check public/works.js && node --check public/admin.js && node --check scripts/judging-smoke.mjs",
+    "check": "node --check src/server.mjs && node --check src/ophrys-store.mjs && node --check src/physical-bridge.mjs && node --check src/openai-artwork.mjs && node --check src/ophrys-cycle.mjs && node --check public/app.js && node --check public/studio.js && node --check public/works.js && node --check public/admin.js && node --check scripts/judging-smoke.mjs && node --check scripts/accessibility-smoke.mjs",
     "test": "node --test",
+    "test:accessibility": "node scripts/accessibility-smoke.mjs",
     "judge:smoke": "node scripts/judging-smoke.mjs"
   },
   "engines": {
