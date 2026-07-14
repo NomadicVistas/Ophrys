@@ -47,3 +47,7 @@ Each composition attempt stores its requested and returned model, provider-retur
 ## D-012 · Ecosystem lineage records context, not hidden influence
 
 Artwork nodes keep explicit, typed relations. The first relation, `context-derived-from`, is created only when an earlier work ID was actually included in a candidate's bounded composition input. Its public evidence states that only title and publication state were present and that the edge does not imply authorship, approval or aesthetic descent. A relation cannot change publication status; the human curatorial gate remains separate.
+
+## D-013 · A quartet can enter the ecosystem without becoming an exhibition
+
+Four human-authored studies map Threshold, Field, Residue, and Counter-field into distinct artwork propositions. They are seeded idempotently as `studio` candidates with project-owned provenance and explicit relations, while `False Spring` remains the sole published work. Seeding provides a substantive ecosystem for comparison and lineage testing; it does not count as curatorial approval, a model-generated cycle, or evidence of a public physical exhibition.

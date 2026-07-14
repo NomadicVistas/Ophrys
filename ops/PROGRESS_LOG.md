@@ -84,3 +84,13 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Verified `npm run check`, all eight deterministic tests and `npm run judge:smoke`; the smoke retained aggregate-only traces, deny-by-default Operator access and curated publication.
 
 Next: OPH-016, an evidence-based runtime continuity/freshness summary that distinguishes a quiet or stale organism from one known to be active.
+
+## 2026-07-14 — curatorial ecosystem quartet
+
+- Added four distinct human-authored Studio candidates at Ewoud’s request: `Borrowed Weather` (Threshold), `Choir of Almost` (Field), `Afterimage Commons` (Residue), and `The Unchosen Signal` (Counter-field).
+- Gave each candidate a full artwork proposition, material form, visitor relation, lure hypothesis, counter-reading, learning question, and `human-ecosystem-quartet-v1` provenance packet.
+- Kept every work unpublished with a pending human review; no composition API request, automatic approval, production deployment, or public artwork mutation occurred.
+- Added four explicit `revision-of`, `coexists-with`, and `counter-to` relations so the quartet forms a legible ecosystem around `False Spring` without claiming authorship, causation, or approval.
+- Added deterministic coverage proving the four candidates enter Studio, only `False Spring` remains public, and every relation endpoint exists in the projected topology.
+
+Next: OPH-016 remains the structural priority, informed by the research observatory’s runtime-state disclosure recommendation and the integration reviewer’s graph-closure acceptance test.

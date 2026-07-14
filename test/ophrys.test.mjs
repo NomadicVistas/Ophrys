@@ -86,6 +86,41 @@ test('aggregate events never create visitor identity records', () => {
   store.close()
 })
 
+test('the curatorial quartet enters the Studio without bypassing human publication', () => {
+  const store = createOphrysStore(':memory:')
+  const artworks = store.listArtworks({ limit: 10 })
+  const quartetIds = new Set([
+    'study-borrowed-weather',
+    'study-choir-of-almost',
+    'study-afterimage-commons',
+    'study-unchosen-signal',
+  ])
+  const quartet = artworks.filter(work => quartetIds.has(work.id))
+
+  assert.equal(artworks.length, 5)
+  assert.equal(quartet.length, 4)
+  assert.deepEqual(new Set(quartet.map(work => work.title)), new Set(['Borrowed Weather', 'Choir of Almost', 'Afterimage Commons', 'The Unchosen Signal']))
+  for (const work of quartet) {
+    assert.equal(work.status, 'studio')
+    assert.equal(work.model, 'human curatorial study')
+    assert.equal(work.provenance.promptVersion, 'human-ecosystem-quartet-v1')
+    assert.equal(work.provenance.response.usage, null)
+    assert.equal(work.provenance.review.decision, 'pending')
+    assert.match(work.provenance.rightsBasis, /human curatorial review/i)
+  }
+
+  assert.deepEqual(store.listArtworks({ publicOnly: true, limit: 10 }).map(work => work.id), ['seed-false-spring'])
+  const topology = store.getEcosystemTopology()
+  assert.deepEqual(topology.statusCounts, { studio: 4, published: 1, archived: 0 })
+  assert.equal(topology.relations.length, 4)
+  const nodeIds = new Set(topology.nodes.map(node => node.id))
+  for (const relation of topology.relations) {
+    assert.ok(nodeIds.has(relation.fromArtworkId))
+    assert.ok(nodeIds.has(relation.toArtworkId))
+  }
+  store.close()
+})
+
 test('aggregate conditions bound the field score and refusal rotates its repertoire', () => {
   const store = createOphrysStore(':memory:')
   const initial = store.getFieldScore()
@@ -124,8 +159,8 @@ test('public and protected server surfaces keep their boundary', async () => {
   const studioResponse = await fetch(`${origin}/api/studio/state`)
   assert.equal(studioResponse.status, 200)
   const studioState = await studioResponse.json()
-  assert.equal(studioState.ecosystem.nodes.length, 1)
-  assert.equal(studioState.ecosystem.relations.length, 0)
+  assert.equal(studioState.ecosystem.nodes.length, 5)
+  assert.equal(studioState.ecosystem.relations.length, 4)
   assert.match(studioState.ecosystem.boundary, /autonomous approval/i)
 
   const refusalResponse = await fetch(`${origin}/api/public/event`, {
@@ -263,7 +298,7 @@ test('artwork provenance packets store the composition packet and curator decisi
     }),
   })
 
-  const artworks = store.listArtworks({ limit: 4 })
+  const artworks = store.listArtworks({ limit: 10 })
   const work = artworks.find(item => item.title === 'Packet Study')
   assert.ok(work)
   assert.equal(work.model, 'gpt-5.6-sol')
@@ -271,10 +306,12 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
   const topology = store.getEcosystemTopology()
-  assert.equal(topology.nodes.length, 2)
-  assert.deepEqual(topology.statusCounts, { studio: 1, published: 1, archived: 0 })
-  assert.equal(topology.relations.length, 1)
-  assert.deepEqual({ ...topology.relations[0] }, {
+  assert.equal(topology.nodes.length, 6)
+  assert.deepEqual(topology.statusCounts, { studio: 5, published: 1, archived: 0 })
+  assert.equal(topology.relations.length, 5)
+  const generatedRelation = topology.relations.find(relation => relation.fromArtworkId === work.id)
+  assert.ok(generatedRelation)
+  assert.deepEqual({ ...generatedRelation }, {
     fromArtworkId: work.id,
     fromTitle: 'Packet Study',
     fromStatus: 'studio',
@@ -282,10 +319,10 @@ test('artwork provenance packets store the composition packet and curator decisi
     toTitle: 'False Spring',
     toStatus: 'published',
     kind: 'context-derived-from',
-    evidence: topology.relations[0].evidence,
-    createdAt: topology.relations[0].createdAt,
+    evidence: generatedRelation.evidence,
+    createdAt: generatedRelation.createdAt,
   })
-  assert.match(topology.relations[0].evidence, /does not imply approval, authorship, or aesthetic descent/i)
+  assert.match(generatedRelation.evidence, /does not imply approval, authorship, or aesthetic descent/i)
   assert.match(topology.boundary, /do not claim aesthetic similarity/i)
   const [cycle] = store.listCycles()
   assert.equal(cycle.usage.total_tokens, 232)
@@ -294,11 +331,11 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.throws(() => store.setArtworkStatus(work.id, 'published'), /Curatorial rationale required/i)
   assert.throws(() => store.setArtworkStatus(work.id, 'archived'), /Curatorial rationale required/i)
   store.setArtworkStatus(work.id, 'published', { reason: 'The proposition and counter-reading are sufficiently precise for public review.' })
-  const approved = store.listArtworks({ limit: 4 }).find(item => item.id === work.id)
+  const approved = store.listArtworks({ limit: 10 }).find(item => item.id === work.id)
   assert.equal(approved.provenance.review.decision, 'approved')
   assert.equal(approved.provenance.review.rationale, 'The proposition and counter-reading are sufficiently precise for public review.')
   store.setArtworkStatus(work.id, 'archived', { reason: 'The packet needs a fuller counter-reading before publication.' })
-  const archived = store.listArtworks({ limit: 4 }).find(item => item.id === work.id)
+  const archived = store.listArtworks({ limit: 10 }).find(item => item.id === work.id)
   assert.equal(archived.status, 'archived')
   assert.equal(archived.provenance.review.decision, 'rejected')
   assert.equal(archived.provenance.review.rejectionReason, 'The packet needs a fuller counter-reading before publication.')

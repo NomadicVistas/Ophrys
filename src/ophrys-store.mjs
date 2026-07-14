@@ -20,6 +20,64 @@ const EVENT_KINDS = new Set(['arrival', 'threshold', 'artwork_open', 'studio_ope
 const ARTWORK_STATUSES = new Set(['studio', 'published', 'archived'])
 const ARTWORK_RELATION_KINDS = new Set(['context-derived-from', 'revision-of', 'counter-to', 'coexists-with'])
 const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
+const CURATORIAL_QUARTET = [
+  {
+    id: 'study-borrowed-weather',
+    title: 'Borrowed Weather',
+    spatialRole: 'threshold',
+    medium: 'Responsive light climate, directional sound, translucent scrims, and coarse threshold counting',
+    proposition: 'A threshold borrows the visual and acoustic signs of an approaching weather system, adjusting their incompleteness from collective crossings while refusing to explain why anyone entered.',
+    publicDescription: 'A pale front of light and low directional sound gathers at the entrance, then breaks apart as aggregate threshold activity changes. Its apparent forecast is only a tactic: the work displays the counts and timing that shaped the signal without turning them into a portrait of the people present.',
+    visitorRelation: 'Visitors may cross, wait outside, approach from another side, or use a visible refusal control that replaces the current weather-sign with a deliberately neutral interval.',
+    exhibitionForm: 'A porous entrance made from translucent scrims, narrow light bands, directional speakers, a coarse crossing counter, and a local evidence display forms an address before the main field.',
+    learningQuestion: 'When does an atmospheric invitation start to feel like a prediction about you?',
+    lureHypothesis: 'An incomplete moving light-front paired with low directional sound will produce more collective threshold crossings than a stable evenly lit entrance.',
+    counterReading: 'Refusal clears the borrowed forecast, reveals the aggregate basis of the tactic, and holds a quiet neutral threshold before another signal may appear.',
+    materials: ['translucent scrims', 'addressable light bars', 'directional speakers', 'coarse threshold counters', 'local evidence display'],
+  },
+  {
+    id: 'study-choir-of-almost',
+    title: 'Choir of Almost',
+    spatialRole: 'field',
+    medium: 'Distributed resonant objects, spatial audio, low-resolution presence counts, and interrupted light',
+    proposition: 'A shared field assembles a chorus from tones that almost resolve, learning only which collective densities sustain attention and preserving the gap between acoustic success and social understanding.',
+    publicDescription: 'Across a room, resonant objects answer one another with partial phrases. Aggregate approach and dwell counts alter spacing, density, and silence, while a public score shows which coarse observations changed the composition and which interpretations remain uncertain.',
+    visitorRelation: 'People may circulate, remain at the edge, gather, disperse, or collectively interrupt the favoured phrase; no voice is recorded and no path is attached to an individual.',
+    exhibitionForm: 'A walkable constellation of resonant surfaces and directional speakers creates overlapping listening positions, with interrupted light marking transitions between observation, interpretation, and bounded artistic choice.',
+    learningQuestion: 'Can a system coordinate a crowd’s attention without knowing what anyone heard?',
+    lureHypothesis: 'Unresolved phrases that migrate between listening positions will sustain more aggregate dwell than a centred complete musical sequence.',
+    counterReading: 'A collective interruption removes the most successful phrase from the next repertoire and gives silence equal status as a compositional response.',
+    materials: ['resonant metal and wood objects', 'directional speakers', 'coarse presence counters', 'interrupted light', 'public score display'],
+  },
+  {
+    id: 'study-afterimage-commons',
+    title: 'Afterimage Commons',
+    spatialRole: 'residue',
+    medium: 'Fading projection, phosphorescent surfaces, aggregate event buckets, and a public erase mechanism',
+    proposition: 'Depersonalised traces of earlier encounters return as a slowly decaying commons whose retention rules, omissions, and erasure controls are as visible as the image they produce.',
+    publicDescription: 'Soft afterimages accumulate from hourly aggregate events rather than recorded bodies. The projection shows what kind of event contributed, when its bucket expires, and where interpretation was added; anyone may accelerate the decay without being asked to justify the erasure.',
+    visitorRelation: 'Visitors may inspect the trace ledger, contribute only through coarse shared events, decline participation, or erase the most recent aggregate layer without deleting another person’s record because no individual record exists.',
+    exhibitionForm: 'A phosphorescent wall and low-luminance projection hold layered traces beside a local retention clock, event legend, and mechanically distinct erase control.',
+    learningQuestion: 'What makes a collective memory accountable when it remembers no individual?',
+    lureHypothesis: 'A visibly decaying trace with an explicit retention clock will invite longer inspection than an unexplained persistent visual archive.',
+    counterReading: 'The erase control makes forgetting consequential, displays the removed aggregate layer, and prevents absence from being misread as missing personal data.',
+    materials: ['phosphorescent surface', 'low-luminance projector', 'aggregate event ledger', 'retention clock', 'public erase control'],
+  },
+  {
+    id: 'study-unchosen-signal',
+    title: 'The Unchosen Signal',
+    spatialRole: 'counter-field',
+    medium: 'Split light field, mechanical shutters, discarded-signal ledger, and public counter-signal controls',
+    proposition: 'The system exhibits the signals it did not choose, allowing rejected tactics and public counter-signals to reorganise the field instead of presenting optimisation as an inevitable direction.',
+    publicDescription: 'Two light fields face one another: one carries the currently favoured lure, while the other holds discarded and publicly refused signals. Mechanical shutters periodically exchange their visibility, exposing selection as a reversible curatorial and computational act.',
+    visitorRelation: 'Visitors may refuse the favoured signal, restore a discarded one for collective inspection, add a bounded counter-signal, or remain outside the choice without being classified.',
+    exhibitionForm: 'Opposing light planes, mechanical shutters, tactile counter-signal controls, and a public ledger stage selected, discarded, and restored signals as equally inspectable states.',
+    learningQuestion: 'Who gains agency when an adaptive system must display what it rejected?',
+    lureHypothesis: 'Showing the favoured and discarded signal together will produce more counter-signal actions than presenting only the system’s current selection.',
+    counterReading: 'No signal can disappear silently: refusal moves it into the visible discarded ledger, and restoration never grants automatic approval or permanence.',
+    materials: ['opposing light planes', 'mechanical shutters', 'tactile counter-signal controls', 'discarded-signal ledger', 'bounded local controller'],
+  },
+]
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value))
@@ -162,6 +220,57 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       },
     })
   }
+
+  for (const [index, candidate] of CURATORIAL_QUARTET.entries()) {
+    const exists = db.prepare('SELECT 1 FROM artworks WHERE id = ?').get(candidate.id)
+    if (exists) continue
+    createArtwork({
+      ...candidate,
+      cycleId: null,
+      model: 'human curatorial study',
+      status: 'studio',
+      createdAt: new Date(Date.parse(now) + index + 1).toISOString(),
+      provenance: {
+        promptVersion: 'human-ecosystem-quartet-v1',
+        sourceReferences: ['Ophrys spatial grammar', 'Ewoud’s 2026-07-14 request for four ecosystem artworks'],
+        rightsBasis: 'Original project-team draft prepared with Codex assistance for human curatorial review; no living artist or third-party artwork was requested as a model.',
+        inputSummary: {
+          type: 'human-authored ecosystem candidate',
+          spatialRole: candidate.spatialRole,
+          note: 'No composition API request was made. The candidate is unpublished and requires an explicit human decision.',
+        },
+        response: { responseId: null, model: 'human curatorial study', usage: null },
+        review: {
+          status: 'studio',
+          decision: 'pending',
+          rationale: null,
+          rejectionReason: null,
+          reviewedAt: null,
+          reviewedBy: null,
+        },
+      },
+    })
+  }
+
+  const quartetRelations = [
+    {
+      fromArtworkId: 'study-borrowed-weather', toArtworkId: 'seed-false-spring', kind: 'revision-of',
+      evidence: 'Borrowed Weather revises the seed work’s threshold condition into an atmospheric address; the relation records a human curatorial proposition and does not confer publication approval.',
+    },
+    {
+      fromArtworkId: 'study-choir-of-almost', toArtworkId: 'study-borrowed-weather', kind: 'coexists-with',
+      evidence: 'Choir of Almost extends the threshold into a distributed shared field; both can coexist spatially without implying that one caused or authored the other.',
+    },
+    {
+      fromArtworkId: 'study-afterimage-commons', toArtworkId: 'seed-false-spring', kind: 'counter-to',
+      evidence: 'Afterimage Commons counters attraction-led adaptation by making retention, expiry, and public erasure the primary material under inspection.',
+    },
+    {
+      fromArtworkId: 'study-unchosen-signal', toArtworkId: 'study-borrowed-weather', kind: 'counter-to',
+      evidence: 'The Unchosen Signal counters the favoured threshold tactic by retaining discarded and refused alternatives as visible, reversible ecosystem states.',
+    },
+  ]
+  for (const relation of quartetRelations) createArtworkRelation(relation)
 
   function getSettings() {
     return Object.fromEntries(db.prepare('SELECT key, value FROM settings ORDER BY key').all().map(row => [row.key, parseValue(row.value)]))

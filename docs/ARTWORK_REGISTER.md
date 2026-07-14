@@ -18,4 +18,13 @@ Implementation note: generated candidates keep that packet in the artwork record
 
 Current seed work: `False Spring` — human-authored baseline, public status, used to test the exhibition interface.
 
+Current human-authored ecosystem candidates, all `studio` / unpublished and pending explicit curatorial review:
+
+- `Borrowed Weather` — Threshold: an atmospheric address that exposes its aggregate crossing basis and can be neutralised through refusal.
+- `Choir of Almost` — Field: distributed unresolved sound that responds to collective density without recording voices or individual paths.
+- `Afterimage Commons` — Residue: a decaying aggregate trace whose retention, expiry, and public erasure are visible materials.
+- `The Unchosen Signal` — Counter-field: favoured, discarded, refused, and restored signals remain inspectable rather than disappearing into optimisation.
+
+The quartet was drafted with Codex assistance after Ewoud’s 2026-07-14 request. It did not use the composition API, carries `human-ecosystem-quartet-v1` provenance, and does not enter the public exhibition until a human curator records an explicit approval rationale.
+
 Implementation note: the adaptive field score is system state, not a newly approved artwork. Its fixed `orbit`, `interruption`, and `split-signal` repertoire exists to test the seed work's consequential counter-reading; model-generated candidates still require separate provenance and human approval.
