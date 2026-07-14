@@ -5,6 +5,7 @@
 | Covert manipulation contradicts the critical artwork | Critical | Visible lure/reveal/counter-read; no individual targeting; refusal atomically suppresses the active lure and rotates a bounded repertoire | OPH-004 tested |
 | Unsupported psychological inference | Critical | Aggregate events only; explicit observation/hypothesis split | Tests active |
 | Generated work is presented as approved art | High | All model output enters `studio`; protected comparison workspace and rationale-required human publication gate | OPH-010 tested |
+| A topology edge is mistaken for aesthetic influence or approval | High | Relations use bounded types and evidence; context edges record only IDs actually present in composition input and explicitly disclaim authorship, similarity and approval | OPH-015 tested |
 | Public Studio leaks secrets or provider details | High | Separate projection; redacted errors; server-only credentials | Active |
 | Concurrent cycles corrupt state or duplicate work | High | SQLite WAL, busy timeout, one-running-cycle index, transactional completion | Active |
 | Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 implemented |

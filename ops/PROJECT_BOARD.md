@@ -18,7 +18,15 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-012 | P1 | DONE | Cost and compute ledger | Returned usage, measured latency, model trace, per-cycle output cap and enforced UTC daily attempt budget visible to Operator/Studio |
 | OPH-013 | P2 | LATER | Physical light/sound bridge | Hardware adapter consumes the same bounded artwork score |
 | OPH-014 | P0 | BLOCKED [!] | Verify a live GPT‑5.6 Sol generation | OpenAI project has available API quota; cycle completes with redacted usage evidence |
+| OPH-015 | P1 | DONE | Explicit artwork ecosystem topology | Generated candidates become `studio` nodes with typed context relations to actual prior-work inputs; public Studio exposes relation evidence without implying approval or authorship |
+| OPH-016 | P0 | READY | Runtime continuity and freshness summary | Public Studio distinguishes active, quiet, stale, disabled and failed runtime conditions from recorded evidence without claiming unverifiable liveness |
+| OPH-017 | P1 | READY | Counter-signal and erasure ledger nodes | Consequential collective refusal becomes an inspectable bounded ecosystem relation without individual attribution |
+| OPH-018 | P1 | READY | Curatorial decision relations | Human approve/reject/revise decisions connect to nodes while comparison remains reversible and non-authoritative |
+| OPH-019 | P1 | LATER | End-to-end public trace lifecycle | Observation, interpretation, candidate, decision and public/refused outcome are connected and inspectable |
+| OPH-020 | P2 | LATER | Simulated physical bridge contract | Deterministic light/sound adapter validates bounded scores and quiet fallback without real hardware action |
+| OPH-021 | P2 | LATER | Ecosystem literacy protocol | Public protocol distinguishes nodes, relations, interpretation and human responsibility |
+| OPH-022 | P1 | LATER | Phase-two reliability and judge pass | Migrations, invalid relations, stale state, accessibility, privacy and reproducibility remain covered |
 
 ## Current definition of done
 
-Build Week P0 is complete when OPH-004 through OPH-008 and OPH-014 have evidence, the demo is freely testable, and the remaining blocked items require explicit human authority.
+Phase one is a completed implementation lane. Phase two is complete when OPH-015 through OPH-022 have evidence and any remaining work requires explicit human authority or external state. Build Week submission blockers remain separately visible rather than being treated as ecosystem implementation work.

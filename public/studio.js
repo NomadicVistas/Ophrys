@@ -67,6 +67,30 @@ function artworkRow(work) {
   return article
 }
 
+function relationRow(relation) {
+  const row = element('article', 'lineage-row')
+  const relationKind = element('span', 'cycle-state', relation.kind.replaceAll('-', ' '))
+  const body = element('div')
+  body.append(
+    element('h3', '', `${relation.fromTitle} → ${relation.toTitle}`),
+    element('p', '', `${relation.fromStatus} work → ${relation.toStatus} context · ${date(relation.createdAt)}`),
+    element('p', 'lineage-evidence', relation.evidence),
+  )
+  row.append(relationKind, body)
+  return row
+}
+
+function renderEcosystem(ecosystem) {
+  document.querySelector('#node-count').textContent = String(ecosystem.nodes.length)
+  document.querySelector('#relation-count').textContent = String(ecosystem.relations.length)
+  document.querySelector('#studio-node-count').textContent = String(ecosystem.statusCounts.studio || 0)
+  document.querySelector('#published-node-count').textContent = String(ecosystem.statusCounts.published || 0)
+  document.querySelector('#lineage-boundary').textContent = ecosystem.boundary
+  document.querySelector('#lineage-list').replaceChildren(...(ecosystem.relations.length
+    ? ecosystem.relations.map(relationRow)
+    : [element('p', 'empty', 'One seed work is present. Explicit lineage will appear after a bounded composition cycle uses an earlier work as context.')]))
+}
+
 const status = document.querySelector('#studio-status')
 
 function renderComputeLedger(compute) {
@@ -88,6 +112,7 @@ try {
   document.querySelector('#cycle-count').textContent = state.cycles.length
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
+  renderEcosystem(state.ecosystem)
   renderComputeLedger(state.compute)
   const max = Math.max(1, ...state.metrics.map(item => Number(item.count)))
   document.querySelector('#metrics').replaceChildren(...(state.metrics.length ? state.metrics.map(item => metricRow(item, max)) : [element('p', 'empty', 'No aggregate public events yet.')]))

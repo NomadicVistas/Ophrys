@@ -1,22 +1,32 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "project": "Ophrys",
+  "phase": {
+    "id": "ecosystem-phase-two",
+    "status": "active",
+    "objective": "Build an inspectable autopoietic artistic ecosystem while preserving bounded runtime, human-curated publication, and review-branch development loops."
+  },
   "automation": {
-    "jobId": "0d023788-f31e-4540-bc4c-d51882dfdfcb",
-    "name": "ophrys-build-week-hourly-sol",
+    "jobId": "f435aa80-ecbc-4973-b59d-10fbca1aba0c",
+    "name": "ophrys-ecosystem-hourly-sol",
     "branch": "codex/hourly-builder",
-    "schedule": "25 * * * * Europe/Amsterdam",
+    "schedule": "hourly (managed by OpenClaw)",
     "model": "codex/gpt-5.6-sol",
     "reasoning": "high",
     "fallbacks": [],
     "deadline": "2026-07-22T00:00:00Z"
   },
-  "lastSuccessfulRun": "2026-07-14T01:44:47Z",
-  "lastSelectedItem": "OPH-012",
+  "previousLane": {
+    "name": "phase-one hourly builder",
+    "stoppedAt": "2026-07-14T02:30:09Z",
+    "finalItem": "OPH-012",
+    "status": "completed-lane"
+  },
+  "lastSuccessfulRun": "2026-07-14T11:54:36Z",
+  "lastSelectedItem": "OPH-015",
   "blockerStreak": 0,
   "complete": false,
-  "stopped": true,
-  "stoppedAt": "2026-07-14T02:30:09Z",
-  "stopReason": "No honest READY or ACTIVE P0/P1 improvement remains; unfinished P0 items require human authority or external quota, deployment, feedback, video, or submission state.",
-  "stopMarker": "ops/AUTONOMY_STOP"
+  "stopped": false,
+  "nextBestSlice": "OPH-016 runtime continuity and freshness summary",
+  "deadline": "2026-07-22T00:00:00Z"
 }

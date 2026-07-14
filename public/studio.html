@@ -8,7 +8,7 @@
 </head>
 <body data-surface="studio" class="studio-body">
   <a class="skip-link" href="#main-content">Skip to main content</a>
-  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>STUDIO</span></a><nav aria-label="Primary"><a href="/">Public field</a><a href="#cycles">Cycles</a><a href="#works">Works</a></nav><div class="system-pill"><i></i><span>public trace</span></div></header>
+  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>STUDIO</span></a><nav aria-label="Primary"><a href="/">Public field</a><a href="#lineage">Lineage</a><a href="#cycles">Cycles</a><a href="#works">Works</a></nav><div class="system-pill"><i></i><span>public trace</span></div></header>
   <main id="main-content" class="studio-shell">
     <section class="studio-intro"><p class="eyebrow">The organism does not explain itself through hidden reasoning</p><h1>Observe its inputs,<br>choices and limits.</h1><p>This Studio exposes operational traces, aggregate counts, generated propositions, publication state and curatorial constraints. It never presents model chain-of-thought as evidence.</p></section>
     <p id="studio-status" class="surface-status" role="status" aria-live="polite">Loading the public trace…</p>
@@ -16,6 +16,10 @@
       <article><span>MODE</span><strong id="mode">—</strong></article><article><span>MODEL</span><strong id="model">—</strong></article><article><span>CYCLES</span><strong id="cycle-count">—</strong></article><article><span>WORKS</span><strong id="work-count">—</strong></article>
     </section>
     <section class="studio-panel"><header><div><p class="eyebrow">Aggregate public field</p><h2>What the room has registered</h2></div><p id="studio-disclosure">No visitor identifiers, exact paths or psychological classifications are retained.</p></header><div id="metrics" class="metric-list"></div></section>
+    <section id="lineage" class="studio-panel"><header><div><p class="eyebrow">Ecosystem topology</p><h2>How works remain connected</h2></div><p id="lineage-boundary">Relations show recorded composition context, not hidden influence or automatic approval.</p></header>
+      <div class="telemetry-grid lineage-counts" aria-live="polite"><article><span>NODES</span><strong id="node-count">—</strong></article><article><span>RELATIONS</span><strong id="relation-count">—</strong></article><article><span>IN STUDIO</span><strong id="studio-node-count">—</strong></article><article><span>PUBLISHED</span><strong id="published-node-count">—</strong></article></div>
+      <div id="lineage-list" class="lineage-list"></div>
+    </section>
     <section id="compute" class="studio-panel"><header><div><p class="eyebrow">Cost and compute ledger</p><h2>What composition consumes</h2></div><p id="compute-basis">Usage is reported only when the provider returns it. No speculative currency figure is presented.</p></header>
       <div class="telemetry-grid compute-grid" aria-live="polite">
         <article><span>UTC ATTEMPTS</span><strong id="compute-attempts">—</strong></article><article><span>REMAINING TODAY</span><strong id="compute-remaining">—</strong></article><article><span>TOTAL TOKENS</span><strong id="compute-tokens">—</strong></article><article><span>AVG LATENCY</span><strong id="compute-latency">—</strong></article><article><span>MODEL TRACE</span><strong id="compute-models">—</strong></article><article><span>OUTPUT LIMIT / CYCLE</span><strong id="compute-output-limit">—</strong></article>

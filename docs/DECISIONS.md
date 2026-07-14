@@ -43,3 +43,7 @@ The public AI-literacy protocol uses the same bounded field score and refusal tr
 ## D-011 · Compute accounting uses enforceable units
 
 Each composition attempt stores its requested and returned model, provider-returned token usage, measured latency and active output-token cap. A validated UTC daily attempt limit is enforced even for manual Operator cycles. Studio and Operator show the same compute boundary; they do not convert tokens into a speculative currency amount because provider pricing is external and may change. Provider billing controls remain an additional external safeguard, not a substitute for application limits.
+
+## D-012 · Ecosystem lineage records context, not hidden influence
+
+Artwork nodes keep explicit, typed relations. The first relation, `context-derived-from`, is created only when an earlier work ID was actually included in a candidate's bounded composition input. Its public evidence states that only title and publication state were present and that the edge does not imply authorship, approval or aesthetic descent. A relation cannot change publication status; the human curatorial gate remains separate.

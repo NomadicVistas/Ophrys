@@ -45,6 +45,8 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.doesNotMatch(publicScript, /article\.tabIndex/)
   assert.match(publicFile('studio.js'), /The public trace could not be loaded\. No system state is being claimed\./)
   assert.match(publicFile('studio.html'), /id="compute"[\s\S]*Cost and compute ledger[\s\S]*id="compute-output-limit"/)
+  assert.match(publicFile('studio.html'), /id="lineage"[\s\S]*Ecosystem topology[\s\S]*id="relation-count"/)
+  assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
   assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
   assert.match(publicFile('admin.html'), /name="dailyCycleLimit"[\s\S]*name="maxOutputTokens"[\s\S]*id="operator-compute-heading"/)
   assert.match(publicFile('admin.html'), /id="candidate-comparison"/)
@@ -118,6 +120,13 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal(publicState.artworks[0].status, 'published')
   assert.match(publicState.disclosure, /aggregate event counts only/i)
   const originalLure = publicState.fieldScore.activeLure
+
+  const studioResponse = await fetch(`${origin}/api/studio/state`)
+  assert.equal(studioResponse.status, 200)
+  const studioState = await studioResponse.json()
+  assert.equal(studioState.ecosystem.nodes.length, 1)
+  assert.equal(studioState.ecosystem.relations.length, 0)
+  assert.match(studioState.ecosystem.boundary, /autonomous approval/i)
 
   const refusalResponse = await fetch(`${origin}/api/public/event`, {
     method: 'POST',
@@ -261,6 +270,23 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.promptVersion, 'ophrys-composition-v1')
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
+  const topology = store.getEcosystemTopology()
+  assert.equal(topology.nodes.length, 2)
+  assert.deepEqual(topology.statusCounts, { studio: 1, published: 1, archived: 0 })
+  assert.equal(topology.relations.length, 1)
+  assert.deepEqual({ ...topology.relations[0] }, {
+    fromArtworkId: work.id,
+    fromTitle: 'Packet Study',
+    fromStatus: 'studio',
+    toArtworkId: 'seed-false-spring',
+    toTitle: 'False Spring',
+    toStatus: 'published',
+    kind: 'context-derived-from',
+    evidence: topology.relations[0].evidence,
+    createdAt: topology.relations[0].createdAt,
+  })
+  assert.match(topology.relations[0].evidence, /does not imply approval, authorship, or aesthetic descent/i)
+  assert.match(topology.boundary, /do not claim aesthetic similarity/i)
   const [cycle] = store.listCycles()
   assert.equal(cycle.usage.total_tokens, 232)
   assert.ok(Number.isInteger(cycle.latencyMs) && cycle.latencyMs >= 0)

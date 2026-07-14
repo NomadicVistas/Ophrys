@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
 
 const EVENT_KINDS = new Set(['arrival', 'threshold', 'artwork_open', 'studio_open', 'dwell_short', 'dwell_long', 'refusal', 'return'])
 const ARTWORK_STATUSES = new Set(['studio', 'published', 'archived'])
+const ARTWORK_RELATION_KINDS = new Set(['context-derived-from', 'revision-of', 'counter-to', 'coexists-with'])
 const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
 
 function clamp(value, minimum, maximum) {
@@ -102,6 +103,18 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       created_at TEXT NOT NULL,
       FOREIGN KEY (cycle_id) REFERENCES cycles(id)
     );
+    CREATE TABLE IF NOT EXISTS artwork_relations (
+      from_artwork_id TEXT NOT NULL,
+      to_artwork_id TEXT NOT NULL,
+      relation_kind TEXT NOT NULL,
+      evidence TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      PRIMARY KEY (from_artwork_id, to_artwork_id, relation_kind),
+      FOREIGN KEY (from_artwork_id) REFERENCES artworks(id),
+      FOREIGN KEY (to_artwork_id) REFERENCES artworks(id),
+      CHECK (from_artwork_id <> to_artwork_id)
+    );
+    CREATE INDEX IF NOT EXISTS artwork_relations_to ON artwork_relations(to_artwork_id);
     CREATE UNIQUE INDEX IF NOT EXISTS one_active_cycle ON cycles(status) WHERE status = 'running';
   `)
   const artworkColumns = db.prepare('PRAGMA table_info(artworks)').all().map(row => row.name)
@@ -275,10 +288,36 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return input.id
   }
 
+  function createArtworkRelation({ fromArtworkId, toArtworkId, kind, evidence, createdAt = new Date().toISOString() }) {
+    if (!ARTWORK_RELATION_KINDS.has(kind)) throw new Error('Invalid artwork relation kind')
+    if (!fromArtworkId || !toArtworkId || fromArtworkId === toArtworkId) throw new Error('Artwork relation requires two distinct works')
+    const normalizedEvidence = typeof evidence === 'string' ? evidence.trim() : ''
+    if (normalizedEvidence.length < 20 || normalizedEvidence.length > 500) throw new Error('Artwork relation requires concise evidence')
+    db.prepare(`INSERT OR IGNORE INTO artwork_relations (
+      from_artwork_id, to_artwork_id, relation_kind, evidence, created_at
+    ) VALUES (?, ?, ?, ?, ?)`).run(fromArtworkId, toArtworkId, kind, normalizedEvidence, createdAt)
+  }
+
+  function linkArtworkContext(artworkId, provenance) {
+    const contextWorks = provenance?.inputSummary?.recentArtworkSummary
+    if (!Array.isArray(contextWorks)) return
+    const existingIds = new Set(db.prepare('SELECT id FROM artworks').all().map(row => row.id))
+    for (const context of contextWorks) {
+      if (!existingIds.has(context?.id) || context.id === artworkId) continue
+      createArtworkRelation({
+        fromArtworkId: artworkId,
+        toArtworkId: context.id,
+        kind: 'context-derived-from',
+        evidence: 'The earlier work’s title and publication state were present in the bounded composition context; this does not imply approval, authorship, or aesthetic descent.',
+      })
+    }
+  }
+
   function commitArtworkCycle(cycleId, input, { summary, responseId = null, usage = null, latencyMs = null }) {
     db.exec('BEGIN IMMEDIATE')
     try {
       createArtwork({ ...input, cycleId })
+      linkArtworkContext(input.id, input.provenance)
       completeCycle(cycleId, { status: 'completed', summary, responseId, usage, latencyMs })
       db.exec('COMMIT')
     } catch (error) {
@@ -326,6 +365,37 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       counterReading: row.counter_reading, materials: parseValue(row.materials),
       model: row.model, status: row.status, provenance: parseObject(row.provenance), createdAt: row.created_at,
     }))
+  }
+
+  function listArtworkRelations(limit = 120) {
+    return db.prepare(`SELECT relation.from_artwork_id AS fromArtworkId,
+      source.title AS fromTitle, source.status AS fromStatus,
+      relation.to_artwork_id AS toArtworkId, context.title AS toTitle, context.status AS toStatus,
+      relation.relation_kind AS kind, relation.evidence, relation.created_at AS createdAt
+      FROM artwork_relations relation
+      JOIN artworks source ON source.id = relation.from_artwork_id
+      JOIN artworks context ON context.id = relation.to_artwork_id
+      ORDER BY relation.created_at DESC, relation.from_artwork_id, relation.to_artwork_id LIMIT ?`).all(limit)
+  }
+
+  function getEcosystemTopology() {
+    const nodes = listArtworks({ limit: 40 }).map(work => ({
+      id: work.id,
+      title: work.title,
+      status: work.status,
+      origin: work.cycleId ? 'composition-cycle' : 'human-seed',
+      cycleId: work.cycleId,
+      createdAt: work.createdAt,
+    }))
+    const statusCounts = { studio: 0, published: 0, archived: 0 }
+    for (const node of nodes) statusCounts[node.status] = (statusCounts[node.status] || 0) + 1
+    return {
+      schemaVersion: 1,
+      nodes,
+      relations: listArtworkRelations(),
+      statusCounts,
+      boundary: 'Relations record explicit system context only. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
+    }
   }
 
   function listCycles(limit = 20) {
@@ -388,7 +458,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const settings = getSettings()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(),
+      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }
@@ -408,5 +478,5 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, commitArtworkCycle, setArtworkStatus, listArtworks, listCycles, getComputeLedger, publicState, studioState, publicStudioState, close: () => db.close() }
+  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, listCycles, getComputeLedger, publicState, studioState, publicStudioState, close: () => db.close() }
 }

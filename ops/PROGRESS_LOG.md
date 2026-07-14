@@ -73,3 +73,14 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Stopped the bounded hourly builder because no honest READY or ACTIVE P0/P1 implementation item remains.
 - Left the project completion flag false: OPH-007, OPH-008, OPH-009 and OPH-014 still depend on human authority or external deployment, feedback, recording, submission or API-quota state.
 - Removed only the current hourly job; no additional automation was created.
+
+## 2026-07-14 — ecosystem phase reactivated and explicit lineage
+
+- Reinterpreted the old stopped state as the completed phase-one lane and created `ops/ECOSYSTEM_ROADMAP.md` for the active ecosystem phase.
+- Re-audited `https://autopoiesis.art` read-only at 11:49 UTC. The site was reachable and exposed a separate eight-agent, multi-artwork gallery, but no Ophrys service route; its broad autonomous-emergence claims are not evidence for this bounded project. Compared `main` (`3e0c5c7`) with the builder head (`1fc5f5a`) without mutating either public production or `main`.
+- Completed OPH-015: generated candidates now form explicit `studio` nodes and receive `context-derived-from` relations only for earlier work IDs actually present in the bounded composition packet.
+- Added a public Studio topology projection with node/status counts, relation direction and concise evidence. It explicitly refuses claims of aesthetic similarity, authorship, visitor knowledge or automatic approval.
+- Preserved the human gate: relation creation has no publication side effect and all generated works still enter `studio` pending a curator decision.
+- Verified `npm run check`, all eight deterministic tests and `npm run judge:smoke`; the smoke retained aggregate-only traces, deny-by-default Operator access and curated publication.
+
+Next: OPH-016, an evidence-based runtime continuity/freshness summary that distinguishes a quiet or stale organism from one known to be active.
