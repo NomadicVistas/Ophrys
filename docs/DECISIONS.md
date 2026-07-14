@@ -79,3 +79,7 @@ An end-to-end public trace is derived from the existing cycle, artwork provenanc
 ## D-020 · Physical output begins as a transport-free deterministic contract
 
 The first light/sound bridge consumes only the existing bounded field-score schema. It validates repertoire, phase, numeric limits, aggregate-count shape and source timestamp before mapping a score to capped light and sound values. The evidence packet carries a stable digest of the validated input, the mapping version and an explicit `hardwareAction: false` / `transport: none` boundary. Invalid or incomplete input returns a quiet frame with light and sound disabled instead of attempting recovery through a device. The current frame is a read projection connected to the runtime-field node; it is not evidence that physical hardware is present, live or rendered the output.
+
+## D-021 · Literacy evidence is not learner surveillance
+
+The public Studio names five distinct evidence types—node, declared relation, provisional interpretation, simulated output and recorded human decision—using current bounded projections and an explicit limit for each. Its automated rubric checks only whether inspectable technical evidence is present; it never asks for, stores or scores visitor answers or infers comprehension. A missing lifecycle interpretation is labelled absent rather than manufactured. Participation remains optional and the protocol is not presented as human-subject research or proof of educational effectiveness.

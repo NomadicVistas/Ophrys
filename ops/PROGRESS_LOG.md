@@ -186,3 +186,14 @@ Next: OPH-020 remains the best bounded slice: a deterministic simulated light/so
 - Added deterministic boundary tests and extended the credential-free judge path. `npm run check`, all 18 tests and `npm run judge:smoke` pass.
 
 Next: OPH-021 ecosystem literacy protocol and evidence rubric, including the distinction between a simulated output record and physical hardware evidence.
+
+## 2026-07-14 — ecosystem literacy without learner surveillance
+
+- Completed OPH-021 with a public Studio sequence that distinguishes a bounded node, a declared relation, a provisional interpretation, a simulator-only output and a recorded human curatorial decision.
+- Added a server-owned literacy projection that selects current graph-closed evidence for every step and reports an absent lifecycle interpretation honestly instead of manufacturing one.
+- Added a five-check technical rubric that verifies evidence availability only. It collects no answer, quiz result, route, comprehension score or inferred learner state and explicitly refuses to claim educational effectiveness.
+- Recorded a five-minute facilitator protocol with optional participation, contestable labels and a boundary against ranking comprehension or treating the encounter as human-subject research.
+- Extended the credential-free judging fixture to provide all five evidence types and require 5 / 5 technical evidence while retaining redacted lifecycle inputs, human-curated publication and disabled hardware transport.
+- Verified the focused literacy/accessibility tests, `npm run check`, all 19 tests and `npm run judge:smoke`.
+
+Next: OPH-022 phase-two reliability, accessibility, privacy and reproducible judging audit; select one failure-backed vertical fix rather than broad cosmetic hardening.

@@ -184,6 +184,33 @@ function renderPhysicalBridge(bridge) {
   document.querySelector('#physical-bridge-fallback').textContent = bridge.safety.fallback
 }
 
+function literacyStep(step, index) {
+  const item = element('li', `literacy-step ${step.supported ? 'supported' : 'unavailable'}`)
+  const head = element('div', 'literacy-step-head')
+  head.append(
+    element('span', 'literacy-step-number', String(index + 1).padStart(2, '0')),
+    element('span', 'cycle-state', step.supported ? 'evidence present' : 'not recorded'),
+  )
+  item.append(
+    head,
+    element('h3', '', step.label),
+    element('p', 'literacy-prompt', step.prompt),
+    element('p', 'literacy-example', step.example),
+    element('p', 'literacy-limit', step.limit),
+  )
+  return item
+}
+
+function renderLiteracy(literacy) {
+  document.querySelector('#literacy-outcome').textContent = literacy.learningOutcome
+  document.querySelector('#literacy-checks').textContent = `${literacy.rubric.supportedChecks} / ${literacy.rubric.totalChecks}`
+  document.querySelector('#literacy-duration').textContent = `${literacy.durationMinutes} min`
+  document.querySelector('#literacy-rubric').textContent = literacy.rubric.limit
+  document.querySelector('#literacy-privacy').textContent = literacy.privacyBoundary
+  document.querySelector('#literacy-steps').replaceChildren(...literacy.steps.map(literacyStep))
+  document.querySelector('#literacy').setAttribute('aria-busy', 'false')
+}
+
 const status = document.querySelector('#studio-status')
 
 function renderRuntime(runtime) {
@@ -217,6 +244,7 @@ try {
   document.querySelector('#cycle-count').textContent = state.cycles.length
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
+  renderLiteracy(state.literacy)
   renderRuntime(state.runtime)
   renderPhysicalBridge(state.physicalBridge)
   renderLifecycles(state.lifecycles)
@@ -230,6 +258,7 @@ try {
   status.textContent = `Runtime record loaded: ${state.runtime.state}.`
   status.className = 'surface-status sr-only'
 } catch {
+  document.querySelector('#literacy').setAttribute('aria-busy', 'false')
   document.querySelector('#runtime').setAttribute('aria-busy', 'false')
   status.className = 'surface-status error'
   status.textContent = 'The public trace could not be loaded. No system state is being claimed.'

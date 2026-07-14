@@ -84,6 +84,8 @@ The coded quartet does not need an API key at runtime. Start the service, open `
 
 The physical bridge is also local and deterministic. It validates the bounded public field score and exposes one inspectable simulated light/sound frame in Studio and the ecosystem topology. Its transport is fixed to `none`: it cannot contact a lamp, speaker, controller or other hardware, and malformed input produces zero light and zero sound.
 
+Studio also includes a five-part ecosystem-literacy protocol for reading nodes, relations, provisional interpretations, simulated outputs and human decisions. Its rubric checks the availability of technical evidence only; it collects no visitor answer or comprehension score. See [the facilitator protocol](docs/ECOSYSTEM_LITERACY.md).
+
 ## Build Week status
 
 Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements, or follow [the five-minute judging guide](docs/JUDGING.md) for a credential-free verification path.

@@ -1113,6 +1113,98 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
+  function getEcosystemLiteracy({
+    ecosystem = getEcosystemTopology(),
+    lifecycles = getPublicTraceLifecycles(),
+    physicalBridge = simulatePhysicalBridge(getFieldScore()),
+  } = {}) {
+    const runtimeNode = ecosystem.nodes.find(node => node.nodeType === 'runtime-field') || null
+    const relation = ecosystem.relations.find(item => item.kind === 'simulated-as') || ecosystem.relations[0] || null
+    const trace = lifecycles.traces[0] || null
+    const interpretation = trace?.stages.find(stage => stage.stage === 'interpretation') || null
+    const decisionNode = ecosystem.nodes.find(node => node.nodeType === 'curatorial-decision') || null
+    const decisionRelation = decisionNode
+      ? ecosystem.relations.find(item => item.fromNodeId === decisionNode.id && item.toNodeId === decisionNode.governance?.artworkId) || null
+      : null
+    const simulatorIsBounded = physicalBridge.safety.hardwareAction === false
+      && physicalBridge.safety.transport === 'none'
+      && ecosystem.nodes.some(node => node.id === physicalBridge.id && node.nodeType === 'physical-output')
+
+    const steps = [
+      {
+        key: 'node',
+        label: 'Node',
+        prompt: 'Name one bounded record and state what kind of thing it records.',
+        example: runtimeNode
+          ? `${runtimeNode.title} is a ${runtimeNode.nodeType.replaceAll('-', ' ')} node in state ${runtimeNode.status}.`
+          : 'No runtime-field node is present in this bounded projection.',
+        supported: Boolean(runtimeNode),
+        limit: 'A node is a recorded system, artwork, counter-signal, decision, or output state. It is not a person or a profile.',
+      },
+      {
+        key: 'relation',
+        label: 'Relation',
+        prompt: 'Follow one labelled edge and read the evidence that permits it.',
+        example: relation
+          ? `${relation.fromTitle} → ${relation.toTitle} is recorded as ${relation.kind.replaceAll('-', ' ')}. Evidence: ${relation.evidence}`
+          : 'No closed relation is present in this bounded projection.',
+        supported: Boolean(relation),
+        limit: 'A relation records a declared connection. It does not prove causation, similarity, authorship, approval, or understanding.',
+      },
+      {
+        key: 'interpretation',
+        label: 'Interpretation',
+        prompt: 'Separate the coarse observation from the provisional reading added by the system.',
+        example: interpretation
+          ? `${interpretation.label}: ${interpretation.evidence}`
+          : 'No generated candidate lifecycle is recorded, so no lifecycle interpretation is invented for this example.',
+        supported: Boolean(interpretation),
+        limit: 'An interpretation is a contestable artistic hypothesis about aggregate conditions, never evidence of identity, motive, emotion, or inner state.',
+      },
+      {
+        key: 'simulated-output',
+        label: 'Simulated output',
+        prompt: 'Check the input digest, mapping version, transport, and hardware-action boundary.',
+        example: simulatorIsBounded
+          ? `${physicalBridge.evidence.mappingVersion} maps revision ${physicalBridge.source?.revision ?? 'unknown'} from digest ${physicalBridge.evidence.inputDigest}, with transport ${physicalBridge.safety.transport} and hardware action disabled.`
+          : 'No bounded transport-free simulator evidence is available.',
+        supported: simulatorIsBounded,
+        limit: 'A simulator frame shows what the score would ask light and sound to do. It is not evidence that a device rendered it.',
+      },
+      {
+        key: 'human-decision',
+        label: 'Human decision',
+        prompt: 'Find the governance node, its rationale, and the artwork state transition it records.',
+        example: decisionNode && decisionRelation
+          ? `${decisionNode.title} is linked to ${decisionRelation.toTitle} with recorded role ${decisionNode.governance.actorRole}. Rationale: ${decisionNode.governance.rationale}`
+          : 'No graph-closed curatorial decision is present in this bounded projection.',
+        supported: Boolean(decisionNode && decisionRelation),
+        limit: 'A decision requires the protected human gate. Its role label and rationale do not prove reviewer identity, deliberative quality, or exhibition endorsement.',
+      },
+    ]
+    const supportedChecks = steps.filter(step => step.supported).length
+    return {
+      schemaVersion: 1,
+      learningOutcome: 'A visitor can distinguish a node, a declared relation, a provisional interpretation, a simulated output, and a recorded human decision without disclosing personal information.',
+      durationMinutes: 5,
+      steps,
+      rubric: {
+        supportedChecks,
+        totalChecks: steps.length,
+        complete: supportedChecks === steps.length,
+        limit: 'This automated rubric checks whether the five distinctions have inspectable technical evidence. It does not observe, store, or score what a visitor understood.',
+      },
+      facilitation: [
+        'Name one node before following any edge.',
+        'Read one relation label and its evidence limit.',
+        'Separate an aggregate observation from a provisional interpretation.',
+        'Verify that the physical-output record is simulated and transport-free.',
+        'Locate the human decision that alone can change publication state.',
+      ],
+      privacyBoundary: 'Participation is optional. Ophrys does not collect answers, names, accounts, routes, quiz results, or inferred comprehension; a visitor may read, discuss, or decline the protocol.',
+    }
+  }
+
   function publicState() {
     const settings = getSettings()
     return {
@@ -1126,9 +1218,13 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   function studioState() {
     const settings = getSettings()
     const fieldScore = getFieldScore()
+    const physicalBridge = simulatePhysicalBridge(fieldScore)
+    const ecosystem = getEcosystemTopology()
+    const lifecycles = getPublicTraceLifecycles()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      runtime: getRuntimeContinuity(), fieldScore, physicalBridge: simulatePhysicalBridge(fieldScore), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(), lifecycles: getPublicTraceLifecycles(),
+      runtime: getRuntimeContinuity(), fieldScore, physicalBridge, metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem, lifecycles,
+      literacy: getEcosystemLiteracy({ ecosystem, lifecycles, physicalBridge }),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }
@@ -1148,5 +1244,5 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, getPublicTraceLifecycles, listCycles, getComputeLedger, getRuntimeContinuity, publicState, studioState, publicStudioState, close: () => db.close() }
+  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, getPublicTraceLifecycles, getEcosystemLiteracy, listCycles, getComputeLedger, getRuntimeContinuity, publicState, studioState, publicStudioState, close: () => db.close() }
 }

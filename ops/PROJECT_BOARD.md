@@ -24,8 +24,8 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-018 | P1 | DONE | Curatorial decision relations | Rationale-required approve/reject/revise transitions atomically append attributed governance nodes/edges; same-status requests return `409` without changing provenance/history; import is idempotent and comparison remains browser-only state |
 | OPH-019 | P1 | DONE | End-to-end public trace lifecycle | Bounded read projections connect redacted aggregate observation, provisional interpretation, candidate, latest human decision and public/refused/revision/pending outcome; source surfaces, request order, exact routes, response IDs, raw errors and hidden reasoning remain absent |
 | OPH-020 | P2 | DONE | Simulated physical bridge contract | Deterministic light/sound adapter validates bounded scores, exposes a digest-linked simulator node/edge and falls quiet without real hardware action |
-| OPH-021 | P2 | READY | Ecosystem literacy protocol | Public protocol distinguishes nodes, relations, interpretation and human responsibility |
-| OPH-022 | P1 | LATER | Phase-two reliability and judge pass | Migrations, invalid relations, stale state, accessibility, privacy and reproducibility remain covered |
+| OPH-021 | P2 | DONE | Ecosystem literacy protocol | Public five-step protocol distinguishes node, relation, provisional interpretation, simulated output and human decision; technical rubric stores and scores no visitor response |
+| OPH-022 | P1 | READY | Phase-two reliability and judge pass | Migrations, invalid relations, stale state, accessibility, privacy and reproducibility remain covered |
 | OPH-023 | P1 | DONE | Curatorial ecosystem quartet | Four distinct Threshold/Field/Residue/Counter-field works enter Studio with pending human review, project-owned provenance and explicit relations; only the approved seed remains public |
 | OPH-024 | P1 | DONE | Coded artwork quartet | Four original image-generation sources become distinct responsive browser works with accessible notes, reduced-motion behaviour, consequential counter-actions and explicit unpublished Studio status |
 

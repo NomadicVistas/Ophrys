@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T20:31:34Z",
-  "lastSelectedItem": "OPH-020 simulated physical light/sound bridge contract",
+  "lastSuccessfulRun": "2026-07-14T21:35:55Z",
+  "lastSelectedItem": "OPH-021 ecosystem literacy protocol and evidence rubric",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-021 ecosystem literacy protocol and evidence rubric",
+  "nextBestSlice": "OPH-022 phase-two reliability, accessibility, privacy and reproducible judge pass",
   "deadline": "2026-07-22T00:00:00Z"
 }

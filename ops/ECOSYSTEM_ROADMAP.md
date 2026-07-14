@@ -7,7 +7,7 @@ Last re-audited: 2026-07-14. This is the active phase-two plan; the stopped phas
 | Layer | Present on `codex/hourly-builder` | Evidence / gap |
 |---|---|---|
 | Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds honest continuity; OPH-017 separates accepted counter-pressure from bounded applied revisions and retains no request-level trace |
-| Ecosystem | Seed and generated artwork nodes, bounded runtime-field state, hourly counter-signal nodes, append-only curatorial decision nodes, redacted end-to-end candidate lifecycles, simulator-only physical-output nodes, cycle/provenance packets, status transitions and explicit typed relations | OPH-020 connects the current field score to a digest-linked light/sound evidence frame while explicitly refusing hardware-liveness claims |
+| Ecosystem | Seed and generated artwork nodes, bounded runtime-field state, hourly counter-signal nodes, append-only curatorial decision nodes, redacted end-to-end candidate lifecycles, simulator-only physical-output nodes, cycle/provenance packets, status transitions and explicit typed relations | OPH-021 connects these records through a five-part public literacy protocol while refusing learner surveillance or comprehension claims |
 | Development | Isolated review branch, narrow/full tests, project records, no deploy path | This job may commit and push only to `codex/hourly-builder`; it cannot merge or deploy |
 | Public production | `autopoiesis.art` is reachable and exposes a separate eight-agent gallery ecosystem | Read-only audit at 2026-07-14T11:49Z found no public Ophrys route; live copy claims “No prompts. No direction. Pure emergence.” and is not evidence for this bounded system |
 
@@ -40,7 +40,7 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 3 | OPH-018 · Curatorial decision relations and lineage comparison — **DONE** | OPH-015, current rationale gate | Approve/reject/revise transitions appear as attributed human-governance edges; same-status requests cannot manufacture decisions; comparison never mutates candidate state |
 | 4 | OPH-019 · Public trace lifecycle — **DONE** | OPH-016–018 | Observation, interpretation, candidate, decision and public/refused outcome can be followed end-to-end with redacted public projections |
 | 5 | OPH-020 · Simulated physical bridge contract — **DONE** | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
-| 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
+| 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric — **DONE** | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
 | 7 | OPH-022 · Reliability/access/privacy/judge pass | Each preceding slice | Migrations, invalid relations, stale state, reduced motion, narrow screens, redaction and reproducible judge path are covered |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
@@ -65,7 +65,11 @@ On 2026-07-14 OPH-019 added a bounded read projection over existing cycle, prove
 
 On 2026-07-14 OPH-020 added a pure deterministic adapter for field-score schema version 1. It validates the fixed lure repertoire, lure/counter-read relationship, score bounds, aggregate-count shape and canonical source timestamp before emitting capped light, sound and frame-timing values. Every valid frame carries a stable input digest and mapping version. Invalid or incomplete input returns zero light, zero sound and zero timing. The adapter has no device or network transport, reports `hardwareAction: false` and `transport: none`, and Studio explicitly says that a simulator frame is not evidence that a device rendered it. The current frame appears as a physical-output node related from the runtime field, preserving graph closure without claiming hardware liveness or adding visitor data.
 
-Next: OPH-021 should turn the connected runtime, lifecycle, governance and simulated-output records into a concise ecosystem literacy protocol and automated evidence rubric.
+## Latest ecosystem literacy slice
+
+On 2026-07-14 OPH-021 added a bounded public literacy projection and Studio sequence for five distinct evidence types: node, declared relation, provisional interpretation, simulated output and recorded human decision. Each step names current evidence plus the claim it cannot support. When no generated lifecycle exists, the interpretation step reports the absence rather than inventing an example. The technical rubric measures only whether inspectable evidence is available; no answers, quiz results, routes, scores or inferred comprehension are collected. A five-minute facilitator protocol preserves optional participation and refuses to present the interface as human-subject research or proof of educational effectiveness. The deterministic judging fixture supplies all five evidence types and passes 5 / 5 without a paid model call, persistent database or hardware action.
+
+Next: OPH-022 should audit the complete phase-two surface for migration, malformed relation, stale-state, narrow-screen, reduced-motion, privacy-redaction and judging reproducibility gaps, then close only failures with deterministic evidence.
 
 ## Slice discipline
 

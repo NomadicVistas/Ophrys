@@ -27,6 +27,7 @@ Ophrys uses minimal aggregate events to compose an artwork about the limits of b
 - Curatorial decision records are created only by the protected status transaction. They contain no visitor data and selecting candidates for comparison creates no durable record.
 - Public lifecycle traces are read-only projections over existing cycle, provenance and decision records. Aggregate inputs are combined by event kind; source surfaces, request order, exact routes, provider response identifiers, raw errors and hidden model reasoning are omitted.
 - Simulated light/sound frames are deterministic read projections of the bounded aggregate field score. They add no sensor stream, device identifier or visitor record, and transport remains disabled.
+- The ecosystem-literacy protocol reads existing public projections only. It stores no answers, quiz results, learning score or inferred comprehension, and its automated rubric measures technical evidence availability rather than a visitor.
 - Aggregate summaries may enter a server-side GPT‑5.6 composition request.
 - OpenAI requests use `store:false` and a stable system-level safety identifier.
 - Raw API keys and Operator tokens remain server-side.

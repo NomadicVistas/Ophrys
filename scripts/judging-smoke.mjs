@@ -101,6 +101,12 @@ try {
   assert.equal(studio.payload.lifecycles.traces[0].links.length, 4)
   assert.doesNotMatch(JSON.stringify(studio.payload.lifecycles), /redacted\/judging-route|redacted-fixture-response/)
   assert.match(studio.payload.lifecycles.authority, /Only a recorded human curatorial decision/i)
+  assert.deepEqual(studio.payload.literacy.steps.map(step => step.key), ['node', 'relation', 'interpretation', 'simulated-output', 'human-decision'])
+  assert.equal(studio.payload.literacy.rubric.supportedChecks, 5)
+  assert.equal(studio.payload.literacy.rubric.complete, true)
+  assert.match(studio.payload.literacy.rubric.limit, /does not observe, store, or score what a visitor understood/i)
+  assert.match(studio.payload.literacy.privacyBoundary, /does not collect answers/i)
+  assert.doesNotMatch(JSON.stringify(studio.payload.literacy), /visitorId|quizResult|comprehensionScore|individualRoute/)
 
   const denied = await json('/api/admin/state')
   assert.equal(denied.response.status, 401)
@@ -116,7 +122,7 @@ try {
   console.log('Ophrys judging smoke: PASS')
   console.log(`refusal: ${initial.payload.fieldScore.activeLure} -> ${refusal.payload.fieldScore.activeLure}; revision ${refusal.payload.fieldScore.revision}`)
   console.log(`runtime: ${studio.payload.runtime.state}; basis: ${studio.payload.runtime.evidence.kind}`)
-  console.log('boundaries: hourly counter-signal only; lifecycle inputs redacted; simulated light/sound transport disabled; no request trace or liveness claim; Operator denied by default; publication curated; compute budget visible')
+  console.log('boundaries: hourly counter-signal only; lifecycle inputs redacted; five-part literacy evidence complete without learner scoring; simulated light/sound transport disabled; no request trace or liveness claim; Operator denied by default; publication curated; compute budget visible')
 } finally {
   server.close()
   await once(server, 'close')

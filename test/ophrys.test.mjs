@@ -58,7 +58,10 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.html'), /PROJECTED DECISIONS[\s\S]*id="curatorial-decision-policy"/)
   assert.match(publicFile('studio.html'), /id="lifecycles"[\s\S]*Public trace lifecycle[\s\S]*PROJECTED \/ TOTAL TRACES[\s\S]*id="lifecycle-redaction"/)
   assert.match(publicFile('studio.html'), /id="physical-bridge"[\s\S]*Simulated physical bridge[\s\S]*id="physical-bridge-light"[\s\S]*id="physical-bridge-sound"/)
+  assert.match(publicFile('studio.html'), /id="literacy"[\s\S]*Ecosystem literacy protocol[\s\S]*VISITOR RESPONSES STORED[\s\S]*id="literacy-steps"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
+  assert.match(publicFile('studio.js'), /renderLiteracy\(state\.literacy\)/)
+  assert.match(publicFile('studio.js'), /literacy\.steps\.map\(literacyStep\)/)
   assert.match(publicFile('studio.js'), /renderLifecycles\(state\.lifecycles\)/)
   assert.match(publicFile('studio.js'), /renderPhysicalBridge\(state\.physicalBridge\)/)
   assert.match(publicFile('studio.js'), /lifecycles\.traces\.map\(lifecycleRow\)/)
@@ -73,6 +76,10 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('admin.js'), /Return for revision/)
   assert.match(publicFile('comparison.css'), /@media \(max-width: 1050px\)[\s\S]*\.candidate-comparison[\s\S]*grid-template-columns: 1fr/)
   assert.match(publicFile('works.css'), /@media \(prefers-reduced-motion: reduce\)/)
+  const studioStyles = publicFile('studio-studies.css')
+  assert.match(studioStyles, /\.literacy-steps[\s\S]*grid-template-columns: repeat\(5, 1fr\)/)
+  assert.match(studioStyles, /@media \(max-width: 1050px\)[\s\S]*\.literacy-steps[\s\S]*grid-template-columns: 1fr/)
+  assert.match(studioStyles, /@media \(max-width: 720px\)[\s\S]*\.telemetry-grid\.literacy-summary[\s\S]*grid-template-columns: 1fr/)
 })
 
 test('the coded quartet couples four original visual sources to bounded counter-actions', () => {
@@ -154,6 +161,47 @@ test('education encounter preserves the Lure, Reveal and consequential Counter-r
   assert.match(script, /public field revision \$\{payload\.fieldScore\.revision\}/)
   assert.match(script, /This refusal was counted as anonymous public pressure/)
   assert.match(styles, /\[data-completed="true"\]/)
+})
+
+test('ecosystem literacy distinguishes five evidence types without collecting or scoring a visitor', () => {
+  const store = createOphrysStore(':memory:')
+  const initial = store.getEcosystemLiteracy()
+  assert.deepEqual(initial.steps.map(step => step.key), ['node', 'relation', 'interpretation', 'simulated-output', 'human-decision'])
+  assert.equal(initial.rubric.supportedChecks, 4)
+  assert.equal(initial.rubric.complete, false)
+  assert.equal(initial.steps.find(step => step.key === 'interpretation').supported, false)
+  assert.match(initial.steps.find(step => step.key === 'interpretation').example, /no generated candidate lifecycle is recorded/i)
+  assert.match(initial.rubric.limit, /does not observe, store, or score what a visitor understood/i)
+  assert.match(initial.privacyBoundary, /does not collect answers, names, accounts, routes, quiz results, or inferred comprehension/i)
+
+  store.createCycle({ id: 'literacy-cycle', trigger: 'test', model: 'gpt-5.6-sol' })
+  store.createArtwork({
+    id: 'literacy-candidate',
+    cycleId: 'literacy-cycle',
+    title: 'Evidence Grammar',
+    medium: 'Bounded public trace',
+    proposition: 'A test-only candidate makes the distinction between observation and interpretation inspectable.',
+    publicDescription: 'This fixture exists only in memory.',
+    visitorRelation: 'No visitor response or identity is collected.',
+    exhibitionForm: 'A deterministic evidence ledger.',
+    learningQuestion: 'Can five evidence types remain distinct?',
+    lureHypothesis: 'Aggregate arrival counts may provisionally support a slower signal, without explaining a person.',
+    counterReading: 'A visitor may contest the interpretation without becoming a scored learner.',
+    materials: ['in-memory ledger'],
+    model: 'deterministic fixture',
+    status: 'studio',
+    provenance: { inputSummary: { aggregateEventSummary: [{ kind: 'arrival', count: 2 }] } },
+  })
+  const complete = store.getEcosystemLiteracy()
+  assert.deepEqual(complete.rubric, {
+    supportedChecks: 5,
+    totalChecks: 5,
+    complete: true,
+    limit: complete.rubric.limit,
+  })
+  assert.match(complete.steps.find(step => step.key === 'interpretation').example, /aggregate arrival counts may provisionally support/i)
+  assert.doesNotMatch(JSON.stringify(complete), /visitorId|quizResult|comprehensionScore|individualRoute/)
+  store.close()
 })
 
 test('aggregate events never create visitor identity records', () => {

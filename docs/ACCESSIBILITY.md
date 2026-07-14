@@ -18,6 +18,8 @@ The coded quartet uses native buttons and links for entry, counter-action, notes
 
 The Lure → Reveal → Counter-read sequence retains a native refusal button and polite live result. Chromium 149 rendered its live aggregate and score values at 1440 × 1000 and its reduced-motion mobile structure at 390 × 844 on 2026-07-14 UTC.
 
+The ecosystem-literacy sequence is a semantic ordered list with separately headed evidence, example and limit text. Its three-column summary collapses to one column below 720 px and its five evidence cards collapse to a linear reading order below 1050 px. Loading uses `aria-busy`; no quiz control, response field or focus trap is introduced. These boundaries have deterministic source assertions; a final deployed screen-reader pass remains open under the scope below.
+
 ## Scope and limits
 
 This is prototype acceptance evidence, not a WCAG conformance claim. Automated checks protect the specific boundaries above. A screen-reader pass on the final deployment URL and a physical iOS/Android pass remain appropriate before a public exhibition.
