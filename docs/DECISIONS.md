@@ -71,3 +71,7 @@ The same refusal transaction upserts at most one counter-signal node per UTC hou
 ## D-018 · Curatorial decisions are append-only governance nodes
 
 Approval, rejection and return-for-revision each require a rationale and write one append-only curatorial decision in the same database transaction as the artwork status and provenance update. The bounded public topology connects that decision node to its artwork with the resulting governance edge and Operator-role attribution. Existing non-pending provenance reviews are imported idempotently as historical decisions. A decision edge cannot create itself, comparison selection remains browser-only reversible state, and the public record does not claim to prove reviewer identity or deliberative quality.
+
+## D-019 · Public lifecycles are derived, redacted views
+
+An end-to-end public trace is derived from the existing cycle, artwork provenance and curatorial-decision ledgers rather than stored as a second mutable history. Each bounded trace connects a coarse aggregate observation, a labelled provisional interpretation, its Studio candidate, the latest human-gate decision and the resulting public, refused, revision or pending outcome. Observation inputs are combined by event kind; surfaces, request order, exact routes, provider response identifiers, raw errors and hidden model reasoning are omitted. A trace can report publication only when an append-only human approval exists.

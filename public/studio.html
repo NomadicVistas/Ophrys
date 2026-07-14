@@ -8,7 +8,7 @@
 </head>
 <body data-surface="studio" class="studio-body">
   <a class="skip-link" href="#main-content">Skip to main content</a>
-  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>STUDIO</span></a><nav aria-label="Primary"><a href="/">Public field</a><a href="#lineage">Lineage</a><a href="#cycles">Cycles</a><a href="#works">Works</a></nav><div class="system-pill"><i></i><span>public trace</span></div></header>
+  <header class="site-header studio-header"><a class="wordmark" href="/">OPHRYS <span>STUDIO</span></a><nav aria-label="Primary"><a href="/">Public field</a><a href="#lifecycles">Lifecycles</a><a href="#lineage">Lineage</a><a href="#works">Works</a></nav><div class="system-pill"><i></i><span>public trace</span></div></header>
   <main id="main-content" class="studio-shell">
     <section class="studio-intro"><p class="eyebrow">The organism does not explain itself through hidden reasoning</p><h1>Observe its inputs,<br>choices and limits.</h1><p>This Studio exposes operational traces, aggregate counts, generated propositions, publication state and curatorial constraints. It never presents model chain-of-thought as evidence.</p></section>
     <p id="studio-status" class="surface-status" role="status" aria-live="polite">Loading the public trace…</p>
@@ -20,6 +20,11 @@
       <article><span>MODE</span><strong id="mode">—</strong></article><article><span>MODEL</span><strong id="model">—</strong></article><article><span>CYCLES</span><strong id="cycle-count">—</strong></article><article><span>WORKS</span><strong id="work-count">—</strong></article>
     </section>
     <section class="studio-panel"><header><div><p class="eyebrow">Aggregate public field</p><h2>What the room has registered</h2></div><p id="studio-disclosure">No visitor identifiers, exact paths or psychological classifications are retained.</p></header><div id="metrics" class="metric-list"></div></section>
+    <section id="lifecycles" class="studio-panel" aria-labelledby="lifecycles-heading"><header><div><p class="eyebrow">Public trace lifecycle</p><h2 id="lifecycles-heading">How a candidate reaches an outcome</h2></div><p id="lifecycle-authority">A composition cycle can propose; only a recorded human curatorial decision can publish or refuse.</p></header>
+      <div class="telemetry-grid lifecycle-counts" aria-live="polite"><article><span>PROJECTED / TOTAL TRACES</span><strong id="lifecycle-count">—</strong></article><article><span>PUBLIC OUTCOMES</span><strong id="lifecycle-public-count">—</strong></article><article><span>REFUSED OUTCOMES</span><strong id="lifecycle-refused-count">—</strong></article><article><span>PENDING / REVISION</span><strong id="lifecycle-open-count">—</strong></article></div>
+      <p id="lifecycle-projection" class="projection-note"></p><p id="lifecycle-redaction" class="projection-note"></p>
+      <div id="lifecycle-list" class="lifecycle-list"></div>
+    </section>
     <section id="lineage" class="studio-panel"><header><div><p class="eyebrow">Ecosystem topology</p><h2>How works, counter-signals, and decisions remain connected</h2></div><p id="lineage-boundary">Relations show recorded composition context, aggregate public counter-pressure, or recorded curatorial governance—not hidden influence or automatic approval.</p></header>
       <div class="telemetry-grid lineage-counts" aria-live="polite"><article><span>PROJECTED / TOTAL NODES</span><strong id="node-count">—</strong></article><article><span>PROJECTED / TOTAL RELATIONS</span><strong id="relation-count">—</strong></article><article><span>PROJECTED IN STUDIO</span><strong id="studio-node-count">—</strong></article><article><span>PROJECTED PUBLISHED</span><strong id="published-node-count">—</strong></article><article><span>PROJECTED COUNTER-SIGNALS</span><strong id="counter-signal-node-count">—</strong></article><article><span>PROJECTED DECISIONS</span><strong id="decision-node-count">—</strong></article></div>
       <p id="lineage-projection" class="projection-note"></p><p id="counter-signal-policy" class="projection-note"></p><p id="curatorial-decision-policy" class="projection-note"></p>

@@ -94,6 +94,58 @@ function relationRow(relation) {
   return row
 }
 
+function stageEvidence(stage) {
+  if (stage.stage === 'observation') {
+    const totals = stage.evidence.totals.length
+      ? stage.evidence.totals.map(item => `${item.kind.replaceAll('_', ' ')} ${item.count}`).join(' · ')
+      : 'No aggregate events were present in the composition packet.'
+    return `${totals} · ${stage.evidence.metricWindowHours}-hour window`
+  }
+  if (typeof stage.evidence === 'string') return stage.evidence
+  if (stage.stage === 'candidate') return `${stage.evidence.status} · ${stage.evidence.proposition} Counter-reading: ${stage.evidence.counterReading}`
+  if (stage.stage === 'decision') {
+    if (stage.evidence.kind === 'pending') return 'No human decision is recorded.'
+    return `${stage.evidence.actorRole} · ${stage.evidence.previousStatus || 'unrecorded prior state'} → ${stage.evidence.resultingStatus} · ${stage.evidence.rationale}`
+  }
+  return `${stage.evidence.outcome.replaceAll('-', ' ')} · artwork status ${stage.evidence.artworkStatus}`
+}
+
+function lifecycleRow(trace) {
+  const article = element('article', 'lifecycle-row')
+  const head = element('header')
+  const title = element('h3', '', trace.stages.find(stage => stage.stage === 'candidate')?.label || 'Composition trace')
+  head.append(title, element('span', `status ${trace.outcome === 'public' ? 'published' : trace.outcome === 'refused' ? 'archived' : 'studio'}`, trace.outcome.replaceAll('-', ' ')))
+  const chain = element('ol', 'lifecycle-chain')
+  for (const [index, stage] of trace.stages.entries()) {
+    const item = element('li', `lifecycle-stage ${stage.stage}`)
+    item.append(
+      element('span', 'lifecycle-stage-number', String(index + 1).padStart(2, '0')),
+      element('strong', '', stage.label),
+      element('p', '', stageEvidence(stage)),
+      element('p', 'lifecycle-limit', stage.limit),
+    )
+    chain.append(item)
+  }
+  const links = element('p', 'lifecycle-links', trace.links.map(link => link.kind.replaceAll('-', ' ')).join(' → '))
+  article.append(head, chain, links)
+  return article
+}
+
+function renderLifecycles(lifecycles) {
+  const publicCount = lifecycles.traces.filter(trace => trace.outcome === 'public').length
+  const refusedCount = lifecycles.traces.filter(trace => trace.outcome === 'refused').length
+  document.querySelector('#lifecycle-count').textContent = `${lifecycles.traces.length} / ${lifecycles.projection.total}`
+  document.querySelector('#lifecycle-public-count').textContent = String(publicCount)
+  document.querySelector('#lifecycle-refused-count').textContent = String(refusedCount)
+  document.querySelector('#lifecycle-open-count').textContent = String(lifecycles.traces.length - publicCount - refusedCount)
+  document.querySelector('#lifecycle-authority').textContent = lifecycles.authority
+  document.querySelector('#lifecycle-projection').textContent = `${lifecycles.projection.scope}${lifecycles.projection.truncated ? ` The view is limited to ${lifecycles.projection.limit} traces.` : ''}`
+  document.querySelector('#lifecycle-redaction').textContent = lifecycles.redaction
+  document.querySelector('#lifecycle-list').replaceChildren(...(lifecycles.traces.length
+    ? lifecycles.traces.map(lifecycleRow)
+    : [element('p', 'empty', 'No composition cycle has produced a candidate lifecycle yet. Human-authored seeds remain visible in the ecosystem topology.')]))
+}
+
 function renderEcosystem(ecosystem) {
   const projection = ecosystem.projection
   document.querySelector('#node-count').textContent = `${ecosystem.nodes.length} / ${projection.totalNodes}`
@@ -148,6 +200,7 @@ try {
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
   renderRuntime(state.runtime)
+  renderLifecycles(state.lifecycles)
   renderEcosystem(state.ecosystem)
   renderComputeLedger(state.compute)
   const max = Math.max(1, ...state.metrics.map(item => Number(item.count)))

@@ -25,6 +25,7 @@ const TOPOLOGY_NODE_LIMIT = 40
 const TOPOLOGY_RELATION_LIMIT = 120
 const TOPOLOGY_COUNTER_SIGNAL_LIMIT = 24
 const TOPOLOGY_DECISION_LIMIT = 40
+const PUBLIC_TRACE_LIMIT = 12
 const RUNTIME_STALE_AFTER_MINUTES = 120
 const REFUSAL_REFRACTORY_MS = 60_000
 const CURATORIAL_QUARTET = [
@@ -931,6 +932,142 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
+  function getPublicTraceLifecycles(limit = PUBLIC_TRACE_LIMIT) {
+    const boundedLimit = clamp(Number.isInteger(limit) ? limit : PUBLIC_TRACE_LIMIT, 1, PUBLIC_TRACE_LIMIT)
+    const defaultMetricWindowHours = Number(getSettings().metricWindowHours)
+    const rows = db.prepare(`SELECT artwork.*, cycle.trigger AS cycle_trigger,
+      cycle.status AS cycle_status, cycle.model AS cycle_model,
+      cycle.started_at AS cycle_started_at, cycle.completed_at AS cycle_completed_at
+      FROM artworks artwork
+      JOIN cycles cycle ON cycle.id = artwork.cycle_id
+      ORDER BY artwork.created_at DESC LIMIT ?`).all(boundedLimit)
+    const latestDecision = db.prepare(`SELECT id, decision_kind AS kind,
+      previous_status AS previousStatus, resulting_status AS resultingStatus,
+      rationale, actor_role AS actorRole, created_at AS createdAt
+      FROM curatorial_decisions WHERE artwork_id = ?
+      ORDER BY created_at DESC, id DESC LIMIT 1`)
+
+    const traces = rows.map(row => {
+      const provenance = parseObject(row.provenance)
+      const inputSummary = parseObject(provenance.inputSummary)
+      const aggregateByKind = new Map()
+      for (const metric of Array.isArray(inputSummary.aggregateEventSummary) ? inputSummary.aggregateEventSummary : []) {
+        if (!EVENT_KINDS.has(metric?.kind)) continue
+        const count = Number(metric.count)
+        if (!Number.isFinite(count) || count < 0) continue
+        aggregateByKind.set(metric.kind, (aggregateByKind.get(metric.kind) || 0) + Math.floor(count))
+      }
+      const aggregateTotals = [...aggregateByKind.entries()]
+        .map(([kind, count]) => ({ kind, count }))
+        .sort((left, right) => right.count - left.count || left.kind.localeCompare(right.kind))
+      const recordedMetricWindowHours = Number(inputSummary.settings?.metricWindowHours)
+      const metricWindowHours = Number.isInteger(recordedMetricWindowHours) && recordedMetricWindowHours >= 1 && recordedMetricWindowHours <= 168
+        ? recordedMetricWindowHours
+        : defaultMetricWindowHours
+      const decision = latestDecision.get(row.id) || null
+      const outcomeKind = decision?.kind === 'approved'
+        ? 'public'
+        : decision?.kind === 'rejected'
+          ? 'refused'
+          : decision?.kind === 'returned_for_revision'
+            ? 'returned-for-revision'
+            : 'awaiting-curation'
+      const observationId = `trace-observation:${row.cycle_id}`
+      const interpretationId = `trace-interpretation:${row.id}`
+      const decisionId = decision?.id || `trace-decision-pending:${row.id}`
+      const outcomeId = `trace-outcome:${row.id}:${outcomeKind}`
+      const stages = [
+        {
+          id: observationId,
+          stage: 'observation',
+          label: 'Coarse aggregate observation',
+          recordedAt: row.cycle_started_at,
+          evidence: {
+            metricWindowHours,
+            totals: aggregateTotals,
+          },
+          limit: 'Counts are combined by event kind. Source surfaces, request order, exact routes, and visitor-level records are not projected.',
+        },
+        {
+          id: interpretationId,
+          stage: 'interpretation',
+          label: 'Provisional system interpretation',
+          recordedAt: row.created_at,
+          evidence: row.lure_hypothesis,
+          limit: 'This is a generated artistic hypothesis about aggregate conditions, not evidence of identity, motive, emotion, or understanding.',
+        },
+        {
+          id: row.id,
+          stage: 'candidate',
+          label: row.title,
+          recordedAt: row.created_at,
+          evidence: { status: row.status, proposition: row.proposition, counterReading: row.counter_reading },
+          limit: 'Composition creates a Studio candidate only; it cannot approve or publish the work.',
+        },
+        {
+          id: decisionId,
+          stage: 'decision',
+          label: decision ? `Human gate: ${decision.kind.replaceAll('_', ' ')}` : 'Human gate: pending',
+          recordedAt: decision?.createdAt || null,
+          evidence: decision ? {
+            kind: decision.kind,
+            previousStatus: decision.previousStatus,
+            resultingStatus: decision.resultingStatus,
+            rationale: decision.rationale,
+            actorRole: decision.actorRole,
+          } : { kind: 'pending', rationale: null, actorRole: null },
+          limit: 'Only an authenticated, rationale-required Operator action can create a decision. The role label does not prove reviewer identity or deliberative quality.',
+        },
+        {
+          id: outcomeId,
+          stage: 'outcome',
+          label: outcomeKind.replaceAll('-', ' '),
+          recordedAt: decision?.createdAt || row.created_at,
+          evidence: { outcome: outcomeKind, artworkStatus: row.status },
+          limit: outcomeKind === 'public'
+            ? 'Public status follows a recorded human approval; it is not autonomous publication or an exhibition endorsement.'
+            : outcomeKind === 'refused'
+              ? 'Refusal remains a consequential ecosystem outcome; the candidate is archived rather than silently removed.'
+              : 'No public outcome is claimed while the human gate is pending or has returned the work for revision.',
+        },
+      ]
+      const links = [
+        { fromId: observationId, toId: interpretationId, kind: 'provisionally-interpreted-as' },
+        { fromId: interpretationId, toId: row.id, kind: 'bounded-composition-produced' },
+        { fromId: row.id, toId: decisionId, kind: 'submitted-to-human-gate' },
+        { fromId: decisionId, toId: outcomeId, kind: 'recorded-as-outcome' },
+      ]
+      return {
+        id: `public-trace:${row.id}`,
+        cycle: {
+          id: row.cycle_id,
+          trigger: row.cycle_trigger,
+          status: row.cycle_status,
+          model: row.cycle_model,
+          startedAt: row.cycle_started_at,
+          completedAt: row.cycle_completed_at,
+        },
+        artworkId: row.id,
+        outcome: outcomeKind,
+        stages,
+        links,
+      }
+    })
+    const total = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks WHERE cycle_id IS NOT NULL').get().count)
+    return {
+      schemaVersion: 1,
+      traces,
+      projection: {
+        limit: PUBLIC_TRACE_LIMIT,
+        total,
+        truncated: total > traces.length,
+        scope: 'Newest composition cycles that produced an artwork candidate. Failed cycles without a candidate remain in the separate operational cycle ledger.',
+      },
+      redaction: 'The public lifecycle combines aggregate inputs by event kind and omits source surfaces, request order, exact routes, provider response identifiers, raw errors, hidden model reasoning, and any visitor-level record.',
+      authority: 'A composition cycle may create a candidate. Only a recorded human curatorial decision can make its outcome public, refused, or returned for revision.',
+    }
+  }
+
   function publicState() {
     const settings = getSettings()
     return {
@@ -945,7 +1082,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const settings = getSettings()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      runtime: getRuntimeContinuity(), fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(),
+      runtime: getRuntimeContinuity(), fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(), lifecycles: getPublicTraceLifecycles(),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }
@@ -965,5 +1102,5 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, listCycles, getComputeLedger, getRuntimeContinuity, publicState, studioState, publicStudioState, close: () => db.close() }
+  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, getPublicTraceLifecycles, listCycles, getComputeLedger, getRuntimeContinuity, publicState, studioState, publicStudioState, close: () => db.close() }
 }

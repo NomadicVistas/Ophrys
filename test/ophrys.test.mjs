@@ -55,7 +55,10 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.html'), /PROJECTED \/ TOTAL NODES[\s\S]*PROJECTED \/ TOTAL RELATIONS[\s\S]*id="lineage-projection"/)
   assert.match(publicFile('studio.html'), /PROJECTED COUNTER-SIGNALS[\s\S]*id="counter-signal-policy"/)
   assert.match(publicFile('studio.html'), /PROJECTED DECISIONS[\s\S]*id="curatorial-decision-policy"/)
+  assert.match(publicFile('studio.html'), /id="lifecycles"[\s\S]*Public trace lifecycle[\s\S]*PROJECTED \/ TOTAL TRACES[\s\S]*id="lifecycle-redaction"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
+  assert.match(publicFile('studio.js'), /renderLifecycles\(state\.lifecycles\)/)
+  assert.match(publicFile('studio.js'), /lifecycles\.traces\.map\(lifecycleRow\)/)
   assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
   assert.match(publicFile('studio.js'), /ecosystem\.counterSignalPolicy\.privacyLimit/)
   assert.match(publicFile('studio.js'), /ecosystem\.curatorialDecisionPolicy\.limit/)
@@ -191,6 +194,13 @@ test('the curatorial quartet enters the Studio without bypassing human publicati
   assert.deepEqual(topology.statusCounts, { studio: 4, published: 1, archived: 0 })
   assert.equal(topology.relations.length, 5)
   assert.equal(topology.nodeTypeCounts.curatorialDecision, 1)
+  const emptyLifecycles = store.getPublicTraceLifecycles()
+  assert.deepEqual(emptyLifecycles.projection, {
+    limit: 12,
+    total: 0,
+    truncated: false,
+    scope: emptyLifecycles.projection.scope,
+  })
   const nodeIds = new Set(topology.nodes.map(node => node.id))
   for (const relation of topology.relations) {
     assert.ok(nodeIds.has(relation.fromNodeId))
@@ -219,6 +229,73 @@ test('curatorial decision migration is idempotent across store restarts', () => 
   } finally {
     rmSync(directory, { recursive: true, force: true })
   }
+})
+
+test('public trace lifecycles connect redacted aggregate observation to a human-gated outcome', () => {
+  let at = new Date('2026-07-14T12:00:00.000Z')
+  const store = createOphrysStore(':memory:', { now: () => at })
+  store.createCycle({ id: 'trace-cycle', trigger: 'test', model: 'gpt-5.6-sol', startedAt: at.toISOString() })
+  store.commitArtworkCycle('trace-cycle', {
+    id: 'trace-candidate',
+    title: 'Redacted Passage',
+    medium: 'Bounded light and public evidence trace',
+    proposition: 'A deterministic candidate makes every transition from aggregate input to curatorial outcome inspectable.',
+    publicDescription: 'A test-only candidate for the public lifecycle projection.',
+    visitorRelation: 'The fixture contains no visitor-level relation.',
+    exhibitionForm: 'A bounded test ledger.',
+    learningQuestion: 'Can a public trace expose its limits?',
+    lureHypothesis: 'Aggregate arrival pressure may support a slower threshold signal, but it cannot explain why anyone approached.',
+    counterReading: 'A human rejection remains visible as a consequential refused outcome.',
+    materials: ['test ledger'],
+    model: 'gpt-5.6-sol',
+    status: 'studio',
+    createdAt: at.toISOString(),
+    provenance: {
+      promptVersion: 'ophrys-composition-v1',
+      inputSummary: {
+        settings: { metricWindowHours: 24 },
+        aggregateEventSummary: [
+          { surface: 'public/threshold', kind: 'arrival', count: 2 },
+          { surface: 'study/private-route', kind: 'arrival', count: 1 },
+          { surface: 'studio', kind: 'threshold', count: 4 },
+        ],
+        hiddenReasoning: 'must never enter the public projection',
+      },
+      response: { responseId: 'resp_must_not_be_public', usage: { total_tokens: 99 } },
+      review: { status: 'studio', decision: 'pending' },
+    },
+  }, { summary: 'Candidate entered Studio.', responseId: 'resp_must_not_be_public' })
+
+  at = new Date('2026-07-14T12:01:00.000Z')
+  store.setArtworkStatus('trace-candidate', 'published', {
+    reason: 'The bounded trace is sufficiently clear for public review.',
+  })
+  const approved = store.getPublicTraceLifecycles()
+  assert.equal(approved.traces[0].outcome, 'public')
+
+  at = new Date('2026-07-14T12:02:00.000Z')
+  store.setArtworkStatus('trace-candidate', 'archived', {
+    reason: 'The candidate is refused until its interpretation is made more contestable.',
+  })
+  const lifecycles = store.getPublicTraceLifecycles()
+  assert.equal(lifecycles.schemaVersion, 1)
+  assert.equal(lifecycles.projection.total, 1)
+  assert.equal(lifecycles.traces.length, 1)
+  const [trace] = lifecycles.traces
+  assert.equal(trace.outcome, 'refused')
+  assert.deepEqual(trace.stages.map(stage => stage.stage), ['observation', 'interpretation', 'candidate', 'decision', 'outcome'])
+  assert.deepEqual(trace.stages[0].evidence.totals, [{ kind: 'threshold', count: 4 }, { kind: 'arrival', count: 3 }])
+  assert.equal(trace.stages[3].evidence.kind, 'rejected')
+  assert.equal(trace.stages[3].evidence.actorRole, 'operator')
+  assert.equal(trace.stages[4].evidence.artworkStatus, 'archived')
+  assert.equal(trace.links.length, 4)
+  const stageIds = new Set(trace.stages.map(stage => stage.id))
+  assert.equal(trace.links.every(link => stageIds.has(link.fromId) && stageIds.has(link.toId)), true)
+  const projection = JSON.stringify(lifecycles)
+  assert.doesNotMatch(projection, /public\/threshold|study\/private-route|resp_must_not_be_public|must never enter the public projection/)
+  assert.match(lifecycles.redaction, /omits source surfaces.+hidden model reasoning.+visitor-level record/i)
+  assert.equal(store.publicStudioState().lifecycles.traces[0].outcome, 'refused')
+  store.close()
 })
 
 test('ecosystem topology projection stays closed when older relation endpoints fall outside its node limit', () => {

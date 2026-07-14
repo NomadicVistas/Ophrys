@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T17:38:12Z",
-  "lastSelectedItem": "OPH-018 typed curatorial decision relations",
+  "lastSuccessfulRun": "2026-07-14T18:36:35Z",
+  "lastSelectedItem": "OPH-019 end-to-end public trace lifecycle",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-019 end-to-end public trace lifecycle",
+  "nextBestSlice": "OPH-020 simulated physical light/sound bridge contract",
   "deadline": "2026-07-22T00:00:00Z"
 }

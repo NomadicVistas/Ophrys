@@ -153,3 +153,14 @@ Next: implement OPH-018 as typed curatorial decision relations while preserving 
 - Verified the targeted migration/provenance tests, `npm run check`, all 15 tests and `npm run judge:smoke`.
 
 Next: implement OPH-019 as one redacted end-to-end trace from aggregate observation through provisional interpretation, candidate and curatorial decision to a public or refused outcome.
+
+## 2026-07-14 — redacted public trace lifecycle
+
+- Completed OPH-019 with a bounded, read-only lifecycle projection derived from the existing composition-cycle, provenance, artwork and append-only curatorial-decision ledgers rather than a second mutable history.
+- Connected five explicit stages—coarse aggregate observation, provisional interpretation, Studio candidate, latest human decision and public/refused/revision/pending outcome—with inspectable endpoint links.
+- Coarsened provenance inputs across source surfaces into event-kind totals and omitted request order, exact routes, provider response identifiers, raw errors and hidden model reasoning from the lifecycle projection.
+- Kept authority at the existing human gate: a cycle can create only a candidate, while public and refused outcomes require the latest authenticated, rationale-required approval or rejection record.
+- Added a responsive Studio lifecycle view with projection/redaction limits and an honest empty state. Extended the credential-free judge path with an ephemeral in-memory refused lifecycle; no live API request, deployment, publication or hardware action occurred.
+- Verified the targeted lifecycle/accessibility tests, `npm run check`, all 16 tests and `npm run judge:smoke`.
+
+Next: implement OPH-020 as a deterministic simulated light/sound bridge with strict score validation and a safe quiet fallback; do not contact real hardware.
