@@ -50,6 +50,8 @@ try {
   assert.equal(studio.payload.fieldScore.phase, 'counter-read')
   assert.equal(studio.payload.compute.budget.dailyCycleLimit, 4)
   assert.equal(studio.payload.compute.budget.maxOutputTokensPerCycle, 2600)
+  assert.equal(studio.payload.runtime.state, 'active')
+  assert.match(studio.payload.runtime.limit, /cannot verify.+currently live/i)
 
   const denied = await json('/api/admin/state')
   assert.equal(denied.response.status, 401)
@@ -64,7 +66,8 @@ try {
 
   console.log('Ophrys judging smoke: PASS')
   console.log(`refusal: ${initial.payload.fieldScore.activeLure} -> ${refusal.payload.fieldScore.activeLure}; revision ${refusal.payload.fieldScore.revision}`)
-  console.log('boundaries: aggregate public trace; Operator denied by default; publication curated; compute budget visible')
+  console.log(`runtime: ${studio.payload.runtime.state}; basis: ${studio.payload.runtime.evidence.kind}`)
+  console.log('boundaries: aggregate public trace; no liveness claim; Operator denied by default; publication curated; compute budget visible')
 } finally {
   server.close()
   await once(server, 'close')

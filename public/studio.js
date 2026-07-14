@@ -98,6 +98,18 @@ function renderEcosystem(ecosystem) {
 
 const status = document.querySelector('#studio-status')
 
+function renderRuntime(runtime) {
+  document.querySelector('#runtime-state').textContent = runtime.state
+  document.querySelector('#runtime-observed').textContent = runtime.observedAt ? date(runtime.observedAt) : 'none recorded'
+  document.querySelector('#runtime-updated').textContent = date(runtime.updatedAt)
+  document.querySelector('#runtime-assessed').textContent = date(runtime.assessedAt)
+  document.querySelector('#runtime-age').textContent = runtime.ageMinutes === null ? 'not applicable' : `${runtime.ageMinutes} min`
+  document.querySelector('#runtime-basis').textContent = runtime.basis
+  document.querySelector('#runtime-policy').textContent = runtime.freshnessPolicy
+  document.querySelector('#runtime-limit').textContent = runtime.limit
+  document.querySelector('#runtime').setAttribute('aria-busy', 'false')
+}
+
 function renderComputeLedger(compute) {
   document.querySelector('#compute-attempts').textContent = `${compute.attempts} / ${compute.budget.dailyCycleLimit}`
   document.querySelector('#compute-remaining').textContent = String(compute.budget.remainingCycles)
@@ -117,6 +129,7 @@ try {
   document.querySelector('#cycle-count').textContent = state.cycles.length
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
+  renderRuntime(state.runtime)
   renderEcosystem(state.ecosystem)
   renderComputeLedger(state.compute)
   const max = Math.max(1, ...state.metrics.map(item => Number(item.count)))
@@ -124,8 +137,10 @@ try {
   document.querySelector('#cycles-list').replaceChildren(...(state.cycles.length ? state.cycles.map(cycleRow) : [element('p', 'empty', 'The first GPT‑5.6 cycle has not run yet.')]))
   document.querySelector('#studio-artworks').replaceChildren(...state.artworks.map(artworkRow))
   document.querySelector('#method-list').replaceChildren(...state.method.map(step => element('li', '', step)))
-  status.hidden = true
+  status.textContent = `Runtime record loaded: ${state.runtime.state}.`
+  status.className = 'surface-status sr-only'
 } catch {
+  document.querySelector('#runtime').setAttribute('aria-busy', 'false')
   status.className = 'surface-status error'
   status.textContent = 'The public trace could not be loaded. No system state is being claimed.'
 }

@@ -55,3 +55,7 @@ Four human-authored studies map Threshold, Field, Residue, and Counter-field int
 ## D-014 · Public topology projections are closed bounded graphs
 
 The Studio selects its newest bounded artwork-node page before selecting relations. It returns only relations whose source and target are both present in that page, then reports exact ledger totals, in-projection relation eligibility and node/relation truncation separately. This preserves a valid inspectable graph as the ledger grows without implying that a partial projection is the whole ecosystem.
+
+## D-015 · Runtime continuity is an evidence label, not a liveness claim
+
+The public Studio derives one of five states from stored aggregate buckets, public-field revisions, composition-cycle outcomes and the operator cycle setting: `active`, `quiet`, `stale`, `disabled` or `failed`. `Active` means only that stored evidence is no more than two hours old; two hours is a documented local policy chosen for hourly buckets, not a sector standard. Every projection carries its observed, updated and assessment times, evidence basis and an explicit statement that it cannot verify a server, sensor or physical installation is currently live.

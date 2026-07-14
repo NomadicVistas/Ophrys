@@ -6,7 +6,7 @@ Last re-audited: 2026-07-14. This is the active phase-two plan; the stopped phas
 
 | Layer | Present on `codex/hourly-builder` | Evidence / gap |
 |---|---|---|
-| Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | Deterministic tests and `npm run judge:smoke`; continuity/freshness is not yet summarised as one honest public state |
+| Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds a timestamped five-state continuity projection with a documented local freshness policy and no claim of current liveness |
 | Ecosystem | Seed and generated artwork nodes, cycle/provenance packets, status transitions, explicit composition-context relations | OPH-015 adds a bounded public topology projection closed over relation endpoints, with exact totals and truncation metadata; counter-signal, decision and physical-output nodes remain to be connected |
 | Development | Isolated review branch, narrow/full tests, project records, no deploy path | This job may commit and push only to `codex/hourly-builder`; it cannot merge or deploy |
 | Public production | `autopoiesis.art` is reachable and exposes a separate eight-agent gallery ecosystem | Read-only audit at 2026-07-14T11:49Z found no public Ophrys route; live copy claims “No prompts. No direction. Pure emergence.” and is not evidence for this bounded system |
@@ -35,8 +35,8 @@ The loops share records but not authority. A runtime event cannot identify a per
 
 | Order | Item | Dependency | Evidence criterion |
 |---:|---|---|---|
-| 1 | OPH-016 · Runtime continuity and freshness summary | Existing field, cycles and settings | Public Studio distinguishes active, quiet, stale, disabled and failed states from stored timestamps without claiming liveness it cannot verify; deterministic clock tests |
-| 2 | OPH-017 · Counter-signal / erasure ledger nodes | OPH-015 topology, current refusal transaction | A refusal creates only a coarse collective counter-signal node/edge, has bounded retention or aggregation, changes the repertoire and cannot be attributed to an individual |
+| 1 | OPH-016 · Runtime continuity and freshness summary — **DONE** | Existing field, cycles and settings | Studio distinguishes active, quiet, stale, disabled and failed from stored timestamps without claiming current liveness; deterministic clock tests cover all labels |
+| 2 | OPH-017 · Counter-signal / erasure ledger nodes | OPH-015 topology; identity-free refractory bound on the current refusal transaction | An anonymous burst rotates the field at most once per declared interval; a refusal creates only a coarse counter-signal node/edge with bounded retention or aggregation and no individual attribution |
 | 3 | OPH-018 · Curatorial decision relations and lineage comparison | OPH-015, current rationale gate | Approve/reject/revise decisions appear as attributed human-governance edges; comparison never mutates candidate state |
 | 4 | OPH-019 · Public trace lifecycle | OPH-016–018 | Observation, interpretation, candidate, decision and public/refused outcome can be followed end-to-end with redacted public projections |
 | 5 | OPH-020 · Simulated physical bridge contract | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
@@ -45,9 +45,9 @@ The loops share records but not authority. A runtime event cannot identify a per
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
-## Latest integrity hardening
+## Latest runtime continuity slice
 
-On 2026-07-14 the builder closed the integration reviewer’s OPH-015 graph-projection finding. The topology now selects up to 40 newest nodes first, admits up to 120 relations only when both endpoints are present, and exposes exact node/relation totals plus eligible-relation and truncation metadata. A deterministic 46-node/865-relation fixture proves that all 120 returned relations remain closed while the Studio labels partial counts as projected. OPH-016 remains the next structural slice; the separate refusal refractory-window finding remains open and must not be solved with visitor identity or tracking.
+On 2026-07-14 OPH-016 added one public Studio continuity record derived only from stored aggregate buckets, public-field revisions, composition-cycle outcomes and the operator cycle setting. It exposes active, quiet, stale, disabled and failed labels with observed/updated/assessment timestamps, a documented local two-hour threshold and an explicit statement that stored evidence cannot verify current server, sensor or installation liveness. A deterministic clock test covers all five labels; the judging smoke verifies the same public projection. Next, the reviewer’s identity-free refusal refractory window should precede OPH-017 counter-signal persistence so one anonymous burst cannot repeatedly rotate the field.
 
 ## Slice discipline
 

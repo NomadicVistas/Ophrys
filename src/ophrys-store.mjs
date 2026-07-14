@@ -22,6 +22,7 @@ const ARTWORK_RELATION_KINDS = new Set(['context-derived-from', 'revision-of', '
 const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
 const TOPOLOGY_NODE_LIMIT = 40
 const TOPOLOGY_RELATION_LIMIT = 120
+const RUNTIME_STALE_AFTER_MINUTES = 120
 const CURATORIAL_QUARTET = [
   {
     id: 'study-borrowed-weather',
@@ -594,6 +595,65 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
+  function getRuntimeContinuity({ at = new Date() } = {}) {
+    const assessedAt = new Date(at)
+    if (Number.isNaN(assessedAt.getTime())) throw new Error('Invalid runtime assessment time')
+    const settings = getSettings()
+    const field = db.prepare('SELECT revision, updated_at AS updatedAt FROM field_state WHERE id = 1').get()
+    const latestMetric = db.prepare('SELECT MAX(bucket) AS observedAt FROM visitor_metrics').get()
+    const latestCycle = db.prepare(`SELECT status, started_at AS startedAt, completed_at AS completedAt
+      FROM cycles ORDER BY COALESCE(completed_at, started_at) DESC LIMIT 1`).get()
+    const cycleSetting = db.prepare("SELECT updated_at AS updatedAt FROM settings WHERE key = 'cycleEnabled'").get()
+    const evidence = []
+    if (latestMetric?.observedAt) evidence.push({ kind: 'aggregate-event-bucket', observedAt: latestMetric.observedAt })
+    if (Number(field.revision) > 0) evidence.push({ kind: 'public-field-revision', observedAt: field.updatedAt })
+    if (latestCycle) evidence.push({
+      kind: 'composition-cycle',
+      status: latestCycle.status,
+      observedAt: latestCycle.completedAt || latestCycle.startedAt,
+    })
+    evidence.sort((left, right) => Date.parse(right.observedAt) - Date.parse(left.observedAt))
+    const latest = evidence[0] || null
+    const ageMinutes = latest
+      ? Math.max(0, Math.floor((assessedAt.getTime() - Date.parse(latest.observedAt)) / 60_000))
+      : null
+    const stale = ageMinutes !== null && ageMinutes > RUNTIME_STALE_AFTER_MINUTES
+    let state
+    let basis
+    let updatedAt = latest?.observedAt || field.updatedAt
+
+    if (!settings.cycleEnabled) {
+      state = 'disabled'
+      basis = 'The stored operator setting disables composition cycles; existing public field traces may still be readable.'
+      updatedAt = cycleSetting.updatedAt
+    } else if (!stale && latest?.kind === 'composition-cycle' && ['failed', 'abandoned'].includes(latest.status)) {
+      state = 'failed'
+      basis = `The newest stored runtime evidence is a ${latest.status} composition cycle.`
+    } else if (!latest) {
+      state = 'quiet'
+      basis = 'The field is initialized, but no aggregate public event, field revision, or composition attempt is recorded.'
+    } else if (stale) {
+      state = 'stale'
+      basis = `The newest stored runtime evidence is older than the local ${RUNTIME_STALE_AFTER_MINUTES}-minute freshness threshold.`
+    } else {
+      state = 'active'
+      basis = `Recent stored evidence is present from ${latest.kind.replaceAll('-', ' ')}${latest.status ? ` (${latest.status})` : ''}.`
+    }
+
+    return {
+      schemaVersion: 1,
+      state,
+      basis,
+      observedAt: latest?.observedAt || null,
+      updatedAt,
+      assessedAt: assessedAt.toISOString(),
+      ageMinutes,
+      evidence: latest,
+      freshnessPolicy: `Records older than ${RUNTIME_STALE_AFTER_MINUTES} minutes are labelled stale. This is a local policy for hourly aggregate buckets, not a sector standard.`,
+      limit: 'This stored summary cannot verify that a server, sensor, or physical installation is currently live.',
+    }
+  }
+
   function publicState() {
     const settings = getSettings()
     return {
@@ -608,7 +668,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const settings = getSettings()
     return {
       system: { ...settings, curatorialDirective: settings.curatorialDirective },
-      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(),
+      runtime: getRuntimeContinuity(), fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ limit: 40 }), cycles: listCycles(30), compute: getComputeLedger(), ecosystem: getEcosystemTopology(),
       method: ['observe coarse public events', 'separate observation from interpretation', 'compose a provisional lure', 'publish its uncertainty', 'allow refusal to change the repertoire'],
     }
   }
@@ -628,5 +688,5 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, listCycles, getComputeLedger, publicState, studioState, publicStudioState, close: () => db.close() }
+  return { db, getSettings, updateSettings, recordEvent, refuseLure, pruneMetrics, getMetrics, getFieldScore, createCycle, completeCycle, createArtwork, createArtworkRelation, commitArtworkCycle, setArtworkStatus, listArtworks, listArtworkRelations, getEcosystemTopology, listCycles, getComputeLedger, getRuntimeContinuity, publicState, studioState, publicStudioState, close: () => db.close() }
 }

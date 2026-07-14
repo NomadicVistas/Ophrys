@@ -104,3 +104,13 @@ Next: OPH-016 remains the structural priority, informed by the research observat
 - Verified the targeted topology test, `npm run check`, all 10 tests and `npm run judge:smoke`.
 
 Next: OPH-016 runtime continuity and freshness summary. The reviewer’s separate anonymous-refusal refractory-window finding remains open for a later bounded slice.
+
+## 2026-07-14 — honest runtime continuity
+
+- Completed OPH-016 with a public Studio continuity record that distinguishes `active`, `quiet`, `stale`, `disabled` and `failed` from stored aggregate buckets, public-field revisions, cycle outcomes and the operator cycle setting.
+- Exposed the evidence basis, observed/updated/assessment timestamps and age. The two-hour stale threshold is labelled as local policy for hourly aggregate buckets, and every state explicitly refuses to claim that a server, sensor or physical installation is currently live.
+- Kept the record in the primary evidence ledger, marked loading with `aria-busy`, and used the existing polite status region for the concise loaded-state transition.
+- Added deterministic clock coverage for all five labels and extended the judging smoke to verify recent aggregate refusal evidence is represented as active without losing the no-liveness boundary.
+- Verified the targeted continuity/server/accessibility checks, `npm run check`, all 11 tests and `npm run judge:smoke`.
+
+Next: add an identity-free refractory window so an anonymous refusal burst can rotate the field at most once per declared interval, then persist bounded counter-signal/erasure nodes for OPH-017.

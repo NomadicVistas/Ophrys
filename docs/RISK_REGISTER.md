@@ -7,6 +7,7 @@
 | Generated work is presented as approved art | High | All model output enters `studio`; protected comparison workspace and rationale-required human publication gate | OPH-010 tested |
 | A topology edge is mistaken for aesthetic influence or approval | High | Relations use bounded types and evidence; context edges record only IDs actually present in composition input and explicitly disclaim authorship, similarity and approval | OPH-015 tested |
 | A bounded topology projection contains relations to omitted works or presents partial counts as global | High | Select the node page first; admit only relations with both endpoints present; expose exact totals, eligible relation count and truncation metadata; label Studio counts as projected | OPH-015 growth fixture tested |
+| Stored evidence is mistaken for a live installation | High | Studio labels active, quiet, stale, disabled and failed from timestamped stored evidence; publishes the local two-hour policy and an explicit no-liveness limit | OPH-016 deterministic clock test |
 | Public Studio leaks secrets or provider details | High | Separate projection; redacted errors; server-only credentials | Active |
 | Concurrent cycles corrupt state or duplicate work | High | SQLite WAL, busy timeout, one-running-cycle index, transactional completion | Active |
 | Rights-ambiguous imitation or source use | High | No named living-artist imitation; provenance and rights register required | OPH-005 implemented |

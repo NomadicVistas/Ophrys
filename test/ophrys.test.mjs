@@ -33,6 +33,7 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
 
   const accessibility = publicFile('accessibility.css')
   assert.match(accessibility, /:focus-visible/)
+  assert.match(accessibility, /\.sr-only[\s\S]*clip: rect/)
   assert.match(accessibility, /@media \(max-width: 720px\)[\s\S]*\.site-header nav[\s\S]*display: flex/)
   assert.match(accessibility, /@media \(prefers-reduced-motion: reduce\)[\s\S]*animation: none !important;[\s\S]*transition: none !important;/)
   assert.ok(contrastRatio('666a60', 'edeee7') >= 4.5, 'muted metadata text must meet WCAG AA normal-text contrast')
@@ -46,6 +47,9 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.js'), /The public trace could not be loaded\. No system state is being claimed\./)
   assert.match(publicFile('studio.html'), /id="compute"[\s\S]*Cost and compute ledger[\s\S]*id="compute-output-limit"/)
   assert.match(publicFile('studio.html'), /id="lineage"[\s\S]*Ecosystem topology[\s\S]*id="relation-count"/)
+  assert.match(publicFile('studio.html'), /id="runtime"[\s\S]*aria-busy="true"[\s\S]*Runtime continuity[\s\S]*id="runtime-state"[\s\S]*id="runtime-updated"/)
+  assert.match(publicFile('studio.js'), /renderRuntime\(state\.runtime\)/)
+  assert.match(publicFile('studio.js'), /Runtime record loaded:/)
   assert.match(publicFile('studio.html'), /PROJECTED \/ TOTAL NODES[\s\S]*PROJECTED \/ TOTAL RELATIONS[\s\S]*id="lineage-projection"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
   assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
@@ -55,6 +59,43 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('admin.js'), /selectedCandidateIds\.size < 2/)
   assert.match(publicFile('admin.js'), /Curatorial rationale/)
   assert.match(publicFile('comparison.css'), /@media \(max-width: 1050px\)[\s\S]*\.candidate-comparison[\s\S]*grid-template-columns: 1fr/)
+})
+
+test('runtime continuity labels stored evidence with a deterministic clock and no liveness claim', () => {
+  const store = createOphrysStore(':memory:')
+  const at = new Date('2026-07-14T12:00:00.000Z')
+  store.db.prepare("UPDATE field_state SET revision = 0, updated_at = '2026-07-14T11:45:00.000Z' WHERE id = 1").run()
+
+  const quiet = store.getRuntimeContinuity({ at })
+  assert.equal(quiet.state, 'quiet')
+  assert.equal(quiet.observedAt, null)
+  assert.equal(quiet.updatedAt, '2026-07-14T11:45:00.000Z')
+
+  store.db.prepare("INSERT INTO visitor_metrics (bucket, surface, kind, count) VALUES ('2026-07-14T11:00:00.000Z', 'public', 'arrival', 3)").run()
+  const active = store.getRuntimeContinuity({ at })
+  assert.equal(active.state, 'active')
+  assert.equal(active.observedAt, '2026-07-14T11:00:00.000Z')
+  assert.equal(active.ageMinutes, 60)
+
+  const stale = store.getRuntimeContinuity({ at: new Date('2026-07-14T14:01:00.000Z') })
+  assert.equal(stale.state, 'stale')
+  assert.equal(stale.ageMinutes, 181)
+  assert.match(stale.freshnessPolicy, /local policy/i)
+
+  store.db.prepare('DELETE FROM visitor_metrics').run()
+  store.createCycle({ id: 'failed-runtime', trigger: 'test', model: 'gpt-5.6-sol', startedAt: '2026-07-14T11:30:00.000Z' })
+  store.db.prepare("UPDATE cycles SET status = 'failed', summary = 'Stopped safely.', completed_at = '2026-07-14T11:31:00.000Z' WHERE id = 'failed-runtime'").run()
+  const failed = store.getRuntimeContinuity({ at })
+  assert.equal(failed.state, 'failed')
+  assert.equal(failed.evidence.status, 'failed')
+
+  store.updateSettings({ cycleEnabled: false })
+  store.db.prepare("UPDATE settings SET updated_at = '2026-07-14T11:50:00.000Z' WHERE key = 'cycleEnabled'").run()
+  const disabled = store.getRuntimeContinuity({ at })
+  assert.equal(disabled.state, 'disabled')
+  assert.equal(disabled.updatedAt, '2026-07-14T11:50:00.000Z')
+  assert.match(disabled.limit, /cannot verify.+currently live/i)
+  store.close()
 })
 
 test('education encounter preserves the Lure, Reveal and consequential Counter-read protocol', () => {

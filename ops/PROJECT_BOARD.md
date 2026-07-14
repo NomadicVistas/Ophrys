@@ -19,8 +19,8 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-013 | P2 | LATER | Physical light/sound bridge | Hardware adapter consumes the same bounded artwork score |
 | OPH-014 | P0 | BLOCKED [!] | Verify a live GPT‑5.6 Sol generation | OpenAI project has available API quota; cycle completes with redacted usage evidence |
 | OPH-015 | P1 | DONE | Explicit artwork ecosystem topology | Generated candidates become `studio` nodes with typed context relations to actual prior-work inputs; the bounded public projection is closed over relation endpoints and labels projected versus exact total counts without implying approval or authorship |
-| OPH-016 | P0 | READY | Runtime continuity and freshness summary | Public Studio distinguishes active, quiet, stale, disabled and failed runtime conditions from recorded evidence without claiming unverifiable liveness |
-| OPH-017 | P1 | READY | Counter-signal and erasure ledger nodes | Consequential collective refusal becomes an inspectable bounded ecosystem relation without individual attribution |
+| OPH-016 | P0 | DONE | Runtime continuity and freshness summary | Studio derives active, quiet, stale, disabled and failed from timestamped stored evidence; deterministic clock tests cover every label and the public projection refuses a liveness claim |
+| OPH-017 | P1 | READY | Counter-signal and erasure ledger nodes | Anonymous bursts can rotate the field at most once per declared interval; consequential refusal then becomes an inspectable bounded ecosystem relation without individual attribution |
 | OPH-018 | P1 | READY | Curatorial decision relations | Human approve/reject/revise decisions connect to nodes while comparison remains reversible and non-authoritative |
 | OPH-019 | P1 | LATER | End-to-end public trace lifecycle | Observation, interpretation, candidate, decision and public/refused outcome are connected and inspectable |
 | OPH-020 | P2 | LATER | Simulated physical bridge contract | Deterministic light/sound adapter validates bounded scores and quiet fallback without real hardware action |

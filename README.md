@@ -55,7 +55,7 @@ See [docs/HACKATHON.md](docs/HACKATHON.md) for the build brief and [docs/ETHICS.
 The Build Week implementation is one small Node 24 service with three deliberately different surfaces:
 
 - `/` — public exhibition and artwork field;
-- `/studio` — public evidence ledger for aggregate inputs, cycles, tactics and counter-readings;
+- `/studio` — public evidence ledger for runtime freshness, aggregate inputs, cycles, tactics and counter-readings;
 - `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
 
 The server uses built-in SQLite and calls the OpenAI Responses API with `gpt-5.6-sol`, explicit reasoning effort, `store:false` and strict structured artwork output. Model-generated code is never executed.
