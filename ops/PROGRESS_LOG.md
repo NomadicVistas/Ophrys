@@ -53,3 +53,10 @@ Next: implement provenance and curator decision records (OPH-005). A live cycle 
 - Aligned each candidate across proposition, visitor relation, exhibition form, learning question, lure hypothesis, counter-reading, materials, model/prompt/usage provenance, rights basis and current review.
 - Replaced prompt-based status shortcuts with explicit per-candidate decision forms. Approval and rejection now both require a written curatorial rationale, enforced in the store as well as the browser, and the decision remains attached to the provenance packet.
 - Verified `npm run check`, all six tests and the credential-free judging smoke.
+
+## 2026-07-14 — education encounter protocol
+
+- Completed OPH-011 with a public Lure → Reveal → Counter-read sequence driven by the existing live field score and consequential refusal transaction.
+- Kept observation, provisional interpretation, uncertainty, bounded artistic choice and human curatorial responsibility separately labelled; the explicit learning outcome asks visitors to distinguish counting from interpretation and verify agency without personal disclosure.
+- Added a five-minute facilitation protocol with observable completion evidence, optional participation and reduced-motion/keyboard boundaries.
+- Extended deterministic coverage and the judging smoke to protect the encounter structure and live repertoire transition. `npm run check`, all seven tests, the judging smoke and Chromium 149 desktop/reduced-motion mobile render checks pass.

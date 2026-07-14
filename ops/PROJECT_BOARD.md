@@ -14,7 +14,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-008 | P0 | BLOCKED [!] | Hackathon evidence package | Prior/new boundary, baseline SHA and repeatable judge path complete; primary `/feedback` Session ID and public URL require human/external state |
 | OPH-009 | P0 | BLOCKED [!] | Submission video and Devpost entry | Human recording, approval and submission required |
 | OPH-010 | P1 | DONE | Artwork candidate comparison | Operator compares up to two candidates across artistic, public-agency and provenance fields; approval and rejection both require stored rationale |
-| OPH-011 | P1 | READY | Education encounter protocol | Lure → reveal → counter-read flow tested with explicit learning outcome |
+| OPH-011 | P1 | DONE | Education encounter protocol | Public Lure → Reveal → Counter-read flow uses the live field/refusal state; five labelled evidence layers, explicit learning outcome, facilitator protocol and deterministic tests recorded |
 | OPH-012 | P1 | READY | Cost and compute ledger | Usage, latency, model and bounded budget visible to Operator/Studio |
 | OPH-013 | P2 | LATER | Physical light/sound bridge | Hardware adapter consumes the same bounded artwork score |
 | OPH-014 | P0 | BLOCKED [!] | Verify a live GPT‑5.6 Sol generation | OpenAI project has available API quota; cycle completes with redacted usage evidence |

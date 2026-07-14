@@ -20,6 +20,7 @@ Work added from July 13, 2026 onward:
 - accessible keyboard paths, reduced-motion behaviour, AA contrast checks, responsive mobile navigation and truthful failure states across all three surfaces;
 - standalone project board, evidence log and deployment plan.
 - a credential-free judging smoke path that verifies the public encounter, consequential refusal, Studio trace, Operator boundary and human-curated publication mode.
+- a public Lure → Reveal → Counter-read education encounter that separates observation, interpretation, uncertainty, artistic choice and human responsibility, with a five-minute facilitation protocol and explicit learning outcome.
 
 Git history is the canonical dated implementation record.
 

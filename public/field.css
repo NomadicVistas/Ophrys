@@ -39,41 +39,95 @@
   box-shadow: 0 0 0 10px var(--paper), 0 0 0 11px var(--ink);
 }
 
-.counter-control {
-  position: absolute;
-  z-index: 3;
-  right: 4vw;
-  bottom: 4vw;
-  width: min(340px, 36vw);
-  padding: 1.1rem;
-  border: 1px solid var(--ink);
-  background: rgba(237, 238, 231, .94);
+.encounter-protocol {
+  background: var(--signal);
 }
 
-.counter-control p {
+.learning-outcome {
   display: grid;
-  margin: 0 0 .8rem;
+  grid-template-columns: minmax(150px, .4fr) 1.6fr;
+  gap: 2rem;
+  max-width: 950px;
+  margin: 0 0 3rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
 }
 
-.counter-control strong {
-  font-size: 1.3rem;
+.learning-outcome span,
+.reading-layers dt,
+.encounter-steps output {
+  font-family: var(--mono);
+  font-size: .65rem;
+  text-transform: uppercase;
+}
+
+.encounter-steps {
+  display: grid;
+  grid-template-columns: .8fr 1.35fr .85fr;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+  border-left: 1px solid var(--ink);
+  list-style: none;
+}
+
+.encounter-steps > li {
+  min-width: 0;
+  padding: 1.5rem;
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+.encounter-steps h3 {
+  margin: 5rem 0 1rem;
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -.06em;
+  line-height: .9;
   text-transform: capitalize;
 }
 
-.counter-control span,
-.counter-control output {
-  font-family: var(--mono);
-  font-size: .6rem;
+.reading-layers {
+  margin: 0;
 }
 
-.counter-control output {
+.reading-layers div {
+  padding: .8rem 0;
+  border-bottom: 1px solid rgba(16, 18, 15, .3);
+}
+
+.reading-layers dt {
+  font-weight: 700;
+}
+
+.reading-layers dd {
+  margin: .25rem 0 0;
+  font-size: .84rem;
+}
+
+.encounter-steps .button {
+  margin-top: 2rem;
+}
+
+.encounter-steps output {
   display: block;
-  margin-top: .8rem;
+  margin-top: 1rem;
+  text-transform: none;
 }
 
-.counter-control button:disabled {
+.encounter-steps button:disabled {
   cursor: wait;
   opacity: .5;
+}
+
+.encounter-steps [data-completed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.encounter-steps [data-completed="true"] .button {
+  border-color: var(--paper);
 }
 
 .hero .field-index {
@@ -86,12 +140,9 @@
     transform: rotate(var(--score-tilt));
   }
 
-  .counter-control {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    width: 100%;
-    margin-top: 1rem;
+  .learning-outcome,
+  .encounter-steps {
+    grid-template-columns: 1fr;
   }
 
   .hero .field-index {

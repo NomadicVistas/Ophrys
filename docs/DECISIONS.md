@@ -35,3 +35,7 @@ Keyboard access, reduced motion and failure states are part of the artwork's pub
 ## D-009 · Comparison precedes publication decisions
 
 Candidate selection is reversible Operator-interface state and never changes a candidate record. The Operator may align at most two works across the same artistic, public-agency and provenance fields, then approve or reject each independently. Both terminal decisions require a written human rationale stored in the candidate's provenance packet; model output and comparison position never decide publication.
+
+## D-010 · Education is enacted through the live state
+
+The public AI-literacy protocol uses the same bounded field score and refusal transaction as the artwork rather than a simulated lesson. Lure precedes explanation; Reveal labels observation, provisional interpretation, uncertainty, artistic choice and human responsibility separately; Counter-read suppresses the active lure and exposes the next collective revision. The learning outcome is the ability to distinguish counting from interpretation and verify agency without requiring personal disclosure.

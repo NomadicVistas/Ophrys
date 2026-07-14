@@ -51,6 +51,24 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('comparison.css'), /@media \(max-width: 1050px\)[\s\S]*\.candidate-comparison[\s\S]*grid-template-columns: 1fr/)
 })
 
+test('education encounter preserves the Lure, Reveal and consequential Counter-read protocol', () => {
+  const page = publicFile('index.html')
+  const script = publicFile('app.js')
+  const styles = publicFile('field.css')
+
+  assert.match(page, /id="encounter"[\s\S]*01 \/ Lure[\s\S]*02 \/ Reveal[\s\S]*03 \/ Counter-read/)
+  assert.match(page, /Learning outcome[\s\S]*distinguish an aggregate observation from a system interpretation/)
+  for (const layer of ['Observation', 'Interpretation', 'Uncertainty', 'Artistic choice', 'Human responsibility']) {
+    assert.match(page, new RegExp(`<dt>${layer}</dt>`))
+  }
+  assert.match(script, /score\.aggregateBasis\.approach/)
+  assert.match(script, /score\.aggregateBasis\.attention/)
+  assert.match(script, /score\.aggregateBasis\.refusal/)
+  assert.match(script, /data-encounter-stage="counter-read"/)
+  assert.match(script, /collective revision \$\{payload\.fieldScore\.revision\}/)
+  assert.match(styles, /\[data-completed="true"\]/)
+})
+
 test('aggregate events never create visitor identity records', () => {
   const store = createOphrysStore(':memory:')
   store.recordEvent({ kind: 'arrival', surface: 'public' })

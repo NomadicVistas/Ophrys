@@ -15,7 +15,7 @@
   <header class="site-header">
     <a class="wordmark" href="/">OPHRYS <span>001</span></a>
     <nav aria-label="Primary">
-      <a href="#exhibition">Exhibition</a>
+      <a href="#encounter">Encounter</a>
       <a href="#method">Method</a>
       <a href="/studio">Studio</a>
     </nav>
@@ -38,13 +38,38 @@
         <div class="organism-core"><span>approach</span><strong>?</strong><span>withdraw</span></div>
         <div class="signal-label label-a">threshold</div><div class="signal-label label-b">residue</div><div class="signal-label label-c">refusal</div>
       </div>
-      <aside class="counter-control" aria-labelledby="counter-title">
-        <p class="eyebrow" id="counter-title">Live adaptive score</p>
-        <p><strong id="active-lure">—</strong><span id="field-basis">Reading aggregate field…</span></p>
-        <button class="text-button" id="refuse-lure" type="button">Refuse this lure</button>
-        <output id="refusal-result" aria-live="polite">Refusal suppresses the current tactic and rotates the bounded repertoire.</output>
-      </aside>
       <div class="field-index"><span>01</span><span>signal</span><span>02</span><span>response</span><span>03</span><span>uncertainty</span></div>
+    </section>
+
+    <section id="encounter" class="encounter-protocol section-pad" aria-labelledby="encounter-title">
+      <header class="section-heading">
+        <div><p class="eyebrow">Public AI-literacy encounter</p><h2 id="encounter-title">Lure → Reveal →<br>Counter-read</h2></div>
+        <p>Move through one live sequence. Ophrys shows what was counted, what it provisionally makes of those counts, what remains unknowable, and how refusal changes the shared field.</p>
+      </header>
+      <p class="learning-outcome"><span>Learning outcome</span>After these three steps, you can distinguish an aggregate observation from a system interpretation—and verify that counter-action changes the repertoire.</p>
+      <ol class="encounter-steps">
+        <li data-encounter-stage="lure">
+          <p class="eyebrow">01 / Lure</p>
+          <h3 id="active-lure">—</h3>
+          <p>Notice the signal before reading the system’s account of it. Attraction alone does not reveal why anyone approached.</p>
+        </li>
+        <li data-encounter-stage="reveal">
+          <p class="eyebrow">02 / Reveal</p>
+          <dl class="reading-layers">
+            <div><dt>Observation</dt><dd id="observed-basis">Reading coarse aggregate counts…</dd></div>
+            <div><dt>Interpretation</dt><dd>Collective activity is provisionally treated as pressure on the current lure.</dd></div>
+            <div><dt>Uncertainty</dt><dd>These counts cannot show who acted, why they acted, or what they felt.</dd></div>
+            <div><dt>Artistic choice</dt><dd id="field-basis">Mapping counts into the bounded visual score…</dd></div>
+            <div><dt>Human responsibility</dt><dd>Generated works remain Studio candidates until an Operator records a curatorial decision.</dd></div>
+          </dl>
+        </li>
+        <li data-encounter-stage="counter-read">
+          <p class="eyebrow">03 / Counter-read</p>
+          <p>Refusal is not failed engagement. It suppresses the named lure and rotates the collective repertoire.</p>
+          <button class="button" id="refuse-lure" type="button">Refuse this lure</button>
+          <output id="refusal-result" aria-live="polite">No counter-action has been made in this view.</output>
+        </li>
+      </ol>
     </section>
 
     <section class="statement dark-field">

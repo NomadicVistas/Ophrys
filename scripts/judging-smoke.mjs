@@ -24,7 +24,10 @@ try {
 
   const publicPage = await fetch(`${origin}/`)
   assert.equal(publicPage.status, 200)
-  assert.match(await publicPage.text(), /id="refuse-lure"/)
+  const publicMarkup = await publicPage.text()
+  assert.match(publicMarkup, /id="refuse-lure"/)
+  assert.match(publicMarkup, /id="encounter"[\s\S]*Lure → Reveal →[\s\S]*Counter-read/)
+  assert.match(publicMarkup, /Learning outcome/)
 
   const initial = await json('/api/public/state')
   assert.equal(initial.response.status, 200)

@@ -26,7 +26,8 @@ function renderField(score) {
   organism.style.setProperty('--score-duration-c', `${Math.round(duration * .75)}s`)
   organism.style.setProperty('--score-tilt', `${score.tiltDegrees}deg`)
   document.querySelector('#active-lure').textContent = score.activeLure.replace('-', ' ')
-  document.querySelector('#field-basis').textContent = `revision ${score.revision} / density ${score.density} / ${score.tempoBpm} bpm`
+  document.querySelector('#observed-basis').textContent = `Approach ${score.aggregateBasis.approach}; attention ${score.aggregateBasis.attention}; refusal ${score.aggregateBasis.refusal}. No visitor record is present.`
+  document.querySelector('#field-basis').textContent = `The renderer chooses density ${score.density}, tempo ${score.tempoBpm} bpm and tilt ${score.tiltDegrees}° at collective revision ${score.revision}.`
 }
 
 function artworkCard(work, index) {
@@ -69,7 +70,8 @@ document.querySelector('#refuse-lure').addEventListener('click', async event => 
     const payload = await response.json()
     if (!response.ok || !payload.fieldScore) throw new Error(payload.error || 'Refusal was not accepted')
     renderField(payload.fieldScore)
-    result.textContent = `${payload.fieldScore.suppressedLure.replace('-', ' ')} was suppressed. The field now uses ${payload.fieldScore.activeLure.replace('-', ' ')}.`
+    document.querySelector('[data-encounter-stage="counter-read"]').dataset.completed = 'true'
+    result.textContent = `${payload.fieldScore.suppressedLure.replace('-', ' ')} was suppressed. The field now uses ${payload.fieldScore.activeLure.replace('-', ' ')} at collective revision ${payload.fieldScore.revision}.`
   } catch {
     result.textContent = 'The refusal control could not reach the field. No change was claimed.'
   } finally {
