@@ -24,6 +24,7 @@ Work added from July 13, 2026 onward:
 - a public/Operator cost and compute ledger with returned token usage, measured latency, model trace, an enforced daily attempt budget and a bounded per-request output limit.
 - an identity-free public-field refractory interval that records refusal pressure only in aggregate, permits at most one repertoire revision per 60 seconds, and reports applied versus deferred outcomes without tracking a visitor.
 - an expiring hourly counter-signal ledger that coalesces refusal pressure into accepted/applied/deferred totals and a typed relation to the bounded runtime field without retaining request-level traces.
+- four original image-assisted, browser-native artwork studies that turn the existing Threshold/Field/Residue/Counter-field concepts into runnable encounters while preserving explicit unpublished status and human approval.
 
 Git history is the canonical dated implementation record.
 

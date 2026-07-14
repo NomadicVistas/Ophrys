@@ -27,6 +27,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-021 | P2 | LATER | Ecosystem literacy protocol | Public protocol distinguishes nodes, relations, interpretation and human responsibility |
 | OPH-022 | P1 | LATER | Phase-two reliability and judge pass | Migrations, invalid relations, stale state, accessibility, privacy and reproducibility remain covered |
 | OPH-023 | P1 | DONE | Curatorial ecosystem quartet | Four distinct Threshold/Field/Residue/Counter-field works enter Studio with pending human review, project-owned provenance and explicit relations; only the approved seed remains public |
+| OPH-024 | P1 | DONE | Coded artwork quartet | Four original image-generation sources become distinct responsive browser works with accessible notes, reduced-motion behaviour, consequential counter-actions and explicit unpublished Studio status |
 
 ## Current definition of done
 

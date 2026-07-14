@@ -57,6 +57,7 @@ The Build Week implementation is one small Node 24 service with three deliberate
 - `/` — public exhibition and artwork field;
 - `/studio` — public evidence ledger for runtime freshness, aggregate inputs, cycles, tactics and counter-readings;
 - `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
+- `/works/<slug>` — four responsive artwork studies linked from Studio and labelled unpublished until explicit human approval.
 
 The server uses built-in SQLite and calls the OpenAI Responses API with `gpt-5.6-sol`, explicit reasoning effort, `store:false` and strict structured artwork output. Model-generated code is never executed.
 
@@ -78,6 +79,8 @@ npm run cycle
 ```
 
 Without an API key, the public and Studio surfaces remain runnable with the human-authored seed work; only real GPT‑5.6 generation is unavailable.
+
+The coded quartet does not need an API key at runtime. Start the service, open `/studio#works`, and enter `Borrowed Weather`, `Choir of Almost`, `Afterimage Commons`, or `The Unchosen Signal`. The studies use original local visual sources and browser-native interaction; they do not bypass the curatorial publication gate.
 
 ## Build Week status
 

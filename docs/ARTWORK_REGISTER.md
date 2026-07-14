@@ -27,4 +27,6 @@ Current human-authored ecosystem candidates, all `studio` / unpublished and pend
 
 The quartet was drafted with Codex assistance after Ewoud’s 2026-07-14 request. It did not use the composition API, carries `human-ecosystem-quartet-v1` provenance, and does not enter the public exhibition until a human curator records an explicit approval rationale.
 
+Each candidate now also has an original generated visual source and a bounded browser-native prototype under `/works/<slug>`. The public Studio may link to these routes as explicitly unpublished studies; this does not change the artwork record’s `studio` status or satisfy the human publication gate. Interaction, physical translation, image prompts and review questions are recorded in [the coded quartet dossier](ARTWORK_QUARTET.md).
+
 Implementation note: the adaptive field score is system state, not a newly approved artwork. Its fixed `orbit`, `interruption`, and `split-signal` repertoire exists to test the seed work's consequential counter-reading; model-generated candidates still require separate provenance and human approval.

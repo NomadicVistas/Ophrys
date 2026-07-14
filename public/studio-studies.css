@@ -1,0 +1,18 @@
+.coded-study-link {
+  display: inline-flex;
+  width: max-content;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 1.2rem;
+  padding: .65rem .8rem;
+  border: 1px solid var(--signal);
+  color: var(--signal);
+  font-family: var(--mono);
+  font-size: .62rem;
+  text-transform: uppercase;
+}
+
+.coded-study-link:hover {
+  background: var(--signal);
+  color: var(--dark);
+}

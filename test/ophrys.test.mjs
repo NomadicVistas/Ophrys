@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
-import { readFileSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 import test from 'node:test'
 import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
@@ -21,15 +21,15 @@ function contrastRatio(foreground, background) {
 }
 
 test('public surfaces preserve keyboard, motion, contrast, mobile and error-state boundaries', () => {
-  const pages = ['index.html', 'studio.html', 'admin.html'].map(publicFile)
+  const pages = ['index.html', 'studio.html', 'admin.html', 'work.html'].map(publicFile)
   for (const page of pages) {
     assert.match(page, /<html lang="en">/)
     assert.match(page, /name="viewport"/)
     assert.match(page, /class="skip-link" href="#main-content"/)
     assert.match(page, /<main id="main-content"/)
-    assert.match(page, /<nav aria-label="Primary">/)
     assert.match(page, /href="\/accessibility\.css"/)
   }
+  for (const page of ['index.html', 'studio.html', 'admin.html'].map(publicFile)) assert.match(page, /<nav aria-label="Primary">/)
 
   const accessibility = publicFile('accessibility.css')
   assert.match(accessibility, /:focus-visible/)
@@ -61,6 +61,32 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('admin.js'), /selectedCandidateIds\.size < 2/)
   assert.match(publicFile('admin.js'), /Curatorial rationale/)
   assert.match(publicFile('comparison.css'), /@media \(max-width: 1050px\)[\s\S]*\.candidate-comparison[\s\S]*grid-template-columns: 1fr/)
+  assert.match(publicFile('works.css'), /@media \(prefers-reduced-motion: reduce\)/)
+})
+
+test('the coded quartet couples four original visual sources to bounded counter-actions', () => {
+  const page = publicFile('work.html')
+  const script = publicFile('works.js')
+  const studioScript = publicFile('studio.js')
+  const slugs = ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']
+
+  assert.match(page, /Studio study · unpublished/)
+  assert.match(page, /id="counter-action"/)
+  assert.match(page, /id="work-canvas" role="img"/)
+  assert.match(page, /This browser study does not identify you, retain a path, or infer a feeling/)
+  for (const slug of slugs) {
+    assert.match(script, new RegExp(`'${slug}'`))
+    assert.match(script, new RegExp(`/assets/works/${slug}\\.webp`))
+    assert.match(studioScript, new RegExp(`/works/${slug}`))
+    const asset = statSync(new URL(`../public/assets/works/${slug}.webp`, import.meta.url))
+    assert.ok(asset.size > 50_000, `${slug} should contain a substantive visual source`)
+    assert.ok(asset.size < 500_000, `${slug} should stay within the browser artwork budget`)
+  }
+  assert.match(script, /new ResizeObserver/)
+  assert.match(script, /Math\.min\(2, window\.devicePixelRatio/)
+  assert.match(script, /prefers-reduced-motion: reduce/)
+  assert.match(script, /kind: 'refusal', surface: `study\/\$\{slug\}`/)
+  assert.doesNotMatch(script, /localStorage|sessionStorage|getUserMedia|fingerprint/i)
 })
 
 test('runtime continuity labels stored evidence with a deterministic clock and no liveness claim', () => {
@@ -389,6 +415,13 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal(studioState.ecosystem.nodes.length, 6)
   assert.equal(studioState.ecosystem.relations.length, 4)
   assert.match(studioState.ecosystem.boundary, /autonomous approval/i)
+
+  for (const slug of ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']) {
+    const studyResponse = await fetch(`${origin}/works/${slug}`)
+    assert.equal(studyResponse.status, 200)
+    assert.match(await studyResponse.text(), /Studio study · unpublished/)
+  }
+  assert.equal((await fetch(`${origin}/works/not-a-study`)).status, 404)
 
   const refusalResponse = await fetch(`${origin}/api/public/event`, {
     method: 'POST',

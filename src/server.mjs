@@ -9,6 +9,7 @@ import { runOphrysCycle } from './ophrys-cycle.mjs'
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const PUBLIC = join(ROOT, 'public')
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png' }
+const WORK_ROUTES = new Set(['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal'])
 
 function securityHeaders(type = 'application/json; charset=utf-8') {
   return {
@@ -58,7 +59,8 @@ function sameOrigin(request) {
 
 function serve(response, path) {
   const routeFiles = { '/': 'index.html', '/studio': 'studio.html', '/admin': 'admin.html' }
-  const relative = routeFiles[path] || path.replace(/^\/+/, '')
+  const workSlug = path.match(/^\/works\/([a-z0-9-]+)$/)?.[1]
+  const relative = routeFiles[path] || (WORK_ROUTES.has(workSlug) ? 'work.html' : path.replace(/^\/+/, ''))
   const safe = normalize(relative).replace(/^(\.\.[/\\])+/, '')
   const file = join(PUBLIC, safe)
   if (!file.startsWith(PUBLIC) || !existsSync(file)) return false

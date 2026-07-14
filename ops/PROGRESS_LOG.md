@@ -134,3 +134,11 @@ Next: complete OPH-017 by persisting a bounded aggregate counter-signal/erasure 
 - Added deterministic coverage for a six-request burst, same-hour coalescing, applied/deferred totals, a second hour, schema minimisation, graph closure and expiry. `npm run check`, all 13 tests and `npm run judge:smoke` pass.
 
 Next: implement OPH-018 as typed curatorial decision relations while preserving reversible comparison and the rationale-required human publication gate.
+
+## 2026-07-14 — coded artwork quartet
+
+- Completed OPH-024 by turning the four human-authored candidates into distinct browser-native studies with original generated visual sources: atmospheric threshold, distributed near-resolution, visibly expiring residue and reversible selection.
+- Added one consequential counter-action per work: clear the forecast, give silence equal status, erase the newest layer and restore a discarded signal.
+- Kept all four candidates explicitly `studio` / unpublished. Studio links expose prototypes for review without changing publication state or making a museum-approval claim.
+- Added accessible textual descriptions, native controls, reduced-motion handling, page-visibility pausing, capped pixel density, optional gesture-gated local synthesis and an explicit no-storage trace boundary.
+- Recorded the complete artwork, implementation and image-prompt rationale in `docs/ARTWORK_QUARTET.md` and added deterministic route, asset-budget, privacy and publication-boundary coverage.

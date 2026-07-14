@@ -20,6 +20,7 @@
 ### Phase 2 · Adaptive encounter
 
 - Bounded visual/audio artwork score renderer.
+- Four coded Threshold/Field/Residue/Counter-field studies with original project-owned visual sources.
 - One visible refusal control with downstream effect.
 - Candidate comparison and curator review.
 - Prompt/model/source/usage provenance.

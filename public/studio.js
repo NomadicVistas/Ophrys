@@ -9,6 +9,13 @@ function date(value) {
   return value ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'open'
 }
 
+const CODED_STUDIES = {
+  'study-borrowed-weather': '/works/borrowed-weather',
+  'study-choir-of-almost': '/works/choir-of-almost',
+  'study-afterimage-commons': '/works/afterimage-commons',
+  'study-unchosen-signal': '/works/unchosen-signal',
+}
+
 function metricRow(metric, max) {
   const row = element('div', 'metric-row')
   const name = element('span', '', `${metric.kind.replaceAll('_', ' ')} / ${metric.surface}`)
@@ -43,6 +50,13 @@ function artworkRow(work) {
   const head = element('header')
   head.append(element('span', `status ${work.status}`, work.status), element('span', '', date(work.createdAt)))
   article.append(head, element('h3', '', work.title), element('p', 'medium', work.medium), element('p', '', work.proposition))
+  const studyRoute = CODED_STUDIES[work.id]
+  if (studyRoute) {
+    const studyLink = element('a', 'coded-study-link', 'Enter coded study ↗')
+    studyLink.href = studyRoute
+    studyLink.setAttribute('aria-label', `Enter the unpublished ${work.title} browser study`)
+    article.append(studyLink)
+  }
   const pair = element('div', 'tactic-pair')
   const lure = element('div'); lure.append(element('span', '', 'LURE HYPOTHESIS'), element('p', '', work.lureHypothesis))
   const counter = element('div'); counter.append(element('span', '', 'COUNTER-READING'), element('p', '', work.counterReading))

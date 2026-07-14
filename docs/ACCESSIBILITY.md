@@ -14,6 +14,8 @@ Verified on 2026-07-13 UTC for the Build Week public, Studio and Operator surfac
 
 Artwork cards are links to the corresponding public Studio ledger rather than focusable containers with no keyboard action. Focusing a work does not count an `artwork_open`; the coarse aggregate event is sent only on activation.
 
+The coded quartet uses native buttons and links for entry, counter-action, notes, optional sound and sequential navigation. Each canvas has a work-specific visual description, while the notes panel exposes the full encounter, question, counter-reading and data boundary as text. The renderer caps device pixel ratio, pauses when the page is hidden and respects reduced motion. `Choir of Almost` synthesises optional local sound only after an explicit action and never requests microphone access. `Afterimage Commons` retains traces only in page memory and visibly expires them.
+
 The Lure → Reveal → Counter-read sequence retains a native refusal button and polite live result. Chromium 149 rendered its live aggregate and score values at 1440 × 1000 and its reduced-motion mobile structure at 390 × 844 on 2026-07-14 UTC.
 
 ## Scope and limits
