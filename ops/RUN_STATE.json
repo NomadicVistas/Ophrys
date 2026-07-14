@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T14:29:03Z",
-  "lastSelectedItem": "OPH-016 runtime continuity and freshness summary",
+  "lastSuccessfulRun": "2026-07-14T15:30:18Z",
+  "lastSelectedItem": "OPH-017 identity-free refusal refractory prerequisite",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "Identity-free refusal refractory window before OPH-017 counter-signal persistence",
+  "nextBestSlice": "OPH-017 bounded aggregate counter-signal and erasure persistence",
   "deadline": "2026-07-22T00:00:00Z"
 }

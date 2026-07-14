@@ -19,7 +19,7 @@ The smoke command starts Ophrys on an ephemeral loopback port with an in-memory 
 
 - the public field and readiness endpoint respond;
 - only published work enters the public projection;
-- refusal suppresses the active lure, rotates the bounded repertoire and increments the collective revision;
+- the first refusal in a declared 60-second interval suppresses the active lure, rotates the bounded repertoire and increments the public field revision; further same-interval refusals are counted as aggregate pressure but explicitly deferred;
 - Studio exposes that refusal as a coarse aggregate event and counter-read state;
 - Operator data is denied without a bearer token; and
 - publication remains in human-curated mode.
@@ -34,7 +34,7 @@ Start a disposable local instance:
 OPHRYS_DB_PATH=:memory: OPHRYS_ADMIN_TOKEN=local-judging-token npm start
 ```
 
-1. Open `http://127.0.0.1:7799/#encounter`. Follow **Lure → Reveal → Counter-read**: notice the active lure, compare the separately labelled observation, interpretation, uncertainty, artistic choice and human responsibility, then activate **Refuse this lure**. The named lure must be suppressed, another must replace it, and the collective revision must increase. The learning and facilitation protocol is in `docs/EDUCATION_ENCOUNTER.md`.
+1. Open `http://127.0.0.1:7799/#encounter`. Follow **Lure → Reveal → Counter-read**: notice the active lure, compare the separately labelled observation, interpretation, uncertainty, artistic choice and human responsibility, then activate **Refuse this lure**. On the first action in the current interval, the named lure must be suppressed, another must replace it, and the public field revision must increase. If the field interval is already refractory, the control must say that anonymous pressure was counted while no new revision is claimed. The learning and facilitation protocol is in `docs/EDUCATION_ENCOUNTER.md`.
 2. Open `http://127.0.0.1:7799/studio`. Under **Aggregate public field**, inspect the refusal count. The Studio separates observed counts, the provisional tactic, the counter-reading and curatorial status.
 3. Open `http://127.0.0.1:7799/admin`. An empty or incorrect token must fail. The local token above reveals protected controls; it is deliberately disposable and must never be used for deployment.
 4. Test keyboard navigation and, if available, reduced-motion mode. The recorded browser matrix and automated assertions are in `docs/ACCESSIBILITY.md`.

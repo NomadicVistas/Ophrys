@@ -22,6 +22,7 @@ Work added from July 13, 2026 onward:
 - a credential-free judging smoke path that verifies the public encounter, consequential refusal, Studio trace, Operator boundary and human-curated publication mode.
 - a public Lure → Reveal → Counter-read education encounter that separates observation, interpretation, uncertainty, artistic choice and human responsibility, with a five-minute facilitation protocol and explicit learning outcome.
 - a public/Operator cost and compute ledger with returned token usage, measured latency, model trace, an enforced daily attempt budget and a bounded per-request output limit.
+- an identity-free public-field refractory interval that records refusal pressure only in aggregate, permits at most one repertoire revision per 60 seconds, and reports applied versus deferred outcomes without tracking a visitor.
 
 Git history is the canonical dated implementation record.
 

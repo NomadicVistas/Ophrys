@@ -89,11 +89,17 @@ export function createOphrysServer({ store = createOphrysStore(), adminToken = p
         if (++aggregateWindow.count > 300) return json(response, 429, { error: 'Aggregate event capacity reached' })
         const event = await body(request, 4096)
         const result = store.recordEvent({ kind: event.kind, surface: event.surface })
+        const refusal = event.kind === 'refusal' ? result : null
         return json(response, 202, {
           accepted: true,
-          fieldScore: event.kind === 'refusal' ? result : undefined,
-          disclosure: event.kind === 'refusal'
-            ? 'The current lure was suppressed and rotated; only an aggregate refusal count was stored.'
+          changed: refusal?.changed,
+          deferred: refusal?.deferred,
+          counterAction: refusal?.counterAction,
+          fieldScore: refusal?.fieldScore,
+          disclosure: refusal
+            ? refusal.changed
+              ? 'The public repertoire advanced once; only aggregate refusal pressure was stored.'
+              : 'The refusal was counted in aggregate; repertoire rotation was deferred by the identity-free shared interval.'
             : 'Recorded as an aggregate hourly count; no visitor identifier was stored.',
         })
       }

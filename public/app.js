@@ -27,7 +27,7 @@ function renderField(score) {
   organism.style.setProperty('--score-tilt', `${score.tiltDegrees}deg`)
   document.querySelector('#active-lure').textContent = score.activeLure.replace('-', ' ')
   document.querySelector('#observed-basis').textContent = `Approach ${score.aggregateBasis.approach}; attention ${score.aggregateBasis.attention}; refusal ${score.aggregateBasis.refusal}. No visitor record is present.`
-  document.querySelector('#field-basis').textContent = `The renderer chooses density ${score.density}, tempo ${score.tempoBpm} bpm and tilt ${score.tiltDegrees}° at collective revision ${score.revision}.`
+  document.querySelector('#field-basis').textContent = `The renderer chooses density ${score.density}, tempo ${score.tempoBpm} bpm and tilt ${score.tiltDegrees}° at public field revision ${score.revision}. Anonymous refusals can advance the repertoire at most once every ${score.counterActionPolicy.refractorySeconds} seconds.`
 }
 
 function artworkCard(work, index) {
@@ -70,8 +70,13 @@ document.querySelector('#refuse-lure').addEventListener('click', async event => 
     const payload = await response.json()
     if (!response.ok || !payload.fieldScore) throw new Error(payload.error || 'Refusal was not accepted')
     renderField(payload.fieldScore)
-    document.querySelector('[data-encounter-stage="counter-read"]').dataset.completed = 'true'
-    result.textContent = `${payload.fieldScore.suppressedLure.replace('-', ' ')} was suppressed. The field now uses ${payload.fieldScore.activeLure.replace('-', ' ')} at collective revision ${payload.fieldScore.revision}.`
+    if (payload.changed) {
+      document.querySelector('[data-encounter-stage="counter-read"]').dataset.completed = 'true'
+      result.textContent = `${payload.fieldScore.suppressedLure.replace('-', ' ')} was suppressed. The field now uses ${payload.fieldScore.activeLure.replace('-', ' ')} at public field revision ${payload.fieldScore.revision}.`
+    } else {
+      const next = new Date(payload.counterAction.nextEligibleAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      result.textContent = `This refusal was counted as anonymous public pressure. Repertoire rotation is deferred until ${next}; no new revision is claimed.`
+    }
   } catch {
     result.textContent = 'The refusal control could not reach the field. No change was claimed.'
   } finally {

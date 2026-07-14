@@ -40,6 +40,8 @@ try {
     body: JSON.stringify({ kind: 'refusal', surface: 'judging/counter-control' }),
   })
   assert.equal(refusal.response.status, 202)
+  assert.equal(refusal.payload.changed, true)
+  assert.equal(refusal.payload.deferred, false)
   assert.equal(refusal.payload.fieldScore.suppressedLure, initial.payload.fieldScore.activeLure)
   assert.notEqual(refusal.payload.fieldScore.activeLure, initial.payload.fieldScore.activeLure)
   assert.equal(refusal.payload.fieldScore.revision, initial.payload.fieldScore.revision + 1)

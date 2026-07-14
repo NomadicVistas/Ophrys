@@ -23,6 +23,7 @@ const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
 const TOPOLOGY_NODE_LIMIT = 40
 const TOPOLOGY_RELATION_LIMIT = 120
 const RUNTIME_STALE_AFTER_MINUTES = 120
+const REFUSAL_REFRACTORY_MS = 60_000
 const CURATORIAL_QUARTET = [
   {
     id: 'study-borrowed-weather',
@@ -105,7 +106,12 @@ function ensureParent(path) {
   if (path !== ':memory:') mkdirSync(dirname(resolve(path)), { recursive: true })
 }
 
-export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophrys.sqlite') {
+export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophrys.sqlite', { now = () => new Date() } = {}) {
+  const currentDate = () => {
+    const value = new Date(now())
+    if (Number.isNaN(value.getTime())) throw new Error('Invalid store clock')
+    return value
+  }
   ensureParent(path)
   const db = new DatabaseSync(path)
   db.exec(`
@@ -129,7 +135,8 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       active_lure TEXT NOT NULL,
       suppressed_lure TEXT,
       revision INTEGER NOT NULL DEFAULT 0,
-      updated_at TEXT NOT NULL
+      updated_at TEXT NOT NULL,
+      last_refusal_mutation_at TEXT
     );
     CREATE TABLE IF NOT EXISTS cycles (
       id TEXT PRIMARY KEY,
@@ -184,14 +191,16 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   if (!cycleColumns.includes('usage')) db.exec("ALTER TABLE cycles ADD COLUMN usage TEXT NOT NULL DEFAULT '{}'")
   if (!cycleColumns.includes('latency_ms')) db.exec('ALTER TABLE cycles ADD COLUMN latency_ms INTEGER')
   if (!cycleColumns.includes('output_token_budget')) db.exec('ALTER TABLE cycles ADD COLUMN output_token_budget INTEGER NOT NULL DEFAULT 2600')
+  const fieldColumns = db.prepare('PRAGMA table_info(field_state)').all().map(row => row.name)
+  if (!fieldColumns.includes('last_refusal_mutation_at')) db.exec('ALTER TABLE field_state ADD COLUMN last_refusal_mutation_at TEXT')
   db.prepare("UPDATE cycles SET status = 'abandoned', summary = 'Cycle expired before completion.', completed_at = ? WHERE status = 'running' AND started_at < ?")
-    .run(new Date().toISOString(), new Date(Date.now() - 2 * 3600_000).toISOString())
+    .run(currentDate().toISOString(), new Date(currentDate().getTime() - 2 * 3600_000).toISOString())
 
   const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (?, ?, ?)')
-  const now = new Date().toISOString()
-  for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) insertSetting.run(key, JSON.stringify(value), now)
+  const initializedAt = currentDate().toISOString()
+  for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) insertSetting.run(key, JSON.stringify(value), initializedAt)
   db.prepare('INSERT OR IGNORE INTO field_state (id, active_lure, suppressed_lure, revision, updated_at) VALUES (1, ?, NULL, 0, ?)')
-    .run(LURE_REPERTOIRE[0], now)
+    .run(LURE_REPERTOIRE[0], initializedAt)
 
   const count = db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count
   if (count === 0) {
@@ -205,7 +214,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       lureHypothesis: 'Low-frequency directional sound combined with interrupted light will produce more threshold crossings than a stable luminous field.',
       counterReading: 'A visible refusal control suppresses the currently favoured signal and records disagreement as a compositional event.',
       materials: ['directional light', 'spatial audio', 'coarse threshold sensor', 'local event display'],
-      model: 'curatorial seed', status: 'published', createdAt: now,
+      model: 'curatorial seed', status: 'published', createdAt: initializedAt,
       provenance: {
         promptVersion: 'human-baseline',
         sourceReferences: ['Human-authored baseline work'],
@@ -217,7 +226,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
           decision: 'approved',
           rationale: 'Human-authored seed work for the public exhibition interface.',
           rejectionReason: null,
-          reviewedAt: now,
+          reviewedAt: initializedAt,
           reviewedBy: 'human baseline',
         },
       },
@@ -232,7 +241,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       cycleId: null,
       model: 'human curatorial study',
       status: 'studio',
-      createdAt: new Date(Date.parse(now) + index + 1).toISOString(),
+      createdAt: new Date(Date.parse(initializedAt) + index + 1).toISOString(),
       provenance: {
         promptVersion: 'human-ecosystem-quartet-v1',
         sourceReferences: ['Ophrys spatial grammar', 'Ewoud’s 2026-07-14 request for four ecosystem artworks'],
@@ -299,7 +308,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
     const statement = db.prepare(`INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`)
-    const timestamp = new Date().toISOString()
+    const timestamp = currentDate().toISOString()
     for (const [key, value] of Object.entries(patch || {})) statement.run(key, JSON.stringify(value), timestamp)
     return next
   }
@@ -307,9 +316,10 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   function insertEvent(kind, surface) {
     if (!EVENT_KINDS.has(kind)) throw new Error('Unsupported aggregate event')
     const cleanSurface = String(surface).replace(/[^a-z0-9_/-]/gi, '').slice(0, 80) || 'public'
+    const bucket = isoHour(currentDate())
     db.prepare(`INSERT INTO visitor_metrics (bucket, surface, kind, count) VALUES (?, ?, ?, 1)
-      ON CONFLICT(bucket, surface, kind) DO UPDATE SET count = count + 1`).run(isoHour(), cleanSurface, kind)
-    return { bucket: isoHour(), surface: cleanSurface, kind }
+      ON CONFLICT(bucket, surface, kind) DO UPDATE SET count = count + 1`).run(bucket, cleanSurface, kind)
+    return { bucket, surface: cleanSurface, kind }
   }
 
   function recordEvent({ kind, surface = 'public' }) {
@@ -321,11 +331,11 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function pruneMetrics() {
     const retention = Number(getSettings().metricRetentionHours || 72)
-    return db.prepare('DELETE FROM visitor_metrics WHERE bucket < ?').run(new Date(Date.now() - retention * 3600_000).toISOString()).changes
+    return db.prepare('DELETE FROM visitor_metrics WHERE bucket < ?').run(new Date(currentDate().getTime() - retention * 3600_000).toISOString()).changes
   }
 
   function getMetrics(hours = getSettings().metricWindowHours) {
-    const since = new Date(Date.now() - Number(hours) * 3600_000).toISOString()
+    const since = new Date(currentDate().getTime() - Number(hours) * 3600_000).toISOString()
     return db.prepare(`SELECT surface, kind, SUM(count) AS count FROM visitor_metrics
       WHERE bucket >= ? GROUP BY surface, kind ORDER BY count DESC, surface, kind`).all(since)
   }
@@ -334,7 +344,9 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     const metrics = getMetrics()
     const totals = Object.fromEntries([...EVENT_KINDS].map(kind => [kind, 0]))
     for (const metric of metrics) totals[metric.kind] = (totals[metric.kind] || 0) + Number(metric.count)
-    const state = db.prepare('SELECT active_lure AS activeLure, suppressed_lure AS suppressedLure, revision, updated_at AS updatedAt FROM field_state WHERE id = 1').get()
+    const state = db.prepare(`SELECT active_lure AS activeLure, suppressed_lure AS suppressedLure,
+      revision, updated_at AS updatedAt, last_refusal_mutation_at AS lastRefusalMutationAt
+      FROM field_state WHERE id = 1`).get()
     const approach = totals.arrival + totals.threshold + totals.artwork_open + totals.return
     const attention = totals.dwell_short + (totals.dwell_long * 2)
     return {
@@ -349,18 +361,39 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       aggregateBasis: { approach, attention, refusal: totals.refusal },
       repertoire: [...LURE_REPERTOIRE],
       updatedAt: state.updatedAt,
+      counterActionPolicy: {
+        refractorySeconds: REFUSAL_REFRACTORY_MS / 1000,
+        lastAppliedAt: state.lastRefusalMutationAt,
+        nextEligibleAt: state.lastRefusalMutationAt
+          ? new Date(Date.parse(state.lastRefusalMutationAt) + REFUSAL_REFRACTORY_MS).toISOString()
+          : null,
+        basis: 'Anonymous refusal pressure is counted in aggregate, while the public repertoire can advance at most once per refractory interval.',
+      },
     }
   }
 
   function refuseLure({ surface = 'public' } = {}) {
+    const requestedAt = currentDate()
+    let changed = false
+    let appliedAt = null
+    let nextEligibleAt = null
     db.exec('BEGIN IMMEDIATE')
     try {
-      const current = db.prepare('SELECT active_lure AS activeLure, revision FROM field_state WHERE id = 1').get()
-      const currentIndex = Math.max(0, LURE_REPERTOIRE.indexOf(current.activeLure))
-      const nextLure = LURE_REPERTOIRE[(currentIndex + 1) % LURE_REPERTOIRE.length]
-      const updatedAt = new Date().toISOString()
-      db.prepare('UPDATE field_state SET active_lure = ?, suppressed_lure = ?, revision = ?, updated_at = ? WHERE id = 1')
-        .run(nextLure, current.activeLure, Number(current.revision) + 1, updatedAt)
+      const current = db.prepare(`SELECT active_lure AS activeLure, revision,
+        last_refusal_mutation_at AS lastRefusalMutationAt FROM field_state WHERE id = 1`).get()
+      const lastAppliedMs = current.lastRefusalMutationAt ? Date.parse(current.lastRefusalMutationAt) : null
+      changed = lastAppliedMs === null || requestedAt.getTime() >= lastAppliedMs + REFUSAL_REFRACTORY_MS
+      if (changed) {
+        const currentIndex = Math.max(0, LURE_REPERTOIRE.indexOf(current.activeLure))
+        const nextLure = LURE_REPERTOIRE[(currentIndex + 1) % LURE_REPERTOIRE.length]
+        appliedAt = requestedAt.toISOString()
+        db.prepare(`UPDATE field_state SET active_lure = ?, suppressed_lure = ?, revision = ?,
+          updated_at = ?, last_refusal_mutation_at = ? WHERE id = 1`)
+          .run(nextLure, current.activeLure, Number(current.revision) + 1, appliedAt, appliedAt)
+      } else {
+        appliedAt = current.lastRefusalMutationAt
+      }
+      nextEligibleAt = new Date(Date.parse(appliedAt) + REFUSAL_REFRACTORY_MS).toISOString()
       insertEvent('refusal', surface)
       db.exec('COMMIT')
     } catch (error) {
@@ -368,12 +401,25 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       throw error
     }
     pruneMetrics()
-    return getFieldScore()
+    return {
+      changed,
+      deferred: !changed,
+      fieldScore: getFieldScore(),
+      counterAction: {
+        requestedAt: requestedAt.toISOString(),
+        appliedAt,
+        nextEligibleAt,
+        refractorySeconds: REFUSAL_REFRACTORY_MS / 1000,
+        basis: changed
+          ? 'This request advanced the public repertoire once.'
+          : 'The refusal was counted as aggregate pressure, but repertoire rotation was deferred inside the shared refractory interval.',
+      },
+    }
   }
 
-  function createCycle({ id, trigger, status = 'running', model, outputTokenBudget = getSettings().maxOutputTokens, startedAt = new Date().toISOString() }) {
+  function createCycle({ id, trigger, status = 'running', model, outputTokenBudget = getSettings().maxOutputTokens, startedAt = currentDate().toISOString() }) {
     const dailyCycleLimit = Number(getSettings().dailyCycleLimit)
-    const dayStart = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`
+    const dayStart = `${currentDate().toISOString().slice(0, 10)}T00:00:00.000Z`
     const attemptsToday = Number(db.prepare('SELECT COUNT(*) AS count FROM cycles WHERE started_at >= ?').get(dayStart).count)
     if (attemptsToday >= dailyCycleLimit) throw new Error(`Daily cycle budget exhausted (${dailyCycleLimit} attempts per UTC day)`)
     db.prepare(`INSERT INTO cycles (
@@ -384,7 +430,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function completeCycle(id, { status, summary = '', responseId = null, error = null, usage = null, latencyMs = null }) {
     db.prepare('UPDATE cycles SET status = ?, summary = ?, response_id = ?, error = ?, usage = ?, latency_ms = ?, completed_at = ? WHERE id = ?')
-      .run(status, summary, responseId, error, JSON.stringify(usage || {}), latencyMs, new Date().toISOString(), id)
+      .run(status, summary, responseId, error, JSON.stringify(usage || {}), latencyMs, currentDate().toISOString(), id)
   }
 
   function createArtwork(input) {
@@ -396,11 +442,11 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       .run(input.id, input.cycleId, input.title, input.medium, input.proposition, input.publicDescription,
         input.visitorRelation, input.exhibitionForm, input.learningQuestion, input.lureHypothesis,
         input.counterReading, JSON.stringify(input.materials || []), input.model, input.status,
-        JSON.stringify(input.provenance || {}), input.createdAt || new Date().toISOString())
+        JSON.stringify(input.provenance || {}), input.createdAt || currentDate().toISOString())
     return input.id
   }
 
-  function createArtworkRelation({ fromArtworkId, toArtworkId, kind, evidence, createdAt = new Date().toISOString() }) {
+  function createArtworkRelation({ fromArtworkId, toArtworkId, kind, evidence, createdAt = currentDate().toISOString() }) {
     if (!ARTWORK_RELATION_KINDS.has(kind)) throw new Error('Invalid artwork relation kind')
     if (!fromArtworkId || !toArtworkId || fromArtworkId === toArtworkId) throw new Error('Artwork relation requires two distinct works')
     const normalizedEvidence = typeof evidence === 'string' ? evidence.trim() : ''
@@ -448,7 +494,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       throw new Error('Curatorial rationale required before approving or rejecting a candidate')
     }
     const decision = status === 'published' ? 'approved' : status === 'archived' ? 'rejected' : 'returned_for_revision'
-    const reviewedAt = new Date().toISOString()
+    const reviewedAt = currentDate().toISOString()
     const updatedProvenance = {
       ...provenance,
       review: {
@@ -558,7 +604,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function getComputeLedger() {
     const settings = getSettings()
-    const periodStart = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`
+    const periodStart = `${currentDate().toISOString().slice(0, 10)}T00:00:00.000Z`
     const cycles = db.prepare(`SELECT status, model, usage, latency_ms AS latencyMs
       FROM cycles WHERE started_at >= ? ORDER BY started_at`).all(periodStart)
     const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0, recordedCycles: 0 }
@@ -595,7 +641,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     }
   }
 
-  function getRuntimeContinuity({ at = new Date() } = {}) {
+  function getRuntimeContinuity({ at = currentDate() } = {}) {
     const assessedAt = new Date(at)
     if (Number.isNaN(assessedAt.getTime())) throw new Error('Invalid runtime assessment time')
     const settings = getSettings()

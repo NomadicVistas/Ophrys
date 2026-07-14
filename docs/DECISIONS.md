@@ -20,9 +20,9 @@ GPT‑5.6 may compose artwork candidates. It may not approve, publish, advertise
 
 The composition organ emits strict JSON. Future visual/audio engines will render validated scores locally and will never execute arbitrary model output.
 
-## D-006 · Consequential refusal rotates a collective repertoire
+## D-006 · Consequential refusal rotates a shared repertoire
 
-The public field renders a server-owned score with a fixed three-lure vocabulary and numeric bounds. Aggregate approach and attention alter its tempo and tilt. A refusal transaction suppresses the active lure, selects the next bounded lure and increments one coarse refusal count. The state is collective and contains no persistent visitor identifier or interpretation of why the refusal occurred.
+The public field renders a server-owned score with a fixed three-lure vocabulary and numeric bounds. Aggregate approach and attention alter its tempo and tilt. The first refusal transaction permitted by the shared refractory policy suppresses the active lure and selects the next bounded lure; every accepted refusal increments one coarse aggregate count. The field state contains no persistent visitor identifier or interpretation of why the refusal occurred. D-016 specifies the later refractory refinement.
 
 ## D-007 · Artwork provenance lives with the candidate
 
@@ -59,3 +59,7 @@ The Studio selects its newest bounded artwork-node page before selecting relatio
 ## D-015 · Runtime continuity is an evidence label, not a liveness claim
 
 The public Studio derives one of five states from stored aggregate buckets, public-field revisions, composition-cycle outcomes and the operator cycle setting: `active`, `quiet`, `stale`, `disabled` or `failed`. `Active` means only that stored evidence is no more than two hours old; two hours is a documented local policy chosen for hourly buckets, not a sector standard. Every projection carries its observed, updated and assessment times, evidence basis and an explicit statement that it cannot verify a server, sensor or physical installation is currently live.
+
+## D-016 · Refusal pressure and repertoire revision have different bounds
+
+Every accepted refusal increments one anonymous hourly aggregate, but the shared repertoire may advance at most once during a 60-second server-side refractory interval. The atomic field transaction returns explicit `changed` and `deferred` outcomes plus the next eligible timestamp. This bound is global to the public field rather than attached to an IP address, cookie, fingerprint or visitor record. A deferred request is still public counter-pressure, but the interface does not claim that it suppressed a lure or created a new revision.

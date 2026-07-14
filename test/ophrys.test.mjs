@@ -112,7 +112,8 @@ test('education encounter preserves the Lure, Reveal and consequential Counter-r
   assert.match(script, /score\.aggregateBasis\.attention/)
   assert.match(script, /score\.aggregateBasis\.refusal/)
   assert.match(script, /data-encounter-stage="counter-read"/)
-  assert.match(script, /collective revision \$\{payload\.fieldScore\.revision\}/)
+  assert.match(script, /public field revision \$\{payload\.fieldScore\.revision\}/)
+  assert.match(script, /This refusal was counted as anonymous public pressure/)
   assert.match(styles, /\[data-completed="true"\]/)
 })
 
@@ -226,8 +227,9 @@ test('ecosystem topology projection stays closed when older relation endpoints f
   store.close()
 })
 
-test('aggregate conditions bound the field score and refusal rotates its repertoire', () => {
-  const store = createOphrysStore(':memory:')
+test('aggregate conditions bound the field score and an anonymous refusal burst rotates once per interval', () => {
+  let at = new Date('2026-07-14T12:00:00.000Z')
+  const store = createOphrysStore(':memory:', { now: () => at })
   const initial = store.getFieldScore()
   for (let index = 0; index < 4; index++) store.recordEvent({ kind: 'threshold', surface: 'public' })
   store.recordEvent({ kind: 'dwell_long', surface: 'public' })
@@ -236,14 +238,74 @@ test('aggregate conditions bound the field score and refusal rotates its reperto
   assert.ok(adapted.tempoBpm >= 18 && adapted.tempoBpm <= 72)
   assert.ok(adapted.tiltDegrees >= -24 && adapted.tiltDegrees <= 24)
 
-  const refused = store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' })
-  assert.equal(refused.revision, initial.revision + 1)
-  assert.equal(refused.suppressedLure, initial.activeLure)
-  assert.notEqual(refused.activeLure, initial.activeLure)
-  assert.equal(refused.phase, 'counter-read')
-  assert.equal(refused.aggregateBasis.refusal, 1)
-  assert.equal(store.getMetrics().some(item => item.kind === 'refusal' && item.count === 1), true)
+  const burst = Array.from({ length: 6 }, () => store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' }))
+  const [applied, ...deferred] = burst
+  assert.equal(applied.changed, true)
+  assert.equal(applied.deferred, false)
+  assert.equal(applied.fieldScore.revision, initial.revision + 1)
+  assert.equal(applied.fieldScore.suppressedLure, initial.activeLure)
+  assert.notEqual(applied.fieldScore.activeLure, initial.activeLure)
+  assert.equal(applied.fieldScore.phase, 'counter-read')
+  assert.equal(applied.counterAction.refractorySeconds, 60)
+  assert.equal(deferred.every(result => !result.changed && result.deferred), true)
+  assert.equal(deferred.every(result => result.fieldScore.revision === initial.revision + 1), true)
+  assert.equal(deferred.at(-1).fieldScore.activeLure, applied.fieldScore.activeLure)
+  assert.equal(deferred.at(-1).fieldScore.aggregateBasis.refusal, 6)
+  assert.equal(store.getMetrics().some(item => item.kind === 'refusal' && item.count === 6), true)
+
+  at = new Date('2026-07-14T12:01:00.000Z')
+  const nextInterval = store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' })
+  assert.equal(nextInterval.changed, true)
+  assert.equal(nextInterval.fieldScore.revision, initial.revision + 2)
+  assert.notEqual(nextInterval.fieldScore.activeLure, applied.fieldScore.activeLure)
   store.close()
+})
+
+test('public refusal responses distinguish one applied revision from deferred aggregate pressure', async () => {
+  let at = new Date('2026-07-14T12:00:00.000Z')
+  const store = createOphrysStore(':memory:', { now: () => at })
+  const server = createOphrysServer({ store })
+  server.listen(0, '127.0.0.1')
+  await once(server, 'listening')
+  const origin = `http://127.0.0.1:${server.address().port}`
+  const initial = store.getFieldScore()
+
+  const refuse = async () => {
+    const response = await fetch(`${origin}/api/public/event`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind: 'refusal', surface: 'public/counter-control' }),
+    })
+    assert.equal(response.status, 202)
+    return response.json()
+  }
+
+  const burst = []
+  for (let index = 0; index < 6; index++) burst.push(await refuse())
+  assert.deepEqual(burst.map(result => [result.changed, result.deferred]), [
+    [true, false],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, true],
+    [false, true],
+  ])
+  assert.equal(burst.every(result => result.fieldScore.revision === initial.revision + 1), true)
+  assert.equal(burst.at(-1).fieldScore.activeLure, burst[0].fieldScore.activeLure)
+  assert.equal(burst.at(-1).fieldScore.aggregateBasis.refusal, 6)
+  assert.match(burst[0].disclosure, /public repertoire advanced once/i)
+  assert.match(burst[1].disclosure, /identity-free shared interval/i)
+
+  at = new Date('2026-07-14T12:01:00.000Z')
+  const nextInterval = await refuse()
+  assert.equal(nextInterval.changed, true)
+  assert.equal(nextInterval.fieldScore.revision, initial.revision + 2)
+
+  const tables = store.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map(row => row.name)
+  assert.equal(tables.includes('visitors'), false)
+  assert.equal(tables.includes('profiles'), false)
+  server.close()
+  await once(server, 'close')
 })
 
 test('public and protected server surfaces keep their boundary', async () => {
@@ -275,6 +337,8 @@ test('public and protected server surfaces keep their boundary', async () => {
   })
   assert.equal(refusalResponse.status, 202)
   const refusal = await refusalResponse.json()
+  assert.equal(refusal.changed, true)
+  assert.equal(refusal.deferred, false)
   assert.equal(refusal.fieldScore.suppressedLure, originalLure)
   assert.notEqual(refusal.fieldScore.activeLure, originalLure)
 

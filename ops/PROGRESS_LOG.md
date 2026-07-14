@@ -114,3 +114,13 @@ Next: OPH-016 runtime continuity and freshness summary. The reviewer’s separat
 - Verified the targeted continuity/server/accessibility checks, `npm run check`, all 11 tests and `npm run judge:smoke`.
 
 Next: add an identity-free refractory window so an anonymous refusal burst can rotate the field at most once per declared interval, then persist bounded counter-signal/erasure nodes for OPH-017.
+
+## 2026-07-14 — identity-free refusal refractory interval
+
+- Completed the prerequisite boundary for OPH-017: every accepted refusal remains a coarse hourly aggregate, while an atomic server-side timestamp permits at most one shared repertoire revision per 60-second interval.
+- Added explicit `changed`/`deferred` API outcomes, the applied and next-eligible timestamps, and public copy that distinguishes a successful suppression from anonymous pressure counted during the refractory interval.
+- Kept the bound field-wide and identity-free: no IP persistence, cookie, fingerprint, visitor row, individualized cooldown or claim that multiple requests represent multiple people.
+- Added deterministic store and HTTP tests proving six same-interval requests yield six aggregate counts but one revision, cannot wrap the three-lure repertoire, and allow exactly one more rotation after the injected clock advances 60 seconds.
+- Verified the targeted refusal/public-boundary tests, `npm run check`, all 12 tests and `npm run judge:smoke`.
+
+Next: complete OPH-017 by persisting a bounded aggregate counter-signal/erasure node and relation; do not create one ledger node per request.

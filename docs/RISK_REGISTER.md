@@ -2,7 +2,8 @@
 
 | Risk | Level | Control | Owner/state |
 |---|---:|---|---|
-| Covert manipulation contradicts the critical artwork | Critical | Visible lure/reveal/counter-read; no individual targeting; refusal atomically suppresses the active lure and rotates a bounded repertoire | OPH-004 tested |
+| Covert manipulation contradicts the critical artwork | Critical | Visible lure/reveal/counter-read; no individual targeting; refusal pressure stays aggregate and an atomic identity-free 60-second interval allows at most one repertoire revision | OPH-004 tested; OPH-017 refractory prerequisite tested |
+| One anonymous burst dominates the shared repertoire | High | All accepted refusals remain coarse hourly counts, but applied/deferred outcomes and a global server-side refractory timestamp prevent more than one repertoire rotation per declared interval without visitor tracking | OPH-017 prerequisite: deterministic store and HTTP burst tests |
 | Unsupported psychological inference | Critical | Aggregate events only; explicit observation/hypothesis split | Tests active |
 | Generated work is presented as approved art | High | All model output enters `studio`; protected comparison workspace and rationale-required human publication gate | OPH-010 tested |
 | A topology edge is mistaken for aesthetic influence or approval | High | Relations use bounded types and evidence; context edges record only IDs actually present in composition input and explicitly disclaim authorship, similarity and approval | OPH-015 tested |
