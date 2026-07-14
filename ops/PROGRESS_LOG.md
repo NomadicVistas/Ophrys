@@ -94,3 +94,13 @@ Next: OPH-016, an evidence-based runtime continuity/freshness summary that disti
 - Added deterministic coverage proving the four candidates enter Studio, only `False Spring` remains public, and every relation endpoint exists in the projected topology.
 
 Next: OPH-016 remains the structural priority, informed by the research observatory’s runtime-state disclosure recommendation and the integration reviewer’s graph-closure acceptance test.
+
+## 2026-07-14 — closed bounded ecosystem projection
+
+- Resolved the integration reviewer’s OPH-015 merge-readiness finding: the public topology now selects the bounded node page first and returns only relations whose two endpoints are present.
+- Added exact total-node and total-relation counts, an in-projection eligible-relation count, explicit node/relation limits and truncation flags; the Studio labels all partial status and graph counts as projected rather than global.
+- Added a deterministic growth fixture with 46 works and 865 relations. Its 40-node projection returns the capped 120 relations, and every returned source and target exists in the projected node set.
+- Preserved the existing authority boundary: this changes only the read projection and creates no publication, curatorial decision, visitor record, identity mechanism or production mutation.
+- Verified the targeted topology test, `npm run check`, all 10 tests and `npm run judge:smoke`.
+
+Next: OPH-016 runtime continuity and freshness summary. The reviewer’s separate anonymous-refusal refractory-window finding remains open for a later bounded slice.

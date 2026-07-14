@@ -81,11 +81,16 @@ function relationRow(relation) {
 }
 
 function renderEcosystem(ecosystem) {
-  document.querySelector('#node-count').textContent = String(ecosystem.nodes.length)
-  document.querySelector('#relation-count').textContent = String(ecosystem.relations.length)
+  const projection = ecosystem.projection
+  document.querySelector('#node-count').textContent = `${ecosystem.nodes.length} / ${projection.totalNodes}`
+  document.querySelector('#relation-count').textContent = `${ecosystem.relations.length} / ${projection.totalRelations}`
   document.querySelector('#studio-node-count').textContent = String(ecosystem.statusCounts.studio || 0)
   document.querySelector('#published-node-count').textContent = String(ecosystem.statusCounts.published || 0)
   document.querySelector('#lineage-boundary').textContent = ecosystem.boundary
+  const truncation = []
+  if (projection.nodesTruncated) truncation.push(`node view limited to ${projection.nodeLimit}`)
+  if (projection.relationsTruncated) truncation.push(`relation view limited to ${projection.relationLimit}`)
+  document.querySelector('#lineage-projection').textContent = `${projection.scope} ${projection.eligibleRelations} of ${projection.totalRelations} total relations have both endpoints in this node projection.${truncation.length ? ` Current limits: ${truncation.join('; ')}.` : ''}`
   document.querySelector('#lineage-list').replaceChildren(...(ecosystem.relations.length
     ? ecosystem.relations.map(relationRow)
     : [element('p', 'empty', 'One seed work is present. Explicit lineage will appear after a bounded composition cycle uses an earlier work as context.')]))

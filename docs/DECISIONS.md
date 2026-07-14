@@ -51,3 +51,7 @@ Artwork nodes keep explicit, typed relations. The first relation, `context-deriv
 ## D-013 · A quartet can enter the ecosystem without becoming an exhibition
 
 Four human-authored studies map Threshold, Field, Residue, and Counter-field into distinct artwork propositions. They are seeded idempotently as `studio` candidates with project-owned provenance and explicit relations, while `False Spring` remains the sole published work. Seeding provides a substantive ecosystem for comparison and lineage testing; it does not count as curatorial approval, a model-generated cycle, or evidence of a public physical exhibition.
+
+## D-014 · Public topology projections are closed bounded graphs
+
+The Studio selects its newest bounded artwork-node page before selecting relations. It returns only relations whose source and target are both present in that page, then reports exact ledger totals, in-projection relation eligibility and node/relation truncation separately. This preserves a valid inspectable graph as the ledger grows without implying that a partial projection is the whole ecosystem.

@@ -7,7 +7,7 @@ Last re-audited: 2026-07-14. This is the active phase-two plan; the stopped phas
 | Layer | Present on `codex/hourly-builder` | Evidence / gap |
 |---|---|---|
 | Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | Deterministic tests and `npm run judge:smoke`; continuity/freshness is not yet summarised as one honest public state |
-| Ecosystem | Seed and generated artwork nodes, cycle/provenance packets, status transitions, explicit composition-context relations | OPH-015 adds the public topology projection; counter-signal, decision and physical-output nodes remain to be connected |
+| Ecosystem | Seed and generated artwork nodes, cycle/provenance packets, status transitions, explicit composition-context relations | OPH-015 adds a bounded public topology projection closed over relation endpoints, with exact totals and truncation metadata; counter-signal, decision and physical-output nodes remain to be connected |
 | Development | Isolated review branch, narrow/full tests, project records, no deploy path | This job may commit and push only to `codex/hourly-builder`; it cannot merge or deploy |
 | Public production | `autopoiesis.art` is reachable and exposes a separate eight-agent gallery ecosystem | Read-only audit at 2026-07-14T11:49Z found no public Ophrys route; live copy claims “No prompts. No direction. Pure emergence.” and is not evidence for this bounded system |
 
@@ -44,6 +44,10 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 7 | OPH-022 · Reliability/access/privacy/judge pass | Each preceding slice | Migrations, invalid relations, stale state, reduced motion, narrow screens, redaction and reproducible judge path are covered |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
+
+## Latest integrity hardening
+
+On 2026-07-14 the builder closed the integration reviewer’s OPH-015 graph-projection finding. The topology now selects up to 40 newest nodes first, admits up to 120 relations only when both endpoints are present, and exposes exact node/relation totals plus eligible-relation and truncation metadata. A deterministic 46-node/865-relation fixture proves that all 120 returned relations remain closed while the Studio labels partial counts as projected. OPH-016 remains the next structural slice; the separate refusal refractory-window finding remains open and must not be solved with visitor identity or tracking.
 
 ## Slice discipline
 

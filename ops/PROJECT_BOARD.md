@@ -18,7 +18,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-012 | P1 | DONE | Cost and compute ledger | Returned usage, measured latency, model trace, per-cycle output cap and enforced UTC daily attempt budget visible to Operator/Studio |
 | OPH-013 | P2 | LATER | Physical light/sound bridge | Hardware adapter consumes the same bounded artwork score |
 | OPH-014 | P0 | BLOCKED [!] | Verify a live GPT‑5.6 Sol generation | OpenAI project has available API quota; cycle completes with redacted usage evidence |
-| OPH-015 | P1 | DONE | Explicit artwork ecosystem topology | Generated candidates become `studio` nodes with typed context relations to actual prior-work inputs; public Studio exposes relation evidence without implying approval or authorship |
+| OPH-015 | P1 | DONE | Explicit artwork ecosystem topology | Generated candidates become `studio` nodes with typed context relations to actual prior-work inputs; the bounded public projection is closed over relation endpoints and labels projected versus exact total counts without implying approval or authorship |
 | OPH-016 | P0 | READY | Runtime continuity and freshness summary | Public Studio distinguishes active, quiet, stale, disabled and failed runtime conditions from recorded evidence without claiming unverifiable liveness |
 | OPH-017 | P1 | READY | Counter-signal and erasure ledger nodes | Consequential collective refusal becomes an inspectable bounded ecosystem relation without individual attribution |
 | OPH-018 | P1 | READY | Curatorial decision relations | Human approve/reject/revise decisions connect to nodes while comparison remains reversible and non-authoritative |

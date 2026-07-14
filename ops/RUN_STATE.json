@@ -22,8 +22,8 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T11:54:36Z",
-  "lastSelectedItem": "OPH-015",
+  "lastSuccessfulRun": "2026-07-14T13:29:57Z",
+  "lastSelectedItem": "OPH-015 bounded topology projection hardening",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,

@@ -20,6 +20,8 @@ const EVENT_KINDS = new Set(['arrival', 'threshold', 'artwork_open', 'studio_ope
 const ARTWORK_STATUSES = new Set(['studio', 'published', 'archived'])
 const ARTWORK_RELATION_KINDS = new Set(['context-derived-from', 'revision-of', 'counter-to', 'coexists-with'])
 const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
+const TOPOLOGY_NODE_LIMIT = 40
+const TOPOLOGY_RELATION_LIMIT = 120
 const CURATORIAL_QUARTET = [
   {
     id: 'study-borrowed-weather',
@@ -487,8 +489,32 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       ORDER BY relation.created_at DESC, relation.from_artwork_id, relation.to_artwork_id LIMIT ?`).all(limit)
   }
 
+  function listProjectedArtworkRelations(artworkIds, limit = TOPOLOGY_RELATION_LIMIT) {
+    if (!artworkIds.length) return []
+    const placeholders = artworkIds.map(() => '?').join(', ')
+    return db.prepare(`SELECT relation.from_artwork_id AS fromArtworkId,
+      source.title AS fromTitle, source.status AS fromStatus,
+      relation.to_artwork_id AS toArtworkId, context.title AS toTitle, context.status AS toStatus,
+      relation.relation_kind AS kind, relation.evidence, relation.created_at AS createdAt
+      FROM artwork_relations relation
+      JOIN artworks source ON source.id = relation.from_artwork_id
+      JOIN artworks context ON context.id = relation.to_artwork_id
+      WHERE relation.from_artwork_id IN (${placeholders})
+        AND relation.to_artwork_id IN (${placeholders})
+      ORDER BY relation.created_at DESC, relation.from_artwork_id, relation.to_artwork_id
+      LIMIT ?`).all(...artworkIds, ...artworkIds, limit)
+  }
+
+  function countProjectedArtworkRelations(artworkIds) {
+    if (!artworkIds.length) return 0
+    const placeholders = artworkIds.map(() => '?').join(', ')
+    return Number(db.prepare(`SELECT COUNT(*) AS count FROM artwork_relations
+      WHERE from_artwork_id IN (${placeholders})
+        AND to_artwork_id IN (${placeholders})`).get(...artworkIds, ...artworkIds).count)
+  }
+
   function getEcosystemTopology() {
-    const nodes = listArtworks({ limit: 40 }).map(work => ({
+    const nodes = listArtworks({ limit: TOPOLOGY_NODE_LIMIT }).map(work => ({
       id: work.id,
       title: work.title,
       status: work.status,
@@ -496,13 +522,28 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       cycleId: work.cycleId,
       createdAt: work.createdAt,
     }))
+    const nodeIds = nodes.map(node => node.id)
+    const relations = listProjectedArtworkRelations(nodeIds)
+    const totalNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count)
+    const totalRelations = Number(db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count)
+    const eligibleRelations = countProjectedArtworkRelations(nodeIds)
     const statusCounts = { studio: 0, published: 0, archived: 0 }
     for (const node of nodes) statusCounts[node.status] = (statusCounts[node.status] || 0) + 1
     return {
-      schemaVersion: 1,
+      schemaVersion: 2,
       nodes,
-      relations: listArtworkRelations(),
+      relations,
       statusCounts,
+      projection: {
+        nodeLimit: TOPOLOGY_NODE_LIMIT,
+        relationLimit: TOPOLOGY_RELATION_LIMIT,
+        totalNodes,
+        totalRelations,
+        eligibleRelations,
+        nodesTruncated: totalNodes > nodes.length,
+        relationsTruncated: eligibleRelations > relations.length,
+        scope: 'Newest work nodes are projected first. A relation appears only when both endpoint works are present in that bounded projection.',
+      },
       boundary: 'Relations record explicit system context only. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
     }
   }

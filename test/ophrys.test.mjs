@@ -46,7 +46,9 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.js'), /The public trace could not be loaded\. No system state is being claimed\./)
   assert.match(publicFile('studio.html'), /id="compute"[\s\S]*Cost and compute ledger[\s\S]*id="compute-output-limit"/)
   assert.match(publicFile('studio.html'), /id="lineage"[\s\S]*Ecosystem topology[\s\S]*id="relation-count"/)
+  assert.match(publicFile('studio.html'), /PROJECTED \/ TOTAL NODES[\s\S]*PROJECTED \/ TOTAL RELATIONS[\s\S]*id="lineage-projection"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
+  assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
   assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
   assert.match(publicFile('admin.html'), /name="dailyCycleLimit"[\s\S]*name="maxOutputTokens"[\s\S]*id="operator-compute-heading"/)
   assert.match(publicFile('admin.html'), /id="candidate-comparison"/)
@@ -118,6 +120,68 @@ test('the curatorial quartet enters the Studio without bypassing human publicati
     assert.ok(nodeIds.has(relation.fromArtworkId))
     assert.ok(nodeIds.has(relation.toArtworkId))
   }
+  store.close()
+})
+
+test('ecosystem topology projection stays closed when older relation endpoints fall outside its node limit', () => {
+  const store = createOphrysStore(':memory:')
+  for (let index = 0; index < 41; index++) {
+    const id = `projection-work-${String(index).padStart(2, '0')}`
+    store.createArtwork({
+      id,
+      cycleId: null,
+      title: `Projection work ${index}`,
+      medium: 'Bounded topology fixture',
+      proposition: 'A deterministic fixture tests whether a bounded public topology remains internally inspectable.',
+      publicDescription: 'This unpublished fixture exists only in memory during the automated test.',
+      visitorRelation: 'No visitor event or personal record is involved in this fixture.',
+      exhibitionForm: 'A test-only ledger node.',
+      learningQuestion: 'Can a projected relation remain valid when the full ledger is larger?',
+      lureHypothesis: 'No public lure is tested.',
+      counterReading: 'Omitted endpoints must remove their relations from the bounded projection.',
+      materials: ['test ledger'],
+      model: 'deterministic test',
+      status: 'studio',
+      provenance: {},
+      createdAt: new Date(Date.UTC(2100, 0, 1, 0, 0, index)).toISOString(),
+    })
+    store.createArtworkRelation({
+      fromArtworkId: id,
+      toArtworkId: 'seed-false-spring',
+      kind: 'revision-of',
+      evidence: 'This deterministic relation points to the older seed solely to test closed bounded graph projection.',
+    })
+    for (let previous = 0; previous < index; previous++) {
+      store.createArtworkRelation({
+        fromArtworkId: id,
+        toArtworkId: `projection-work-${String(previous).padStart(2, '0')}`,
+        kind: 'coexists-with',
+        evidence: 'This deterministic relation keeps visible endpoints inside the newest bounded node projection.',
+      })
+    }
+  }
+
+  const topology = store.getEcosystemTopology()
+  const nodeIds = new Set(topology.nodes.map(node => node.id))
+  assert.equal(topology.nodes.length, 40)
+  assert.equal(topology.relations.length, 120)
+  assert.deepEqual(topology.statusCounts, { studio: 40, published: 0, archived: 0 })
+  assert.deepEqual(topology.projection, {
+    nodeLimit: 40,
+    relationLimit: 120,
+    totalNodes: 46,
+    totalRelations: 865,
+    eligibleRelations: 780,
+    nodesTruncated: true,
+    relationsTruncated: true,
+    scope: topology.projection.scope,
+  })
+  assert.match(topology.projection.scope, /both endpoint works are present/i)
+  for (const relation of topology.relations) {
+    assert.ok(nodeIds.has(relation.fromArtworkId), `missing projected source ${relation.fromArtworkId}`)
+    assert.ok(nodeIds.has(relation.toArtworkId), `missing projected target ${relation.toArtworkId}`)
+  }
+  assert.equal(topology.relations.some(relation => relation.toArtworkId === 'seed-false-spring'), false)
   store.close()
 })
 
