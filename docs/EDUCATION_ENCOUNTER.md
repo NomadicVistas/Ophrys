@@ -18,6 +18,7 @@ After one Lure → Reveal → Counter-read sequence, a visitor can distinguish a
 - Refusal changes the bounded repertoire rather than merely displaying confirmation copy.
 - A same-interval refusal burst cannot wrap the repertoire: it yields one applied revision and explicit deferred outcomes while preserving every accepted action only as an aggregate count.
 - The Studio records only a coarse aggregate refusal count and shows the field in `counter-read` phase.
+- The Studio coalesces that pressure into at most one expiring counter-signal node per UTC hour, related to the shared runtime field rather than to a person or inferred motive.
 - The visitor can state that successful attraction is not evidence of identity, motive or emotion.
 
 ## Facilitation and access boundary

@@ -34,6 +34,10 @@ Ophrys should begin as a bounded, inspectable system. A transparent feedback loo
 - **Failure as state:** missing input, latency and signal loss remain part of the work.
 - **Repairable parts:** prefer replaceable components and documented interfaces.
 
+## Inspectable ecosystem ledger
+
+The runnable service projects artwork, runtime-field and counter-signal nodes as one closed bounded graph. Artwork relations record explicit composition or curatorial context. Public refusals instead coalesce into at most one UTC-hour counter-signal node containing accepted/applied/deferred totals, with a `counter-to` edge to the shared runtime field. Counter-signals use the aggregate-retention policy and never become publication or approval records.
+
 ## Possible first stack
 
 The architecture is technology-neutral. A small implementation might use:

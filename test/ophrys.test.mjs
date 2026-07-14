@@ -51,8 +51,10 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.js'), /renderRuntime\(state\.runtime\)/)
   assert.match(publicFile('studio.js'), /Runtime record loaded:/)
   assert.match(publicFile('studio.html'), /PROJECTED \/ TOTAL NODES[\s\S]*PROJECTED \/ TOTAL RELATIONS[\s\S]*id="lineage-projection"/)
+  assert.match(publicFile('studio.html'), /PROJECTED COUNTER-SIGNALS[\s\S]*id="counter-signal-policy"/)
   assert.match(publicFile('studio.js'), /ecosystem\.relations\.map\(relationRow\)/)
   assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
+  assert.match(publicFile('studio.js'), /ecosystem\.counterSignalPolicy\.privacyLimit/)
   assert.match(publicFile('admin.html'), /id="login-error"[^>]*role="alert"/)
   assert.match(publicFile('admin.html'), /name="dailyCycleLimit"[\s\S]*name="maxOutputTokens"[\s\S]*id="operator-compute-heading"/)
   assert.match(publicFile('admin.html'), /id="candidate-comparison"/)
@@ -205,20 +207,23 @@ test('ecosystem topology projection stays closed when older relation endpoints f
 
   const topology = store.getEcosystemTopology()
   const nodeIds = new Set(topology.nodes.map(node => node.id))
-  assert.equal(topology.nodes.length, 40)
+  assert.equal(topology.nodes.length, 41)
   assert.equal(topology.relations.length, 120)
   assert.deepEqual(topology.statusCounts, { studio: 40, published: 0, archived: 0 })
   assert.deepEqual(topology.projection, {
     nodeLimit: 40,
+    counterSignalNodeLimit: 24,
     relationLimit: 120,
-    totalNodes: 46,
+    totalNodes: 47,
+    totalArtworkNodes: 46,
+    totalCounterSignalNodes: 0,
     totalRelations: 865,
     eligibleRelations: 780,
     nodesTruncated: true,
     relationsTruncated: true,
     scope: topology.projection.scope,
   })
-  assert.match(topology.projection.scope, /both endpoint works are present/i)
+  assert.match(topology.projection.scope, /both endpoint nodes are in this bounded projection/i)
   for (const relation of topology.relations) {
     assert.ok(nodeIds.has(relation.fromArtworkId), `missing projected source ${relation.fromArtworkId}`)
     assert.ok(nodeIds.has(relation.toArtworkId), `missing projected target ${relation.toArtworkId}`)
@@ -258,6 +263,61 @@ test('aggregate conditions bound the field score and an anonymous refusal burst 
   assert.equal(nextInterval.changed, true)
   assert.equal(nextInterval.fieldScore.revision, initial.revision + 2)
   assert.notEqual(nextInterval.fieldScore.activeLure, applied.fieldScore.activeLure)
+  store.close()
+})
+
+test('refusals coalesce into retained hourly counter-signal nodes without request-level traces', () => {
+  let at = new Date('2026-07-14T12:00:00.000Z')
+  const store = createOphrysStore(':memory:', { now: () => at })
+
+  const burst = Array.from({ length: 6 }, () => store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' }))
+  assert.equal(burst.filter(result => result.changed).length, 1)
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM counter_signal_buckets').get().count, 1)
+  assert.deepEqual({ ...store.db.prepare('SELECT * FROM counter_signal_buckets').get() }, {
+    bucket: '2026-07-14T12:00:00.000Z',
+    accepted_count: 6,
+    applied_count: 1,
+    deferred_count: 5,
+  })
+  assert.deepEqual(
+    store.db.prepare('PRAGMA table_info(counter_signal_buckets)').all().map(column => column.name),
+    ['bucket', 'accepted_count', 'applied_count', 'deferred_count'],
+  )
+
+  const topology = store.getEcosystemTopology()
+  const counterSignal = topology.nodes.find(node => node.nodeType === 'counter-signal')
+  assert.deepEqual(counterSignal.aggregate, { acceptedRefusals: 6, appliedRevisions: 1, deferredRevisions: 5 })
+  assert.equal(counterSignal.createdAt, '2026-07-14T12:00:00.000Z')
+  assert.equal(counterSignal.expiresAt, '2026-07-17T12:00:00.000Z')
+  const relation = topology.relations.find(item => item.fromNodeId === counterSignal.id)
+  assert.equal(relation.kind, 'counter-to')
+  assert.equal(relation.toNodeId, 'runtime-public-field')
+  assert.equal(relation.toType, 'runtime-field')
+  assert.match(relation.evidence, /does not identify or distinguish visitors/i)
+  const nodeIds = new Set(topology.nodes.map(node => node.id))
+  assert.equal(topology.relations.every(item => nodeIds.has(item.fromNodeId) && nodeIds.has(item.toNodeId)), true)
+  assert.match(topology.counterSignalPolicy.privacyLimit, /No request timestamp.+visitor identifier/i)
+  assert.doesNotMatch(JSON.stringify({ node: counterSignal, relation }), /requestedAt|sequence|surface|ipAddress|cookie|fingerprint|freeText/i)
+
+  at = new Date('2026-07-14T12:01:00.000Z')
+  store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' })
+  assert.deepEqual({ ...store.db.prepare('SELECT accepted_count, applied_count, deferred_count FROM counter_signal_buckets').get() }, {
+    accepted_count: 7,
+    applied_count: 2,
+    deferred_count: 5,
+  })
+
+  at = new Date('2026-07-14T13:00:00.000Z')
+  store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' })
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM counter_signal_buckets').get().count, 2)
+
+  at = new Date('2026-07-17T13:01:00.000Z')
+  const expiredProjection = store.getEcosystemTopology()
+  assert.equal(expiredProjection.nodeTypeCounts.counterSignal, 0)
+  assert.equal(expiredProjection.projection.totalCounterSignalNodes, 0)
+  assert.equal(store.db.prepare('SELECT COUNT(*) AS count FROM counter_signal_buckets').get().count, 2)
+  store.recordEvent({ kind: 'refusal', surface: 'public/counter-control' })
+  assert.deepEqual(store.db.prepare('SELECT bucket FROM counter_signal_buckets ORDER BY bucket').all().map(row => row.bucket), ['2026-07-17T13:00:00.000Z'])
   store.close()
 })
 
@@ -326,7 +386,7 @@ test('public and protected server surfaces keep their boundary', async () => {
   const studioResponse = await fetch(`${origin}/api/studio/state`)
   assert.equal(studioResponse.status, 200)
   const studioState = await studioResponse.json()
-  assert.equal(studioState.ecosystem.nodes.length, 5)
+  assert.equal(studioState.ecosystem.nodes.length, 6)
   assert.equal(studioState.ecosystem.relations.length, 4)
   assert.match(studioState.ecosystem.boundary, /autonomous approval/i)
 
@@ -475,18 +535,22 @@ test('artwork provenance packets store the composition packet and curator decisi
   assert.equal(work.provenance.response.usage.total_tokens, 232)
   assert.match(work.provenance.rightsBasis, /aggregate events only/i)
   const topology = store.getEcosystemTopology()
-  assert.equal(topology.nodes.length, 6)
+  assert.equal(topology.nodes.length, 7)
   assert.deepEqual(topology.statusCounts, { studio: 5, published: 1, archived: 0 })
   assert.equal(topology.relations.length, 5)
   const generatedRelation = topology.relations.find(relation => relation.fromArtworkId === work.id)
   assert.ok(generatedRelation)
   assert.deepEqual({ ...generatedRelation }, {
     fromArtworkId: work.id,
+    fromNodeId: work.id,
     fromTitle: 'Packet Study',
     fromStatus: 'studio',
+    fromType: 'artwork',
     toArtworkId: 'seed-false-spring',
+    toNodeId: 'seed-false-spring',
     toTitle: 'False Spring',
     toStatus: 'published',
+    toType: 'artwork',
     kind: 'context-derived-from',
     evidence: generatedRelation.evidence,
     createdAt: generatedRelation.createdAt,

@@ -22,6 +22,7 @@ const ARTWORK_RELATION_KINDS = new Set(['context-derived-from', 'revision-of', '
 const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
 const TOPOLOGY_NODE_LIMIT = 40
 const TOPOLOGY_RELATION_LIMIT = 120
+const TOPOLOGY_COUNTER_SIGNAL_LIMIT = 24
 const RUNTIME_STALE_AFTER_MINUTES = 120
 const REFUSAL_REFRACTORY_MS = 60_000
 const CURATORIAL_QUARTET = [
@@ -137,6 +138,13 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       revision INTEGER NOT NULL DEFAULT 0,
       updated_at TEXT NOT NULL,
       last_refusal_mutation_at TEXT
+    );
+    CREATE TABLE IF NOT EXISTS counter_signal_buckets (
+      bucket TEXT PRIMARY KEY,
+      accepted_count INTEGER NOT NULL CHECK (accepted_count > 0),
+      applied_count INTEGER NOT NULL CHECK (applied_count >= 0),
+      deferred_count INTEGER NOT NULL CHECK (deferred_count >= 0),
+      CHECK (accepted_count = applied_count + deferred_count)
     );
     CREATE TABLE IF NOT EXISTS cycles (
       id TEXT PRIMARY KEY,
@@ -283,6 +291,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     },
   ]
   for (const relation of quartetRelations) createArtworkRelation(relation)
+  pruneMetrics()
 
   function getSettings() {
     return Object.fromEntries(db.prepare('SELECT key, value FROM settings ORDER BY key').all().map(row => [row.key, parseValue(row.value)]))
@@ -331,7 +340,17 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function pruneMetrics() {
     const retention = Number(getSettings().metricRetentionHours || 72)
-    return db.prepare('DELETE FROM visitor_metrics WHERE bucket < ?').run(new Date(currentDate().getTime() - retention * 3600_000).toISOString()).changes
+    const cutoff = new Date(currentDate().getTime() - retention * 3600_000).toISOString()
+    db.exec('BEGIN IMMEDIATE')
+    try {
+      const metrics = db.prepare('DELETE FROM visitor_metrics WHERE bucket < ?').run(cutoff).changes
+      const counterSignals = db.prepare('DELETE FROM counter_signal_buckets WHERE bucket < ?').run(cutoff).changes
+      db.exec('COMMIT')
+      return metrics + counterSignals
+    } catch (error) {
+      db.exec('ROLLBACK')
+      throw error
+    }
   }
 
   function getMetrics(hours = getSettings().metricWindowHours) {
@@ -374,6 +393,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function refuseLure({ surface = 'public' } = {}) {
     const requestedAt = currentDate()
+    const bucket = isoHour(requestedAt)
     let changed = false
     let appliedAt = null
     let nextEligibleAt = null
@@ -395,6 +415,14 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       }
       nextEligibleAt = new Date(Date.parse(appliedAt) + REFUSAL_REFRACTORY_MS).toISOString()
       insertEvent('refusal', surface)
+      db.prepare(`INSERT INTO counter_signal_buckets (
+        bucket, accepted_count, applied_count, deferred_count
+      ) VALUES (?, 1, ?, ?)
+      ON CONFLICT(bucket) DO UPDATE SET
+        accepted_count = accepted_count + 1,
+        applied_count = applied_count + excluded.applied_count,
+        deferred_count = deferred_count + excluded.deferred_count`)
+        .run(bucket, changed ? 1 : 0, changed ? 0 : 1)
       db.exec('COMMIT')
     } catch (error) {
       db.exec('ROLLBACK')
@@ -560,38 +588,118 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
         AND to_artwork_id IN (${placeholders})`).get(...artworkIds, ...artworkIds).count)
   }
 
+  function listProjectedCounterSignals(limit = TOPOLOGY_COUNTER_SIGNAL_LIMIT) {
+    const retentionHours = Number(getSettings().metricRetentionHours || 72)
+    const cutoff = new Date(currentDate().getTime() - retentionHours * 3600_000).toISOString()
+    return db.prepare(`SELECT bucket, accepted_count AS acceptedCount, applied_count AS appliedCount,
+      deferred_count AS deferredCount FROM counter_signal_buckets
+      WHERE bucket >= ? ORDER BY bucket DESC LIMIT ?`).all(cutoff, limit).map(signal => ({
+        ...signal,
+        acceptedCount: Number(signal.acceptedCount),
+        appliedCount: Number(signal.appliedCount),
+        deferredCount: Number(signal.deferredCount),
+        expiresAt: new Date(Date.parse(signal.bucket) + retentionHours * 3600_000).toISOString(),
+      }))
+  }
+
   function getEcosystemTopology() {
-    const nodes = listArtworks({ limit: TOPOLOGY_NODE_LIMIT }).map(work => ({
+    const artworkNodes = listArtworks({ limit: TOPOLOGY_NODE_LIMIT }).map(work => ({
       id: work.id,
+      nodeType: 'artwork',
       title: work.title,
       status: work.status,
       origin: work.cycleId ? 'composition-cycle' : 'human-seed',
       cycleId: work.cycleId,
       createdAt: work.createdAt,
     }))
-    const nodeIds = nodes.map(node => node.id)
-    const relations = listProjectedArtworkRelations(nodeIds)
-    const totalNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count)
-    const totalRelations = Number(db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count)
-    const eligibleRelations = countProjectedArtworkRelations(nodeIds)
+    const artworkIds = artworkNodes.map(node => node.id)
+    const fieldScore = getFieldScore()
+    const runtimeFieldNode = {
+      id: 'runtime-public-field',
+      nodeType: 'runtime-field',
+      title: 'Public field repertoire',
+      status: fieldScore.phase,
+      origin: 'bounded-runtime-state',
+      cycleId: null,
+      createdAt: fieldScore.updatedAt,
+      revision: fieldScore.revision,
+    }
+    const counterSignals = listProjectedCounterSignals()
+    const counterSignalNodes = counterSignals.map(signal => ({
+      id: `counter-signal:${signal.bucket}`,
+      nodeType: 'counter-signal',
+      title: `Aggregate counter-signal · ${signal.bucket.slice(0, 13)}:00Z`,
+      status: 'retained-aggregate',
+      origin: 'hourly-aggregate',
+      cycleId: null,
+      createdAt: signal.bucket,
+      expiresAt: signal.expiresAt,
+      aggregate: {
+        acceptedRefusals: signal.acceptedCount,
+        appliedRevisions: signal.appliedCount,
+        deferredRevisions: signal.deferredCount,
+      },
+    }))
+    const counterSignalRelations = counterSignals.map(signal => ({
+      fromNodeId: `counter-signal:${signal.bucket}`,
+      fromTitle: `Aggregate counter-signal · ${signal.bucket.slice(0, 13)}:00Z`,
+      fromStatus: 'retained aggregate',
+      fromType: 'counter-signal',
+      toNodeId: runtimeFieldNode.id,
+      toTitle: runtimeFieldNode.title,
+      toStatus: runtimeFieldNode.status,
+      toType: 'runtime-field',
+      kind: 'counter-to',
+      evidence: `${signal.acceptedCount} accepted refusal${signal.acceptedCount === 1 ? '' : 's'} in this hourly bucket; ${signal.appliedCount} public-field revision${signal.appliedCount === 1 ? '' : 's'} applied and ${signal.deferredCount} deferred. This aggregate does not identify or distinguish visitors.`,
+      createdAt: signal.bucket,
+      expiresAt: signal.expiresAt,
+    }))
+    const artworkRelationLimit = Math.max(0, TOPOLOGY_RELATION_LIMIT - counterSignalRelations.length)
+    const artworkRelations = listProjectedArtworkRelations(artworkIds, artworkRelationLimit).map(relation => ({
+      ...relation,
+      fromNodeId: relation.fromArtworkId,
+      fromType: 'artwork',
+      toNodeId: relation.toArtworkId,
+      toType: 'artwork',
+    }))
+    const nodes = [runtimeFieldNode, ...counterSignalNodes, ...artworkNodes]
+    const relations = [...counterSignalRelations, ...artworkRelations]
+    const totalArtworkNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM artworks').get().count)
+    const counterSignalCutoff = new Date(currentDate().getTime() - Number(getSettings().metricRetentionHours || 72) * 3600_000).toISOString()
+    const totalCounterSignalNodes = Number(db.prepare('SELECT COUNT(*) AS count FROM counter_signal_buckets WHERE bucket >= ?').get(counterSignalCutoff).count)
+    const totalArtworkRelations = Number(db.prepare('SELECT COUNT(*) AS count FROM artwork_relations').get().count)
+    const totalRelations = totalArtworkRelations + totalCounterSignalNodes
+    const eligibleArtworkRelations = countProjectedArtworkRelations(artworkIds)
+    const eligibleCounterSignalRelations = totalCounterSignalNodes
+    const eligibleRelations = eligibleArtworkRelations + eligibleCounterSignalRelations
+    const totalNodes = 1 + totalArtworkNodes + totalCounterSignalNodes
     const statusCounts = { studio: 0, published: 0, archived: 0 }
-    for (const node of nodes) statusCounts[node.status] = (statusCounts[node.status] || 0) + 1
+    for (const node of artworkNodes) statusCounts[node.status] = (statusCounts[node.status] || 0) + 1
     return {
-      schemaVersion: 2,
+      schemaVersion: 3,
       nodes,
       relations,
       statusCounts,
+      nodeTypeCounts: { artwork: artworkNodes.length, runtimeField: 1, counterSignal: counterSignalNodes.length },
       projection: {
         nodeLimit: TOPOLOGY_NODE_LIMIT,
+        counterSignalNodeLimit: TOPOLOGY_COUNTER_SIGNAL_LIMIT,
         relationLimit: TOPOLOGY_RELATION_LIMIT,
         totalNodes,
+        totalArtworkNodes,
+        totalCounterSignalNodes,
         totalRelations,
         eligibleRelations,
-        nodesTruncated: totalNodes > nodes.length,
+        nodesTruncated: totalArtworkNodes > artworkNodes.length || totalCounterSignalNodes > counterSignalNodes.length,
         relationsTruncated: eligibleRelations > relations.length,
-        scope: 'Newest work nodes are projected first. A relation appears only when both endpoint works are present in that bounded projection.',
+        scope: 'The bounded runtime field, newest work nodes, and newest retained hourly counter-signals are projected together. A relation appears only when both endpoint nodes are in this bounded projection.',
       },
-      boundary: 'Relations record explicit system context only. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
+      counterSignalPolicy: {
+        aggregation: 'At most one node per UTC hour. It contains accepted, applied, and deferred totals only.',
+        retentionHours: Number(getSettings().metricRetentionHours || 72),
+        privacyLimit: 'No request timestamp, sequence, surface, IP address, cookie, fingerprint, free text, visitor identifier, or inferred trait is stored in this ledger.',
+      },
+      boundary: 'Relations record explicit composition context or aggregate public counter-pressure only. They do not claim aesthetic similarity, authorship, autonomous approval, or knowledge about a visitor.',
     }
   }
 

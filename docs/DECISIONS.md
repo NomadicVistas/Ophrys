@@ -63,3 +63,7 @@ The public Studio derives one of five states from stored aggregate buckets, publ
 ## D-016 · Refusal pressure and repertoire revision have different bounds
 
 Every accepted refusal increments one anonymous hourly aggregate, but the shared repertoire may advance at most once during a 60-second server-side refractory interval. The atomic field transaction returns explicit `changed` and `deferred` outcomes plus the next eligible timestamp. This bound is global to the public field rather than attached to an IP address, cookie, fingerprint or visitor record. A deferred request is still public counter-pressure, but the interface does not claim that it suppressed a lure or created a new revision.
+
+## D-017 · Counter-signals are hourly ecosystem nodes, not request histories
+
+The same refusal transaction upserts at most one counter-signal node per UTC hour. Its complete durable payload is the hour bucket plus accepted, applied and deferred aggregate totals; it stores no request timestamp, order, surface, technical marker, free text or visitor reference. Each node has a `counter-to` relation to the bounded runtime-field node rather than to an artwork the action did not specifically address. Counter-signals use the configured aggregate-retention period, are capped to 24 nodes in the public projection, and cannot publish, approve or alter an artwork record.

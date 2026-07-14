@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T15:30:18Z",
-  "lastSelectedItem": "OPH-017 identity-free refusal refractory prerequisite",
+  "lastSuccessfulRun": "2026-07-14T16:36:25Z",
+  "lastSelectedItem": "OPH-017 bounded aggregate counter-signal and erasure persistence",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-017 bounded aggregate counter-signal and erasure persistence",
+  "nextBestSlice": "OPH-018 typed curatorial decision relations",
   "deadline": "2026-07-22T00:00:00Z"
 }

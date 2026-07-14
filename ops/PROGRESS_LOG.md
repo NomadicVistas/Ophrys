@@ -124,3 +124,13 @@ Next: add an identity-free refractory window so an anonymous refusal burst can r
 - Verified the targeted refusal/public-boundary tests, `npm run check`, all 12 tests and `npm run judge:smoke`.
 
 Next: complete OPH-017 by persisting a bounded aggregate counter-signal/erasure node and relation; do not create one ledger node per request.
+
+## 2026-07-14 — expiring aggregate counter-signal ledger
+
+- Completed OPH-017 by coalescing every accepted refusal in a UTC hour into one counter-signal record with only accepted, applied and deferred aggregate totals.
+- Added a dedicated bounded runtime-field topology node and a typed `counter-to` edge. The public action is not falsely attributed to an artwork, person, device or motive, and it cannot change publication or curator review state.
+- Applied the existing aggregate-retention policy to counter-signals, capped the public projection at 24 retained counter-signal nodes, preserved the 120-edge projection bound and displayed expiry plus privacy limits in Studio.
+- Recorded an isolation/linkage/inference assessment: no request timestamp, order, surface, IP address, cookie, fingerprint, user agent, free text, visitor identifier or inferred trait enters the counter-signal table.
+- Added deterministic coverage for a six-request burst, same-hour coalescing, applied/deferred totals, a second hour, schema minimisation, graph closure and expiry. `npm run check`, all 13 tests and `npm run judge:smoke` pass.
+
+Next: implement OPH-018 as typed curatorial decision relations while preserving reversible comparison and the rationale-required human publication gate.

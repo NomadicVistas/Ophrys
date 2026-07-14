@@ -73,7 +73,7 @@ function relationRow(relation) {
   const body = element('div')
   body.append(
     element('h3', '', `${relation.fromTitle} → ${relation.toTitle}`),
-    element('p', '', `${relation.fromStatus} work → ${relation.toStatus} context · ${date(relation.createdAt)}`),
+    element('p', '', `${relation.fromStatus} ${relation.fromType} → ${relation.toStatus} ${relation.toType} · ${date(relation.createdAt)}${relation.expiresAt ? ` · expires ${date(relation.expiresAt)}` : ''}`),
     element('p', 'lineage-evidence', relation.evidence),
   )
   row.append(relationKind, body)
@@ -86,11 +86,13 @@ function renderEcosystem(ecosystem) {
   document.querySelector('#relation-count').textContent = `${ecosystem.relations.length} / ${projection.totalRelations}`
   document.querySelector('#studio-node-count').textContent = String(ecosystem.statusCounts.studio || 0)
   document.querySelector('#published-node-count').textContent = String(ecosystem.statusCounts.published || 0)
+  document.querySelector('#counter-signal-node-count').textContent = String(ecosystem.nodeTypeCounts.counterSignal || 0)
   document.querySelector('#lineage-boundary').textContent = ecosystem.boundary
   const truncation = []
-  if (projection.nodesTruncated) truncation.push(`node view limited to ${projection.nodeLimit}`)
+  if (projection.nodesTruncated) truncation.push(`work view limited to ${projection.nodeLimit} and counter-signal view to ${projection.counterSignalNodeLimit}`)
   if (projection.relationsTruncated) truncation.push(`relation view limited to ${projection.relationLimit}`)
-  document.querySelector('#lineage-projection').textContent = `${projection.scope} ${projection.eligibleRelations} of ${projection.totalRelations} total relations have both endpoints in this node projection.${truncation.length ? ` Current limits: ${truncation.join('; ')}.` : ''}`
+  document.querySelector('#lineage-projection').textContent = `${projection.scope} ${projection.eligibleRelations} of ${projection.totalRelations} total relations are eligible for this closed node projection.${truncation.length ? ` Current limits: ${truncation.join('; ')}.` : ''}`
+  document.querySelector('#counter-signal-policy').textContent = `${ecosystem.counterSignalPolicy.aggregation} Retention: ${ecosystem.counterSignalPolicy.retentionHours} hours. ${ecosystem.counterSignalPolicy.privacyLimit}`
   document.querySelector('#lineage-list').replaceChildren(...(ecosystem.relations.length
     ? ecosystem.relations.map(relationRow)
     : [element('p', 'empty', 'One seed work is present. Explicit lineage will appear after a bounded composition cycle uses an earlier work as context.')]))
