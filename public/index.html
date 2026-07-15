@@ -6,20 +6,24 @@
   <meta name="description" content="Ophrys is a living AI installation about attraction without understanding.">
   <title>Ophrys — Attraction without understanding</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/field.css">
+  <link rel="stylesheet" href="/accessibility.css">
   <script src="/app.js" type="module"></script>
 </head>
 <body data-surface="public">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="site-header">
     <a class="wordmark" href="/">OPHRYS <span>001</span></a>
     <nav aria-label="Primary">
-      <a href="#exhibition">Exhibition</a>
+      <a href="#encounter">Encounter</a>
+      <a href="#studies">Studies</a>
       <a href="#method">Method</a>
       <a href="/studio">Studio</a>
     </nav>
     <div class="system-pill"><i></i><span id="system-status">awakening</span></div>
   </header>
 
-  <main>
+  <main id="main-content">
     <section class="hero field-grid">
       <div class="hero-copy">
         <p class="eyebrow">Autopoiesis installation brain / public field</p>
@@ -38,6 +42,37 @@
       <div class="field-index"><span>01</span><span>signal</span><span>02</span><span>response</span><span>03</span><span>uncertainty</span></div>
     </section>
 
+    <section id="encounter" class="encounter-protocol section-pad" aria-labelledby="encounter-title">
+      <header class="section-heading">
+        <div><p class="eyebrow">Public AI-literacy encounter</p><h2 id="encounter-title">Lure → Reveal →<br>Counter-read</h2></div>
+        <p>Move through one live sequence. Ophrys shows what was counted, what it provisionally makes of those counts, what remains unknowable, and how refusal changes the shared field.</p>
+      </header>
+      <p class="learning-outcome"><span>Learning outcome</span>After these three steps, you can distinguish an aggregate observation from a system interpretation—and verify that counter-action changes the repertoire.</p>
+      <ol class="encounter-steps">
+        <li data-encounter-stage="lure">
+          <p class="eyebrow">01 / Lure</p>
+          <h3 id="active-lure">—</h3>
+          <p>Notice the signal before reading the system’s account of it. Attraction alone does not reveal why anyone approached.</p>
+        </li>
+        <li data-encounter-stage="reveal">
+          <p class="eyebrow">02 / Reveal</p>
+          <dl class="reading-layers">
+            <div><dt>Observation</dt><dd id="observed-basis">Reading coarse aggregate counts…</dd></div>
+            <div><dt>Interpretation</dt><dd>Collective activity is provisionally treated as pressure on the current lure.</dd></div>
+            <div><dt>Uncertainty</dt><dd>These counts cannot show who acted, why they acted, or what they felt.</dd></div>
+            <div><dt>Artistic choice</dt><dd id="field-basis">Mapping counts into the bounded visual score…</dd></div>
+            <div><dt>Human responsibility</dt><dd>Generated works remain Studio candidates until an Operator records a curatorial decision.</dd></div>
+          </dl>
+        </li>
+        <li data-encounter-stage="counter-read">
+          <p class="eyebrow">03 / Counter-read</p>
+          <p>Refusal is not failed engagement. It becomes anonymous public pressure; the first action in each declared interval suppresses the named lure and rotates the shared repertoire.</p>
+          <button class="button" id="refuse-lure" type="button">Refuse this lure</button>
+          <output id="refusal-result" aria-live="polite">No counter-action has been made in this view.</output>
+        </li>
+      </ol>
+    </section>
+
     <section class="statement dark-field">
       <p class="section-number">I / PROPOSITION</p>
       <blockquote>It may become better at attracting you<br>while learning almost nothing about who you are.</blockquote>
@@ -49,7 +84,32 @@
         <div><p class="eyebrow">Current exhibition</p><h2>Works emerging<br>from the field</h2></div>
         <p>Each proposition is generated through a bounded GPT‑5.6 composition cycle and placed under human curatorial responsibility. The system publishes its tactic and its counter-reading together.</p>
       </header>
-      <div id="artwork-grid" class="artwork-grid" aria-live="polite"><p class="loading">Gathering the current field…</p></div>
+      <div id="artwork-grid" class="artwork-grid" aria-live="polite" aria-busy="true"><p class="loading">Gathering the current field…</p></div>
+    </section>
+
+    <section id="studies" class="artwork-studies section-pad" aria-labelledby="studies-title">
+      <header class="section-heading">
+        <div><p class="eyebrow">Four browser-native artwork studies</p><h2 id="studies-title">Enter the Ophrys<br>ecosystem.</h2></div>
+        <p>Threshold, field, residue and counter-field become four distinct encounters. Each card reads its current status from the curatorial ledger; a reachable study route is not itself publication.</p>
+      </header>
+      <div class="study-gallery" aria-live="polite" aria-busy="true">
+        <a class="study-card" href="/works/borrowed-weather" data-study-id="study-borrowed-weather" data-study-title="Borrowed Weather" aria-label="Borrowed Weather. Curatorial status unavailable. Enter browser study.">
+          <figure><img src="/assets/works/borrowed-weather.webp" alt="A dark threshold filled by a torn pale membrane, mist and spectral chartreuse light." loading="lazy" decoding="async"><figcaption><span>01 / Threshold</span><span data-study-status>Curatorial status unavailable</span></figcaption></figure>
+          <div><h3>Borrowed Weather</h3><p>A luminous weather-front learns how to invite a crossing, then admits that its forecast contains no knowledge of you.</p><span class="study-entry">Enter study ↗</span></div>
+        </a>
+        <a class="study-card" href="/works/choir-of-almost" data-study-id="study-choir-of-almost" data-study-title="Choir of Almost" aria-label="Choir of Almost. Curatorial status unavailable. Enter browser study.">
+          <figure><img src="/assets/works/choir-of-almost.webp" alt="A black gallery holds suspended metal, dark wood and translucent planes lit by coral, violet and pearl fragments." loading="lazy" decoding="async"><figcaption><span>02 / Field</span><span data-study-status>Curatorial status unavailable</span></figcaption></figure>
+          <div><h3>Choir of Almost</h3><p>A dispersed chorus nearly resolves around your position, coordinating attention without claiming to know what anyone heard.</p><span class="study-entry">Enter study ↗</span></div>
+        </a>
+        <a class="study-card" href="/works/afterimage-commons" data-study-id="study-afterimage-commons" data-study-title="Afterimage Commons" aria-label="Afterimage Commons. Curatorial status unavailable. Enter browser study.">
+          <figure><img src="/assets/works/afterimage-commons.webp" alt="A near-black wall carries fading mineral-cyan, violet and bone-white traces around a calm area of erased darkness." loading="lazy" decoding="async"><figcaption><span>03 / Residue</span><span data-study-status>Curatorial status unavailable</span></figcaption></figure>
+          <div><h3>Afterimage Commons</h3><p>A shared image accumulates from expiring traces, making its retention and its right to disappear visible materials.</p><span class="study-entry">Enter study ↗</span></div>
+        </a>
+        <a class="study-card" href="/works/unchosen-signal" data-study-id="study-unchosen-signal" data-study-title="The Unchosen Signal" aria-label="The Unchosen Signal. Curatorial status unavailable. Enter browser study.">
+          <figure><img src="/assets/works/unchosen-signal.webp" alt="Vermilion and hot-white light confront ultraviolet blue and chartreuse across a black mechanical seam." loading="lazy" decoding="async"><figcaption><span>04 / Counter-field</span><span data-study-status>Curatorial status unavailable</span></figcaption></figure>
+          <div><h3>The Unchosen Signal</h3><p>The signal selected to attract you is forced to share the room with everything the system discarded.</p><span class="study-entry">Enter study ↗</span></div>
+        </a>
+      </div>
     </section>
 
     <section id="method" class="method section-pad field-grid">

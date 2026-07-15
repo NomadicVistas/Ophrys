@@ -54,9 +54,10 @@ See [docs/HACKATHON.md](docs/HACKATHON.md) for the build brief and [docs/ETHICS.
 
 The Build Week implementation is one small Node 24 service with three deliberately different surfaces:
 
-- `/` — public exhibition and artwork field;
-- `/studio` — public evidence ledger for aggregate inputs, cycles, tactics and counter-readings;
+- `/` — public exhibition and artwork field, including a visible four-study gallery;
+- `/studio` — public evidence ledger for runtime freshness, aggregate inputs, redacted candidate lifecycles, cycles, tactics, counter-readings and the simulator-only light/sound bridge;
 - `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
+- `/works/<slug>` — four responsive artwork studies linked from the public field and Studio, with ledger-backed pending, revision, rejection or approval labels.
 
 The server uses built-in SQLite and calls the OpenAI Responses API with `gpt-5.6-sol`, explicit reasoning effort, `store:false` and strict structured artwork output. Model-generated code is never executed.
 
@@ -79,9 +80,17 @@ npm run cycle
 
 Without an API key, the public and Studio surfaces remain runnable with the human-authored seed work; only real GPT‑5.6 generation is unavailable.
 
+The coded quartet does not need an API key at runtime. Start the service, open `/studio#works`, and enter `Borrowed Weather`, `Choir of Almost`, `Afterimage Commons`, or `The Unchosen Signal`. The studies use original local visual sources and browser-native interaction; they do not bypass the curatorial publication gate.
+
+The physical bridge is also local and deterministic. It validates the bounded public field score and exposes one inspectable simulated light/sound frame in Studio and the ecosystem topology. Its transport is fixed to `none`: it cannot contact a lamp, speaker, controller or other hardware, and malformed input produces zero light and zero sound.
+
+Studio also includes a five-part ecosystem-literacy protocol for reading nodes, relations, provisional interpretations, simulated outputs and human decisions. Its rubric checks the availability of technical evidence only; it collects no visitor answer or comprehension score. See [the facilitator protocol](docs/ECOSYSTEM_LITERACY.md).
+
+Operator includes a protected operational-literacy handover briefing derived from current settings. It names role responsibilities, system boundaries, stop conditions and five review scenarios without recording answers or scoring people. It remains visibly blocked pending a human-approved escalation contact and handover record; see [the handover protocol](docs/OPERATIONAL_LITERACY_HANDOVER.md).
+
 ## Build Week status
 
-Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements.
+Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements, or follow [the five-minute judging guide](docs/JUDGING.md) for a credential-free verification path.
 
 This is a testable prototype, not the final installation form. Generated work remains a candidate until a human curator approves publication.
 
