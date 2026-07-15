@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-14T23:32:40Z",
-  "lastSelectedItem": "OPH-022 transactional migration and malformed-relation failure handling",
+  "lastSuccessfulRun": "2026-07-15T00:30:18Z",
+  "lastSelectedItem": "OPH-022 stale-state timestamp trust boundary",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "OPH-022 stale-state boundary audit",
+  "nextBestSlice": "OPH-022 public-redaction boundary audit",
   "deadline": "2026-07-22T00:00:00Z"
 }

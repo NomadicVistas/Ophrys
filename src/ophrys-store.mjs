@@ -155,6 +155,10 @@ function isCanonicalUtcTimestamp(value) {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value
 }
 
+function isCanonicalUtcHour(value) {
+  return isCanonicalUtcTimestamp(value) && value.endsWith(':00:00.000Z')
+}
+
 function assertRequiredStoreColumns(db) {
   for (const [table, requiredColumns] of Object.entries(REQUIRED_STORE_COLUMNS)) {
     const columns = new Set(db.prepare(`PRAGMA table_info(${table})`).all().map(row => row.name))
@@ -1021,6 +1025,9 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   function getRuntimeContinuity({ at = currentDate() } = {}) {
     const assessedAt = new Date(at)
     if (Number.isNaN(assessedAt.getTime())) throw new Error('Invalid runtime assessment time')
+    const assessedAtIso = assessedAt.toISOString()
+    const freshnessPolicy = `Records more than ${RUNTIME_STALE_AFTER_MINUTES} minutes old are labelled stale. Ages are rounded up to a whole minute. This is a local policy for hourly aggregate buckets, not a sector standard.`
+    const limit = 'This stored summary cannot verify that a server, sensor, or physical installation is currently live.'
     const settings = getSettings()
     const field = db.prepare('SELECT revision, updated_at AS updatedAt FROM field_state WHERE id = 1').get()
     const latestMetric = db.prepare('SELECT MAX(bucket) AS observedAt FROM visitor_metrics').get()
@@ -1035,12 +1042,35 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       status: latestCycle.status,
       observedAt: latestCycle.completedAt || latestCycle.startedAt,
     })
+    const invalidEvidence = evidence.find(item => item.kind === 'aggregate-event-bucket'
+      ? !isCanonicalUtcHour(item.observedAt)
+      : !isCanonicalUtcTimestamp(item.observedAt))
+    const futureEvidence = invalidEvidence ? null : evidence.find(item => Date.parse(item.observedAt) > assessedAt.getTime())
+    const fallbackTimestamp = !settings.cycleEnabled ? cycleSetting?.updatedAt : field?.updatedAt
+    const invalidFallback = !isCanonicalUtcTimestamp(fallbackTimestamp)
+    const futureFallback = !invalidFallback && Date.parse(fallbackTimestamp) > assessedAt.getTime()
+    if (invalidEvidence || futureEvidence || invalidFallback || futureFallback) {
+      const issue = invalidEvidence || invalidFallback
+        ? 'a stored runtime timestamp is malformed or violates the hourly aggregate boundary'
+        : 'stored runtime evidence is dated later than the assessment clock'
+      return {
+        schemaVersion: 1,
+        state: 'failed',
+        basis: `Runtime freshness cannot be established because ${issue}. The record is not treated as active.`,
+        observedAt: null,
+        updatedAt: assessedAtIso,
+        assessedAt: assessedAtIso,
+        ageMinutes: null,
+        evidence: { kind: 'runtime-evidence-integrity', status: 'invalid' },
+        freshnessPolicy,
+        limit,
+      }
+    }
     evidence.sort((left, right) => Date.parse(right.observedAt) - Date.parse(left.observedAt))
     const latest = evidence[0] || null
-    const ageMinutes = latest
-      ? Math.max(0, Math.floor((assessedAt.getTime() - Date.parse(latest.observedAt)) / 60_000))
-      : null
-    const stale = ageMinutes !== null && ageMinutes > RUNTIME_STALE_AFTER_MINUTES
+    const elapsedMs = latest ? assessedAt.getTime() - Date.parse(latest.observedAt) : null
+    const ageMinutes = elapsedMs === null ? null : Math.ceil(elapsedMs / 60_000)
+    const stale = elapsedMs !== null && elapsedMs > RUNTIME_STALE_AFTER_MINUTES * 60_000
     let state
     let basis
     let updatedAt = latest?.observedAt || field.updatedAt
@@ -1069,11 +1099,11 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
       basis,
       observedAt: latest?.observedAt || null,
       updatedAt,
-      assessedAt: assessedAt.toISOString(),
+      assessedAt: assessedAtIso,
       ageMinutes,
       evidence: latest,
-      freshnessPolicy: `Records older than ${RUNTIME_STALE_AFTER_MINUTES} minutes are labelled stale. This is a local policy for hourly aggregate buckets, not a sector standard.`,
-      limit: 'This stored summary cannot verify that a server, sensor, or physical installation is currently live.',
+      freshnessPolicy,
+      limit,
     }
   }
 

@@ -87,3 +87,7 @@ The public Studio names five distinct evidence types—node, declared relation, 
 ## D-022 · Store upgrades and relation integrity fail closed
 
 The SQLite store carries an explicit schema version and applies schema creation, supported additive upgrades, and required-column validation in one transaction. An incompatible or future schema stops initialization and closes the database without committing a partial upgrade. Initialization also validates every stored artwork relation before exposing Studio state: both works must exist, the relation type must be declared, evidence must be concise and canonical, and its creation time must be canonical UTC. Invalid relation requests are rejected before insertion; an already malformed ledger remains untouched for operator-led repair and cannot be projected as a partial or misleading graph.
+
+## D-023 · Runtime freshness requires a trustworthy clock boundary
+
+A stored timestamp may support `active` or `stale` only when it is canonical UTC, aggregate buckets remain aligned to UTC hours, and the evidence is not later than the assessment clock. An invalid or future timestamp makes freshness indeterminate and therefore projects the existing `failed` state with a generic integrity basis, no offending timestamp and no computed age; it is never clamped to age zero or presented as active. The two-hour policy is evaluated against exact elapsed time, while the displayed age is conservatively rounded up to a whole minute.

@@ -1,6 +1,6 @@
 # Ophrys ecosystem roadmap
 
-Last re-audited: 2026-07-14. This is the active phase-two plan; the stopped phase-one lane remains a completed foundation.
+Last re-audited: 2026-07-15. This is the active phase-two plan; the stopped phase-one lane remains a completed foundation.
 
 ## Current-state map
 
@@ -41,7 +41,7 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 4 | OPH-019 · Public trace lifecycle — **DONE** | OPH-016–018 | Observation, interpretation, candidate, decision and public/refused outcome can be followed end-to-end with redacted public projections |
 | 5 | OPH-020 · Simulated physical bridge contract — **DONE** | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
 | 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric — **DONE** | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
-| 7 | OPH-022 · Reliability/access/privacy/judge pass — **ACTIVE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure and malformed-relation refusal are covered; stale state, redaction and judge reproducibility remain under audit |
+| 7 | OPH-022 · Reliability/access/privacy/judge pass — **ACTIVE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure, malformed-relation refusal and stale-state timestamp integrity are covered; redaction and judge reproducibility remain under audit |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
@@ -75,7 +75,9 @@ On 2026-07-14 OPH-022 made reduced-motion counter-actions semantically honest ac
 
 The second OPH-022 slice gives SQLite schema and relation-ledger failures a fail-closed boundary. Store schema creation, supported additive upgrades, required-column checks and the explicit schema-version write now commit atomically; an incompatible fixture proves that added columns, tables and the version marker all roll back. Initialization seeds and backfills inside a second transaction, then validates every stored artwork relation before any public projection can be returned. New relations require existing distinct endpoints, a declared type, bounded trimmed evidence and canonical UTC time; a deliberately corrupted legacy relation stops initialization without deleting or projecting the row. Targeted failure probes, syntax checks, all 21 deterministic tests and the credential-free judging smoke pass.
 
-Next: continue OPH-022 with a bounded stale-state audit. Public-redaction and judge reproducibility checks remain explicitly open; OPH-022 is not complete.
+The third OPH-022 slice closes the runtime freshness clock boundary. A reproduced future aggregate bucket was previously clamped to age zero and labelled active. Continuity evidence now requires canonical UTC timestamps, exact UTC-hour alignment for aggregate buckets and no date later than the assessment clock. Invalid evidence returns a generic failed integrity record without exposing the offending value or manufacturing an age. The two-hour threshold now uses exact elapsed time and reports a conservatively rounded-up whole-minute age. Deterministic tests cover the exact threshold, one millisecond beyond it, a future bucket, a non-hourly bucket and a malformed value; syntax checks, all 22 tests and the credential-free judging smoke pass.
+
+Next: continue OPH-022 with a bounded public-redaction audit. Judge reproducibility remains explicitly open; OPH-022 is not complete.
 
 ## Slice discipline
 

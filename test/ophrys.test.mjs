@@ -128,6 +128,13 @@ test('runtime continuity labels stored evidence with a deterministic clock and n
   assert.equal(active.observedAt, '2026-07-14T11:00:00.000Z')
   assert.equal(active.ageMinutes, 60)
 
+  const threshold = store.getRuntimeContinuity({ at: new Date('2026-07-14T13:00:00.000Z') })
+  assert.equal(threshold.state, 'active')
+  assert.equal(threshold.ageMinutes, 120)
+  const justStale = store.getRuntimeContinuity({ at: new Date('2026-07-14T13:00:00.001Z') })
+  assert.equal(justStale.state, 'stale')
+  assert.equal(justStale.ageMinutes, 121)
+
   const stale = store.getRuntimeContinuity({ at: new Date('2026-07-14T14:01:00.000Z') })
   assert.equal(stale.state, 'stale')
   assert.equal(stale.ageMinutes, 181)
@@ -146,6 +153,33 @@ test('runtime continuity labels stored evidence with a deterministic clock and n
   assert.equal(disabled.state, 'disabled')
   assert.equal(disabled.updatedAt, '2026-07-14T11:50:00.000Z')
   assert.match(disabled.limit, /cannot verify.+currently live/i)
+  store.close()
+})
+
+test('runtime continuity fails closed on malformed or future-dated evidence', () => {
+  const now = new Date('2026-07-14T12:00:00.000Z')
+  const store = createOphrysStore(':memory:', { now: () => now })
+
+  store.db.prepare("INSERT INTO visitor_metrics (bucket, surface, kind, count) VALUES ('2026-07-14T13:00:00.000Z', 'public', 'arrival', 1)").run()
+  const future = store.getRuntimeContinuity({ at: now })
+  assert.equal(future.state, 'failed')
+  assert.equal(future.observedAt, null)
+  assert.equal(future.ageMinutes, null)
+  assert.deepEqual(future.evidence, { kind: 'runtime-evidence-integrity', status: 'invalid' })
+  assert.match(future.basis, /not treated as active/i)
+  assert.doesNotMatch(JSON.stringify(future), /2026-07-14T13:00:00\.000Z/)
+
+  store.db.prepare("UPDATE visitor_metrics SET bucket = '2026-07-14T11:15:00.000Z'").run()
+  const nonHourly = store.getRuntimeContinuity({ at: now })
+  assert.equal(nonHourly.state, 'failed')
+  assert.equal(nonHourly.observedAt, null)
+  assert.match(nonHourly.basis, /hourly aggregate boundary/i)
+
+  store.db.prepare("UPDATE visitor_metrics SET bucket = 'not-a-time'").run()
+  const malformed = store.getRuntimeContinuity({ at: now })
+  assert.equal(malformed.state, 'failed')
+  assert.equal(malformed.ageMinutes, null)
+  assert.doesNotMatch(JSON.stringify(malformed), /not-a-time/)
   store.close()
 })
 

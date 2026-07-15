@@ -219,3 +219,14 @@ Next: audit malformed relation and migration failure handling as the next bounde
 - Verified the three focused migration/integrity tests, `npm run check`, all 21 tests and `npm run judge:smoke`.
 
 Next: audit the stale-state boundary as the next bounded OPH-022 slice; public-redaction and judge-reproducibility audits remain open.
+
+## 2026-07-15 — stale-state timestamp trust boundary
+
+- Continued OPH-022 with a reproduced honesty failure: a future-dated aggregate bucket was clamped to age zero and projected as active.
+- Required runtime evidence timestamps to be canonical UTC, required aggregate buckets to remain aligned to UTC hours, and rejected evidence dated later than the assessment clock.
+- Made invalid clock evidence project the existing failed state with a generic integrity basis, no offending stored value and no computed age; it can no longer claim activity or liveness.
+- Evaluated the local two-hour stale threshold against exact elapsed time and rounded the displayed whole-minute age up so the label and age do not contradict one another at the boundary.
+- Added deterministic coverage for exactly 120 minutes, one millisecond beyond the boundary, future-dated evidence, a non-hourly bucket and a malformed timestamp.
+- No visitor identity, artwork status, curatorial decision, publication, deployment, hardware transport, production database or scheduler state changed. `npm run check`, all 22 tests and `npm run judge:smoke` pass.
+
+Next: audit the public-redaction boundary as the next bounded OPH-022 slice; judge reproducibility remains open.
