@@ -1,3 +1,5 @@
+import { curatorialStatusLabel } from './study-status.js'
+
 function element(tag, className, text) {
   const node = document.createElement(tag)
   if (className) node.className = className
@@ -70,7 +72,8 @@ function artworkRow(work) {
   if (study) {
     const preview = element('a', 'coded-study-preview')
     preview.href = study.route
-    preview.setAttribute('aria-label', `Enter the unpublished ${work.title} browser study`)
+    const statusLabel = curatorialStatusLabel({ status: work.status, reviewDecision: provenance.review?.decision })
+    preview.setAttribute('aria-label', `${work.title}. ${statusLabel}. Enter browser study.`)
     const image = element('img')
     image.src = study.image
     image.alt = study.alt

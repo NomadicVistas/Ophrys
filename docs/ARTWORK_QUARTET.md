@@ -4,7 +4,7 @@
 
 The quartet translates Ophrys’ four spatial conditions into four browser-native studies. Each work must first attract at image scale, then reveal a different limit of adaptive address through participation. The set aims at museum-grade artistic and technical discipline; it does not claim endorsement, collection status or approval by any museum.
 
-All four works remain `studio` candidates and are explicitly labelled **unpublished**. Their coded routes are prototypes for human curatorial review, visitor testing and eventual physical translation.
+All four works currently remain `studio` candidates. Their coded routes are prototypes for human curatorial review, visitor testing and eventual physical translation; the routes now read current status from the ledger rather than treating route availability as publication.
 
 ## The works
 
@@ -54,7 +54,7 @@ One dependency-free ES module drives the four routes through a strict configurat
 
 The visual sources are original project assets generated with the built-in OpenAI image-generation path, then converted to WebP. No named artist or third-party artwork was supplied as a style reference.
 
-All four visual sources now appear as direct entry points on the public field and again beside their provenance records in Studio. This improves discovery without changing the works' `studio` status: each card and full-screen route continues to identify the work as unpublished and pending human review.
+All four visual sources now appear as direct entry points on the public field and again beside their provenance records in Studio. Each entry point and full-screen route reads a minimal allow-listed status from the curatorial ledger, distinguishing pending review, requested revision, rejection and human approval. When that record cannot be loaded, the interface reports the status as unavailable instead of inferring it from route availability.
 
 ## Final image prompt set
 

@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
 
 const EVENT_KINDS = new Set(['arrival', 'threshold', 'artwork_open', 'studio_open', 'dwell_short', 'dwell_long', 'refusal', 'return'])
 const ARTWORK_STATUSES = new Set(['studio', 'published', 'archived'])
+const PUBLIC_REVIEW_DECISIONS = new Set(['pending', 'approved', 'rejected', 'returned_for_revision'])
 const ARTWORK_RELATION_KINDS = new Set(['context-derived-from', 'revision-of', 'counter-to', 'coexists-with'])
 const LURE_REPERTOIRE = ['orbit', 'interruption', 'split-signal']
 const TOPOLOGY_NODE_LIMIT = 40
@@ -210,6 +211,15 @@ function projectPublicArtwork(work) {
     status: work.status,
     provenance: projectPublicProvenance(work.provenance),
     createdAt: work.createdAt,
+  }
+}
+
+function projectPublicStudyStatus(work) {
+  const review = work?.provenance?.review
+  return {
+    id: work.id,
+    status: ARTWORK_STATUSES.has(work.status) ? work.status : null,
+    reviewDecision: PUBLIC_REVIEW_DECISIONS.has(review?.decision) ? review.decision : 'unavailable',
   }
 }
 
@@ -1420,12 +1430,17 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
 
   function publicState() {
     const settings = getSettings()
+    const studyStatuses = CURATORIAL_QUARTET.map(study => {
+      const row = db.prepare('SELECT id, status, provenance FROM artworks WHERE id = ?').get(study.id)
+      return row ? projectPublicStudyStatus({ id: row.id, status: row.status, provenance: parseObject(row.provenance) }) : { id: study.id, status: null, reviewDecision: 'unavailable' }
+    })
     return {
       identity: { name: 'Ophrys', proposition: 'Attraction without understanding.', organism: 'Autopoiesis installation brain' },
       system: { mode: settings.systemMode, model: settings.model, publicationMode: settings.publicationMode, cycleEnabled: settings.cycleEnabled },
       fieldScore: getFieldScore(),
       metrics: projectAggregateByKind(getMetrics()),
       artworks: listArtworks({ publicOnly: true, limit: 12 }).map(projectPublicArtwork),
+      studyStatuses,
       disclosure: 'Ophrys stores aggregate event counts only. It does not retain faces, voices, identities, demographic classifications, emotions, or individual movement histories.',
     }
   }

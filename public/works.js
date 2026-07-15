@@ -1,3 +1,5 @@
+import { curatorialStatusLabel } from './study-status.js'
+
 const TAU = Math.PI * 2
 
 const WORKS = {
@@ -102,6 +104,16 @@ document.querySelector('#notes-title').textContent = work.title
 document.querySelector('#notes-description').textContent = work.description
 document.querySelector('#notes-question').textContent = work.question
 document.querySelector('#notes-counter').textContent = work.counter
+
+fetch('/api/public/state').then(async response => {
+  if (!response.ok) throw new Error(`Public state failed (${response.status})`)
+  return response.json()
+}).then(state => {
+  const study = state.studyStatuses?.find(candidate => candidate.id === work.id)
+  const label = curatorialStatusLabel(study)
+  document.querySelector('#work-curatorial-status').textContent = label
+  document.querySelector('#work-review-state').textContent = `Artwork study / ${label.toLowerCase()}`
+}).catch(() => {})
 
 const route = name => `/works/${name}`
 const previous = document.querySelector('#previous-work')

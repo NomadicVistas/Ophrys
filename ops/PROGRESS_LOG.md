@@ -262,3 +262,13 @@ Next: no autonomous implementation slice remains in the bounded phase-two roadma
 - Verified `npm run check`, all 23 deterministic tests, the reduced-motion 320px accessibility smoke and `npm run judge:smoke`.
 
 Next: no autonomous implementation slice remains. Await a new integration finding or human-authorised roadmap item; otherwise record an evidence-backed no-op.
+
+## 2026-07-15 — ledger-backed public study status
+
+- Completed OPH-027 after reproducing a status-drift risk in OPH-026: the new public study cards and full-screen route hard-coded “review pending / unpublished,” so a later human decision could leave them contradicting the curatorial ledger.
+- Added a fixed public quartet-status projection containing only artwork ID, bounded status and review-decision vocabulary. Rationale, reviewer attribution, source references and complete provenance remain outside this minimal endpoint record.
+- Made the public gallery, Studio preview and full-screen study route distinguish pending review, returned revision, human rejection and human approval. A missing or failed record now says the status is unavailable; route accessibility never establishes publication.
+- Added deterministic coverage for all four decision states, exact schema minimisation, public HTTP exposure and surface fallbacks. No artwork status, curatorial decision, visitor record, provider request, deployment, hardware or scheduler state changed outside isolated in-memory tests.
+- Verified the focused status tests, `npm run check`, all 24 deterministic tests, the four-study reduced-motion 320px accessibility smoke and `npm run judge:smoke`.
+
+Next: no autonomous implementation slice remains. Await a new integration finding or human-authorised roadmap item; otherwise record an evidence-backed no-op.

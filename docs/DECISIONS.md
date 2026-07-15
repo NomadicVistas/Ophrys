@@ -103,3 +103,7 @@ The credential-free smoke uses an injected UTC clock, an in-memory store, its ow
 ## D-026 · Operational literacy protects the human gate without scoring people
 
 Operator receives a versioned, read-only briefing derived from current protected settings. It names responsible roles, aggregate-input and `store:false` limits, candidate/publication authority, simulator-only physical evidence, refusal behaviour, stop conditions and five scenario responses. It is deliberately absent from public and Studio APIs and persists no acknowledgement, answer, competency score or learning inference. Until a human approves a separately retained record and assigns an escalation contact, the briefing reports handover readiness as blocked; it is not certification, legal advice or deployment authority.
+
+## D-027 · Public study routes do not manufacture publication state
+
+The four coded routes remain reachable for review regardless of curatorial status, so route availability is never used as evidence of approval. Public state exposes a fixed, allow-listed projection containing only each quartet ID, bounded artwork status and review-decision vocabulary. The public gallery, Studio entry point and full-screen study read that ledger state and distinguish pending review, returned revision, human rejection and human approval; if the projection is unavailable, they say so instead of retaining a stale publication claim. Rationale, reviewer attribution and complete provenance remain outside this minimal status projection.

@@ -10,6 +10,7 @@ import { createOphrysServer } from '../src/server.mjs'
 import { runOphrysCycle } from '../src/ophrys-cycle.mjs'
 import { generateArtwork } from '../src/openai-artwork.mjs'
 import { simulatePhysicalBridge, validatePhysicalBridgeScore } from '../src/physical-bridge.mjs'
+import { curatorialStatusLabel } from '../public/study-status.js'
 
 const publicFile = name => readFileSync(new URL(`../public/${name}`, import.meta.url), 'utf8')
 
@@ -92,7 +93,7 @@ test('the coded quartet couples four original visual sources to bounded counter-
   const studioScript = publicFile('studio.js')
   const slugs = ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']
 
-  assert.match(page, /Studio study · unpublished/)
+  assert.match(page, /role="status" aria-live="polite"[\s\S]*id="work-curatorial-status"[\s\S]*Curatorial status unavailable/)
   assert.match(page, /id="counter-action"/)
   assert.match(page, /id="work-canvas" role="img"/)
   assert.match(page, /id="work-motion-state"/)
@@ -115,9 +116,46 @@ test('the coded quartet couples four original visual sources to bounded counter-
   assert.match(script, /this\.entered && !this\.reducedMotion/)
   assert.match(script, /static reduced-motion state/)
   assert.match(script, /kind: 'refusal', surface: `study\/\$\{slug\}`/)
-  assert.match(publicPage, /id="studies"[\s\S]*Studio study · review pending/)
+  assert.match(publicPage, /id="studies"[\s\S]*data-study-status[\s\S]*Curatorial status unavailable/)
+  assert.match(publicFile('app.js'), /renderStudyStatuses\(state\?\.studyStatuses\)/)
+  assert.match(publicFile('app.js'), /\.study-gallery'\)\.setAttribute\('aria-busy', 'false'\)/)
+  assert.match(script, /state\.studyStatuses\?\.find/)
   assert.match(studioScript, /Enter coded study ↗/)
+  assert.match(studioScript, /curatorialStatusLabel\(\{ status: work\.status/)
   assert.doesNotMatch(script, /localStorage|sessionStorage|getUserMedia|fingerprint/i)
+})
+
+test('public study discovery follows the allow-listed human curatorial ledger', () => {
+  const store = createOphrysStore(':memory:', { now: () => new Date('2026-07-15T08:40:00.000Z') })
+  try {
+    const initial = store.publicState().studyStatuses
+    assert.equal(initial.length, 4)
+    assert.ok(initial.every(study => study.status === 'studio' && study.reviewDecision === 'pending'))
+    assert.ok(initial.every(study => Object.keys(study).sort().join(',') === 'id,reviewDecision,status'))
+
+    store.setArtworkStatus('study-borrowed-weather', 'archived', { reason: 'Rejected in an isolated status-projection test.' })
+    store.setArtworkStatus('study-choir-of-almost', 'published', { reason: 'Approved in an isolated status-projection test.' })
+    store.setArtworkStatus('study-afterimage-commons', 'archived', { reason: 'First transition for an isolated revision test.' })
+    store.setArtworkStatus('study-afterimage-commons', 'studio', { reason: 'Returned for revision in an isolated status-projection test.' })
+
+    const statuses = new Map(store.publicState().studyStatuses.map(study => [study.id, study]))
+    assert.equal(curatorialStatusLabel(statuses.get('study-borrowed-weather')), 'Archived · human rejected')
+    assert.equal(curatorialStatusLabel(statuses.get('study-choir-of-almost')), 'Published · human approved')
+    assert.equal(curatorialStatusLabel(statuses.get('study-afterimage-commons')), 'Studio study · revision requested')
+    assert.equal(curatorialStatusLabel(statuses.get('study-unchosen-signal')), 'Studio study · review pending')
+    assert.equal(curatorialStatusLabel(null), 'Curatorial status unavailable')
+    assert.doesNotMatch(JSON.stringify(store.publicState().studyStatuses), /rationale|reviewedBy|sourceReferences/)
+
+    const untrusted = store.db.prepare('SELECT provenance FROM artworks WHERE id = ?').get('study-unchosen-signal')
+    const untrustedProvenance = JSON.parse(untrusted.provenance)
+    untrustedProvenance.review.decision = 'private-review-marker'
+    store.db.prepare('UPDATE artworks SET provenance = ? WHERE id = ?').run(JSON.stringify(untrustedProvenance), 'study-unchosen-signal')
+    const redacted = store.publicState().studyStatuses.find(study => study.id === 'study-unchosen-signal')
+    assert.equal(redacted.reviewDecision, 'unavailable')
+    assert.doesNotMatch(JSON.stringify(redacted), /private-review-marker/)
+  } finally {
+    store.close()
+  }
 })
 
 test('runtime continuity labels stored evidence with a deterministic clock and no liveness claim', () => {
@@ -846,6 +884,8 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal(publicResponse.status, 200)
   const publicState = await publicResponse.json()
   assert.equal(publicState.artworks[0].status, 'published')
+  assert.equal(publicState.studyStatuses.length, 4)
+  assert.ok(publicState.studyStatuses.every(study => study.status === 'studio' && study.reviewDecision === 'pending'))
   assert.match(publicState.disclosure, /aggregate event counts only/i)
   const originalLure = publicState.fieldScore.activeLure
 
@@ -861,7 +901,7 @@ test('public and protected server surfaces keep their boundary', async () => {
   for (const slug of ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']) {
     const studyResponse = await fetch(`${origin}/works/${slug}`)
     assert.equal(studyResponse.status, 200)
-    assert.match(await studyResponse.text(), /Studio study · unpublished/)
+    assert.match(await studyResponse.text(), /role="status" aria-live="polite"[\s\S]*id="work-curatorial-status"[\s\S]*Curatorial status unavailable/)
   }
   assert.equal((await fetch(`${origin}/works/not-a-study`)).status, 404)
 

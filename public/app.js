@@ -1,3 +1,5 @@
+import { curatorialStatusLabel } from './study-status.js'
+
 const state = await fetch('/api/public/state').then(async response => {
   if (!response.ok) throw new Error(`Public state failed (${response.status})`)
   return response.json()
@@ -48,7 +50,19 @@ function artworkCard(work, index) {
   return article
 }
 
+function renderStudyStatuses(studies) {
+  const byId = new Map((studies || []).map(study => [study.id, study]))
+  for (const card of document.querySelectorAll('[data-study-id]')) {
+    const study = byId.get(card.dataset.studyId)
+    const label = curatorialStatusLabel(study)
+    card.querySelector('[data-study-status]').textContent = label
+    card.setAttribute('aria-label', `${card.dataset.studyTitle}. ${label}. Enter browser study.`)
+  }
+  document.querySelector('.study-gallery').setAttribute('aria-busy', 'false')
+}
+
 const grid = document.querySelector('#artwork-grid')
+renderStudyStatuses(state?.studyStatuses)
 if (state?.artworks?.length) {
   grid.replaceChildren(...state.artworks.map(artworkCard))
   document.querySelector('#system-status').textContent = `${state.system.mode} / ${state.system.model}`

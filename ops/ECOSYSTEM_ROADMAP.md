@@ -6,7 +6,7 @@ Last re-audited: 2026-07-15. This is the active phase-two plan; the stopped phas
 
 | Layer | Present on `codex/hourly-builder` | Evidence / gap |
 |---|---|---|
-| Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds honest continuity; OPH-017 separates accepted counter-pressure from bounded applied revisions and retains no request-level trace |
+| Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds honest continuity; OPH-017 bounds revisions; OPH-027 keeps public study labels synchronized with the human gate |
 | Ecosystem | Seed and generated artwork nodes, bounded runtime-field state, hourly counter-signal nodes, append-only curatorial decision nodes, redacted end-to-end candidate lifecycles, simulator-only physical-output nodes, cycle/provenance packets, status transitions and explicit typed relations | OPH-021 connects these records through a five-part public literacy protocol while refusing learner surveillance or comprehension claims |
 | Development | Isolated review branch, narrow/full tests, project records, no deploy path | This job may commit and push only to `codex/hourly-builder`; it cannot merge or deploy |
 | Public production | `autopoiesis.art` is reachable and exposes a separate eight-agent gallery ecosystem | Read-only audit at 2026-07-14T11:49Z found no public Ophrys route; live copy claims “No prompts. No direction. Pure emergence.” and is not evidence for this bounded system |
@@ -43,6 +43,8 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric — **DONE** | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
 | 7 | OPH-022 · Reliability/access/privacy/judge pass — **DONE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure, malformed-relation refusal, stale-state timestamp integrity, full-payload public redaction and environment-independent fixed-clock judging evidence are covered |
 | 8 | OPH-025 · Protected operational-literacy handover — **DONE** | OPH-021–022; observatory finding | Operator names current system boundaries, responsible roles, stop conditions and five scenarios without public exposure, acknowledgement storage or people scoring; readiness remains blocked pending human approval and an assigned escalation contact |
+| 9 | OPH-026 · Public artwork-study discovery — **DONE** | OPH-023–024 | Public field and Studio expose all four coded study routes and original image previews without changing publication state |
+| 10 | OPH-027 · Ledger-backed public study status — **DONE** | OPH-018, OPH-026 | Public gallery, Studio and study routes read pending, revision, rejection or approval from a minimal allow-listed ledger projection and fail without a publication claim |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
@@ -86,7 +88,11 @@ The fifth OPH-022 slice resolves a judging-evidence mismatch: the guide claimed 
 
 On 2026-07-15 OPH-025 integrated the observatory's independently verified AI-literacy finding as a protected Operator handover briefing. It derives the active model, reasoning, mode and cycle state from current settings, then names aggregate-only inputs, `store:false`, the human publication gate, simulator-only output, bounded refusal, role responsibilities, stop conditions and five concrete review scenarios. It stores no acknowledgement, answer or competency score and remains absent from public and Studio APIs. The record explicitly reports readiness as blocked until a human approves a separately retained handover and assigns an escalation contact; it grants no deployment authority and makes no compliance or visitor-learning claim.
 
-OPH-022 and the bounded phase-two implementation lane, including the new research-backed OPH-025 handover slice, are complete. No further autonomous slice is selected: production, live provider evidence, feedback, video and submission remain human/external blockers, while this job stays available for a new reviewed roadmap item or integration finding without deploying or changing scheduler topology.
+## Latest public-status continuity slice
+
+On 2026-07-15 OPH-027 corrected a drift risk introduced by public study discovery: hard-coded “review pending / unpublished” copy could survive a later human decision and contradict the ledger. Public state now projects only each fixed quartet ID, bounded artwork status and review-decision vocabulary. The public gallery, Studio preview and full-screen route derive pending, revision, rejection and approval labels from that record; unavailable evidence produces an explicit unavailable label. Deterministic store and HTTP tests exercise every status, assert the exact three-field schema and exclude rationale, reviewer attribution and source provenance.
+
+OPH-022 and the bounded phase-two implementation lane, including the research-backed OPH-025 handover and OPH-027 status-continuity repair, are complete. No further autonomous slice is selected: production, live provider evidence, feedback, video and submission remain human/external blockers, while this job stays available for a new reviewed roadmap item or integration finding without deploying or changing scheduler topology.
 
 ## Slice discipline
 
