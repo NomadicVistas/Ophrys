@@ -107,3 +107,7 @@ Operator receives a versioned, read-only briefing derived from current protected
 ## D-027 · Public study routes do not manufacture publication state
 
 The four coded routes remain reachable for review regardless of curatorial status, so route availability is never used as evidence of approval. Public state exposes a fixed, allow-listed projection containing only each quartet ID, bounded artwork status and review-decision vocabulary. The public gallery, Studio entry point and full-screen study read that ledger state and distinguish pending review, returned revision, human rejection and human approval; if the projection is unavailable, they say so instead of retaining a stale publication claim. Rationale, reviewer attribution and complete provenance remain outside this minimal status projection.
+
+## D-028 · The artworks lead the public encounter
+
+Following Ewoud Bakker’s explicit approval to publish and deploy the quartet, the public field opens with four full-viewport artwork heroes rather than an explanatory project graphic. Each hero provides a direct path into its responsive browser artwork, exposes its ledger-backed human approval and records only coarse aggregate opens and dwell bands. Pointer response is local, bounded and disabled for reduced motion; it does not identify or optimise for an individual. The explanatory proposition, live counter-read and Studio remain available after the artwork encounter rather than preceding it.

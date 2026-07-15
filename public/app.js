@@ -1,5 +1,12 @@
 import { curatorialStatusLabel } from './study-status.js'
 
+const PUBLIC_WORK_ROUTES = {
+  'study-borrowed-weather': '/works/borrowed-weather',
+  'study-choir-of-almost': '/works/choir-of-almost',
+  'study-afterimage-commons': '/works/afterimage-commons',
+  'study-unchosen-signal': '/works/unchosen-signal',
+}
+
 const state = await fetch('/api/public/state').then(async response => {
   if (!response.ok) throw new Error(`Public state failed (${response.status})`)
   return response.json()
@@ -34,8 +41,8 @@ function renderField(score) {
 
 function artworkCard(work, index) {
   const article = element('a', 'artwork-card')
-  article.href = '/studio#works'
-  article.setAttribute('aria-label', `Inspect ${work.title} in the public Studio`)
+  article.href = PUBLIC_WORK_ROUTES[work.id] || '/studio#works'
+  article.setAttribute('aria-label', PUBLIC_WORK_ROUTES[work.id] ? `Enter ${work.title}` : `Inspect ${work.title} in the public Studio`)
   article.style.setProperty('--index', index)
   const visual = element('div', 'artwork-visual')
   visual.append(element('span', 'visual-code', String(index + 1).padStart(2, '0')), element('i', 'visual-ring'), element('i', 'visual-line'))
@@ -52,16 +59,56 @@ function artworkCard(work, index) {
 
 function renderStudyStatuses(studies) {
   const byId = new Map((studies || []).map(study => [study.id, study]))
-  for (const card of document.querySelectorAll('[data-study-id]')) {
-    const study = byId.get(card.dataset.studyId)
+  for (const hero of document.querySelectorAll('[data-study-id]')) {
+    const study = byId.get(hero.dataset.studyId)
     const label = curatorialStatusLabel(study)
-    card.querySelector('[data-study-status]').textContent = label
-    card.setAttribute('aria-label', `${card.dataset.studyTitle}. ${label}. Enter browser study.`)
+    hero.querySelector('[data-study-status]').textContent = label
+    const entry = hero.querySelector('[data-study-entry]')
+    entry.setAttribute('aria-label', `${hero.dataset.studyTitle}. ${label}. Enter interactive artwork.`)
   }
-  document.querySelector('.study-gallery').setAttribute('aria-busy', 'false')
+  document.querySelector('.artwork-heroes').setAttribute('aria-busy', 'false')
+}
+
+function initializeArtworkHeroes() {
+  const heroes = [...document.querySelectorAll('.artwork-hero')]
+  const heroLinks = [...document.querySelectorAll('[data-hero-link]')]
+  const setCurrent = id => {
+    for (const link of heroLinks) {
+      if (link.dataset.heroLink === id) link.setAttribute('aria-current', 'true')
+      else link.removeAttribute('aria-current')
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+      if (visible) setCurrent(visible.target.id)
+    }, { threshold: [.35, .55, .75] })
+    heroes.forEach(hero => observer.observe(hero))
+  }
+
+  const responsivePointer = window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  for (const hero of heroes) {
+    hero.querySelector('[data-study-entry]').addEventListener('click', () => {
+      send('artwork_open', `artwork/${hero.dataset.studyId}`).catch(() => {})
+    }, { once: true })
+    if (!responsivePointer) continue
+    hero.addEventListener('pointermove', event => {
+      const bounds = hero.getBoundingClientRect()
+      const x = ((event.clientX - bounds.left) / bounds.width - .5) * -18
+      const y = ((event.clientY - bounds.top) / bounds.height - .5) * -12
+      hero.style.setProperty('--hero-x', `${x.toFixed(2)}px`)
+      hero.style.setProperty('--hero-y', `${y.toFixed(2)}px`)
+    })
+    hero.addEventListener('pointerleave', () => {
+      hero.style.setProperty('--hero-x', '0px')
+      hero.style.setProperty('--hero-y', '0px')
+    })
+  }
 }
 
 const grid = document.querySelector('#artwork-grid')
+initializeArtworkHeroes()
 renderStudyStatuses(state?.studyStatuses)
 if (state?.artworks?.length) {
   grid.replaceChildren(...state.artworks.map(artworkCard))

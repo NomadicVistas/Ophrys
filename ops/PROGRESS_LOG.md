@@ -272,3 +272,13 @@ Next: no autonomous implementation slice remains. Await a new integration findin
 - Verified the focused status tests, `npm run check`, all 24 deterministic tests, the four-study reduced-motion 320px accessibility smoke and `npm run judge:smoke`.
 
 Next: no autonomous implementation slice remains. Await a new integration finding or human-authorised roadmap item; otherwise record an evidence-backed no-op.
+
+## 2026-07-15 — artwork-first public encounter
+
+- Implemented OPH-028 after Ewoud Bakker explicitly authorised public release of the quartet and a production deployment.
+- Rebuilt the homepage opening as four viewport-scale artwork heroes, each with its own image, proposition, participation cue, live ledger-backed status and direct route into the work. Project explanation now follows the encounter instead of preceding it.
+- Reframed the public routes around artworks rather than internal studies and added aggregate-only artwork-open and bounded dwell evidence. No visitor identifier, path history, profile, hidden optimisation or individual engagement score was introduced.
+- Preserved visible refusal, reduced-motion alternatives, keyboard access and the human publication gate. The four publication decisions and production deployment remain separate operational actions recorded after this verified implementation commit.
+- Verified `npm run check`, all 24 deterministic tests, the four-artwork reduced-motion 320px accessibility smoke, `npm run judge:smoke` and clean diff whitespace.
+
+Next: record four human publication decisions, promote this verified revision to production and verify every public artwork route over HTTPS.

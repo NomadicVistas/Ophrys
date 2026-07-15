@@ -140,8 +140,8 @@ try {
     await devtools.evaluate(`new Promise((resolve, reject) => {
       const deadline = Date.now() + 5000;
       const ready = () => {
-        if (document.readyState === 'complete' && document.querySelector('#enter-work')?.textContent === 'Enter study') return resolve(true);
-        if (Date.now() > deadline) return reject(new Error('study did not become ready'));
+        if (document.readyState === 'complete' && document.querySelector('#enter-work')?.textContent === 'Enter artwork') return resolve(true);
+        if (Date.now() > deadline) return reject(new Error('artwork did not become ready'));
         setTimeout(ready, 25);
       };
       ready();
@@ -227,7 +227,7 @@ try {
     assert.match(reducedAgain.label, /Reduced motion: static/i)
   }
 
-  console.log('Accessibility smoke passed: 4 reduced-motion studies at 320 × 700 CSS pixels; no loop, overflow, hidden control or stored preference.')
+  console.log('Accessibility smoke passed: 4 reduced-motion artworks at 320 × 700 CSS pixels; no loop, overflow, hidden control or stored preference.')
 } finally {
   devtools?.close()
   chromium.kill('SIGTERM')

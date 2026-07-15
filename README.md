@@ -54,10 +54,10 @@ See [docs/HACKATHON.md](docs/HACKATHON.md) for the build brief and [docs/ETHICS.
 
 The Build Week implementation is one small Node 24 service with three deliberately different surfaces:
 
-- `/` — public exhibition and artwork field, including a visible four-study gallery;
+- `/` — public exhibition led by four full-viewport interactive artwork heroes;
 - `/studio` — public evidence ledger for runtime freshness, aggregate inputs, redacted candidate lifecycles, cycles, tactics, counter-readings and the simulator-only light/sound bridge;
 - `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
-- `/works/<slug>` — four responsive artwork studies linked from the public field and Studio, with ledger-backed pending, revision, rejection or approval labels.
+- `/works/<slug>` — four responsive public artworks with ledger-backed curatorial status, counter-actions and aggregate-only engagement traces.
 
 The server uses built-in SQLite and calls the OpenAI Responses API with `gpt-5.6-sol`, explicit reasoning effort, `store:false` and strict structured artwork output. Model-generated code is never executed.
 
@@ -80,7 +80,7 @@ npm run cycle
 
 Without an API key, the public and Studio surfaces remain runnable with the human-authored seed work; only real GPT‑5.6 generation is unavailable.
 
-The coded quartet does not need an API key at runtime. Start the service, open `/studio#works`, and enter `Borrowed Weather`, `Choir of Almost`, `Afterimage Commons`, or `The Unchosen Signal`. The studies use original local visual sources and browser-native interaction; they do not bypass the curatorial publication gate.
+The coded quartet does not need an API key at runtime. Start the service, open `/`, and enter `Borrowed Weather`, `Choir of Almost`, `Afterimage Commons`, or `The Unchosen Signal`. The works use original local visual sources and browser-native interaction; their public status always follows the curatorial ledger.
 
 The physical bridge is also local and deterministic. It validates the bounded public field score and exposes one inspectable simulated light/sound frame in Studio and the ecosystem topology. Its transport is fixed to `none`: it cannot contact a lamp, speaker, controller or other hardware, and malformed input produces zero light and zero sound.
 

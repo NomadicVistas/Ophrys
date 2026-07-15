@@ -54,7 +54,7 @@ One dependency-free ES module drives the four routes through a strict configurat
 
 The visual sources are original project assets generated with the built-in OpenAI image-generation path, then converted to WebP. No named artist or third-party artwork was supplied as a style reference.
 
-All four visual sources now appear as direct entry points on the public field and again beside their provenance records in Studio. Each entry point and full-screen route reads a minimal allow-listed status from the curatorial ledger, distinguishing pending review, requested revision, rejection and human approval. When that record cannot be loaded, the interface reports the status as unavailable instead of inferring it from route availability.
+All four visual sources now lead the public field as full-viewport artwork heroes and appear again beside their provenance records in Studio. Each entry point and full-screen route reads a minimal allow-listed status from the curatorial ledger, distinguishing pending review, requested revision, rejection and human approval. Following Ewoud Bakker’s explicit 2026-07-15 approval, production records and displays the corresponding human-approved state rather than inferring publication from route availability.
 
 ## Final image prompt set
 

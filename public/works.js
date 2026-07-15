@@ -82,8 +82,8 @@ const slug = window.location.pathname.split('/').filter(Boolean).at(-1)
 const work = WORKS[slug]
 
 if (!work) {
-  document.title = 'Ophrys — Study not found'
-  document.querySelector('#work-title').textContent = 'Study not found'
+  document.title = 'Ophrys — Artwork not found'
+  document.querySelector('#work-title').textContent = 'Artwork not found'
   document.querySelector('#work-proposition').textContent = 'This route is not part of the bounded Ophrys quartet.'
   const button = document.querySelector('#enter-work')
   button.textContent = 'Return to Studio'
@@ -92,7 +92,7 @@ if (!work) {
 }
 
 document.documentElement.style.setProperty('--work-accent', work.accent)
-document.title = `${work.title} — Ophrys study`
+document.title = `${work.title} — Ophrys artwork`
 document.querySelector('meta[name="description"]').content = work.proposition
 document.querySelector('#work-position').textContent = `${String(work.index).padStart(2, '0')} / 04`
 document.querySelector('#work-role').textContent = work.role
@@ -112,8 +112,17 @@ fetch('/api/public/state').then(async response => {
   const study = state.studyStatuses?.find(candidate => candidate.id === work.id)
   const label = curatorialStatusLabel(study)
   document.querySelector('#work-curatorial-status').textContent = label
-  document.querySelector('#work-review-state').textContent = `Artwork study / ${label.toLowerCase()}`
+  document.querySelector('#work-review-state').textContent = `Artwork / ${label.toLowerCase()}`
 }).catch(() => {})
+
+function sendStudyEvent(kind) {
+  return fetch('/api/public/event', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind, surface: `artwork/${slug}` }),
+    keepalive: true,
+  })
+}
 
 const route = name => `/works/${name}`
 const previous = document.querySelector('#previous-work')
@@ -497,11 +506,7 @@ class ArtworkRenderer {
     this.setStatus(message)
     this.queueDraw()
     try {
-      const response = await fetch('/api/public/event', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ kind: 'refusal', surface: `study/${slug}` }),
-      })
+      const response = await sendStudyEvent('refusal')
       if (!response.ok) throw new Error('Counter-event unavailable')
     } catch {
       this.setStatus(`${message} The local artwork changed; no aggregate receipt is claimed.`)
@@ -529,7 +534,10 @@ document.querySelector('#enter-work').addEventListener('click', () => {
   window.setTimeout(() => { intro.hidden = true }, renderer.reducedMotion ? 0 : 720)
   interfaceElement.hidden = false
   renderer.enter()
-})
+  sendStudyEvent('artwork_open').catch(() => {})
+  window.setTimeout(() => sendStudyEvent('dwell_short').catch(() => {}), 12_000)
+  window.setTimeout(() => sendStudyEvent('dwell_long').catch(() => {}), 45_000)
+}, { once: true })
 
 document.querySelector('#counter-action').addEventListener('click', () => renderer.counterAction())
 
