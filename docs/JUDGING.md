@@ -28,6 +28,8 @@ The smoke command starts Ophrys on an ephemeral loopback port with an in-memory 
 
 Expected final output begins with `Ophrys judging smoke: PASS`. No network access or credential is needed.
 
+The fixture injects a fixed UTC clock, passes its own disposable Operator token, and ignores deployment database, port, token and API-key settings. The OPH-022 reproducibility audit also runs it with an otherwise empty environment, a non-UTC timezone and deliberately unusable deployment values; the smoke still uses only its in-memory ledger and ephemeral loopback listener. It never calls the composition provider.
+
 ## Browser encounter
 
 Start a disposable local instance:

@@ -4,7 +4,8 @@ import { createOphrysStore } from '../src/ophrys-store.mjs'
 import { createOphrysServer } from '../src/server.mjs'
 
 const operatorToken = 'local-judging-boundary-token'
-const store = createOphrysStore(':memory:')
+const judgingTime = new Date('2026-07-15T02:42:00.000Z')
+const store = createOphrysStore(':memory:', { now: () => judgingTime })
 store.createCycle({ id: 'judge-trace-cycle', trigger: 'judge-fixture', model: 'gpt-5.6-sol' })
 store.commitArtworkCycle('judge-trace-cycle', {
   id: 'judge-trace-candidate',
@@ -75,13 +76,26 @@ try {
   assert.notEqual(refusal.payload.fieldScore.activeLure, initial.payload.fieldScore.activeLure)
   assert.equal(refusal.payload.fieldScore.revision, initial.payload.fieldScore.revision + 1)
 
+  const deferredRefusal = await json('/api/public/event', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ kind: 'refusal', surface: 'judging/counter-control' }),
+  })
+  assert.equal(deferredRefusal.response.status, 202)
+  assert.equal(deferredRefusal.payload.changed, false)
+  assert.equal(deferredRefusal.payload.deferred, true)
+  assert.equal(deferredRefusal.payload.fieldScore.activeLure, refusal.payload.fieldScore.activeLure)
+  assert.equal(deferredRefusal.payload.fieldScore.revision, refusal.payload.fieldScore.revision)
+  assert.equal(deferredRefusal.payload.fieldScore.aggregateBasis.refusal, 2)
+  assert.match(deferredRefusal.payload.disclosure, /counted in aggregate.+deferred/i)
+
   const studio = await json('/api/studio/state')
   assert.equal(studio.response.status, 200)
-  assert.equal(studio.payload.metrics.some(metric => metric.kind === 'refusal' && metric.count === 1), true)
+  assert.equal(studio.payload.metrics.some(metric => metric.kind === 'refusal' && metric.count === 2), true)
   assert.equal(studio.payload.fieldScore.phase, 'counter-read')
   assert.equal(studio.payload.ecosystem.nodeTypeCounts.counterSignal, 1)
   const counterSignal = studio.payload.ecosystem.nodes.find(node => node.nodeType === 'counter-signal')
-  assert.deepEqual(counterSignal.aggregate, { acceptedRefusals: 1, appliedRevisions: 1, deferredRevisions: 0 })
+  assert.deepEqual(counterSignal.aggregate, { acceptedRefusals: 2, appliedRevisions: 1, deferredRevisions: 1 })
   assert.equal(studio.payload.ecosystem.relations.some(relation => relation.fromNodeId === counterSignal.id && relation.kind === 'counter-to'), true)
   assert.match(studio.payload.ecosystem.counterSignalPolicy.privacyLimit, /No request timestamp/i)
   assert.equal(studio.payload.compute.budget.dailyCycleLimit, 4)
@@ -125,7 +139,7 @@ try {
   assert.match(JSON.stringify(operator.payload), /redacted-fixture-response/)
 
   console.log('Ophrys judging smoke: PASS')
-  console.log(`refusal: ${initial.payload.fieldScore.activeLure} -> ${refusal.payload.fieldScore.activeLure}; revision ${refusal.payload.fieldScore.revision}`)
+  console.log(`refusals: ${initial.payload.fieldScore.activeLure} -> ${refusal.payload.fieldScore.activeLure}; revision ${refusal.payload.fieldScore.revision}; same-interval follow-up deferred`)
   console.log(`runtime: ${studio.payload.runtime.state}; basis: ${studio.payload.runtime.evidence.kind}`)
   console.log('boundaries: hourly counter-signal only; complete public Studio payload allow-listed; full provenance protected for Operator; five-part literacy evidence complete without learner scoring; simulated light/sound transport disabled; no request trace or liveness claim; Operator denied by default; publication curated; compute budget visible')
 } finally {

@@ -95,3 +95,7 @@ A stored timestamp may support `active` or `stale` only when it is canonical UTC
 ## D-024 · Public provenance is an allow-listed projection
 
 The unauthenticated public and Studio APIs are assembled from declared fields rather than copies of the protected Operator state. Public cycle evidence omits provider response identifiers and exposes only bounded token totals, generic failure state, timing, model and summary fields. Public artwork provenance retains prompt version, rights basis, aggregate totals combined by event kind, bounded usage and the human-gate result; it omits source surfaces, exact routes, hidden reasoning, unknown provenance fields and reviewer attribution. The complete stored packet remains available only through the authenticated Operator boundary. Adding a field to protected provenance never makes it public without an explicit projection change and regression test.
+
+## D-025 · Judge evidence must exercise each claimed boundary
+
+The credential-free smoke uses an injected UTC clock, an in-memory store, its own disposable Operator token and an ephemeral loopback port, so deployment environment values cannot change its evidence. It sends two refusals at the same instant: the first must apply one repertoire revision and the second must remain counted aggregate pressure while being explicitly deferred. A judging claim is not considered reproducible merely because the broader unit suite covers it; the smoke itself must exercise the public HTTP and Studio projection boundary it names.

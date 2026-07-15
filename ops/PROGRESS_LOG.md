@@ -241,3 +241,13 @@ Next: audit the public-redaction boundary as the next bounded OPH-022 slice; jud
 - Verified the three focused tests, `npm run check`, all 23 tests and `npm run judge:smoke`.
 
 Next: audit judge reproducibility as the remaining OPH-022 slice.
+
+## 2026-07-15 — environment-independent judging evidence
+
+- Completed OPH-022 after reproducing an evidence mismatch: the judging guide said the smoke proved a same-interval refusal was counted and deferred, but the script exercised only the first applied refusal.
+- Injected a fixed UTC store clock and sent two refusals through the public HTTP boundary. The smoke now requires one repertoire revision, an unchanged lure/revision for the deferred follow-up, two aggregate refusals and an hourly counter-signal with accepted `2`, applied `1` and deferred `1`.
+- Reran the smoke with an otherwise empty environment, a non-UTC timezone and deliberately unusable deployment database, port, token and API-key values. It passed on its fixture-owned token, in-memory ledger and ephemeral loopback port without creating the hostile database path or calling a provider.
+- Kept all public-agency and authority boundaries intact: no request-level trace, visitor identifier, paid composition, artwork publication, production mutation, deployment, hardware action or scheduler change occurred.
+- Verified the focused judging smoke in both normal and hostile environments, then `npm run check`, all 23 deterministic tests and `npm run judge:smoke`.
+
+Next: no autonomous implementation slice remains in the bounded phase-two roadmap. Await a new integration finding or human-authorised item; otherwise record an evidence-backed no-op while the fixed five-job topology remains unchanged.

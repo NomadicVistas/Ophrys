@@ -25,10 +25,10 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-019 | P1 | DONE | End-to-end public trace lifecycle | Bounded read projections connect redacted aggregate observation, provisional interpretation, candidate, latest human decision and public/refused/revision/pending outcome; source surfaces, request order, exact routes, response IDs, raw errors and hidden reasoning remain absent |
 | OPH-020 | P2 | DONE | Simulated physical bridge contract | Deterministic light/sound adapter validates bounded scores, exposes a digest-linked simulator node/edge and falls quiet without real hardware action |
 | OPH-021 | P2 | DONE | Ecosystem literacy protocol | Public five-step protocol distinguishes node, relation, provisional interpretation, simulated output and human decision; technical rubric stores and scores no visitor response |
-| OPH-022 | P1 | ACTIVE | Phase-two reliability and judge pass | Reduced-motion/320px, transactional migration/malformed-relation handling, stale-state timestamp integrity and full-payload public redaction are covered; judge reproducibility remains under audit |
+| OPH-022 | P1 | DONE | Phase-two reliability and judge pass | Reduced-motion/320px, transactional migration/malformed-relation handling, stale-state timestamp integrity, full-payload public redaction and fixed-clock environment-independent judge evidence are covered |
 | OPH-023 | P1 | DONE | Curatorial ecosystem quartet | Four distinct Threshold/Field/Residue/Counter-field works enter Studio with pending human review, project-owned provenance and explicit relations; only the approved seed remains public |
 | OPH-024 | P1 | DONE | Coded artwork quartet | Four original image-generation sources become distinct responsive browser works with accessible notes, reduced-motion behaviour, consequential counter-actions and explicit unpublished Studio status |
 
 ## Current definition of done
 
-Phase one is a completed implementation lane. Phase two is complete when OPH-015 through OPH-022 have evidence and any remaining work requires explicit human authority or external state. Build Week submission blockers remain separately visible rather than being treated as ecosystem implementation work.
+Phase one and the bounded phase-two implementation lane are complete. Remaining deployment, live-generation and submission items require explicit human authority or external state and remain separately visible rather than being treated as autonomous ecosystem implementation work.
