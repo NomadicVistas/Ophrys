@@ -28,6 +28,7 @@ Work added from July 13, 2026 onward:
 - a deterministic simulator-only light/sound bridge with strict score validation, capped outputs, stable input evidence, quiet fallback and no device transport or real hardware action.
 - a five-part ecosystem-literacy protocol that distinguishes nodes, relations, provisional interpretations, simulated outputs and human decisions with a technical evidence rubric that collects or scores no learner response.
 - four original image-assisted, browser-native artwork studies that turn the existing Threshold/Field/Residue/Counter-field concepts into runnable encounters while preserving explicit unpublished status and human approval.
+- a protected, settings-aware operational-literacy handover briefing with explicit role, stop, escalation and no-scoring boundaries; it does not claim legal compliance or replace human approval.
 
 Git history is the canonical dated implementation record.
 

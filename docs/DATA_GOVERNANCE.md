@@ -28,6 +28,7 @@ Ophrys uses minimal aggregate events to compose an artwork about the limits of b
 - Public lifecycle traces are read-only projections over existing cycle, provenance and decision records. Aggregate inputs are combined by event kind; source surfaces, request order, exact routes, provider response identifiers, raw errors and hidden model reasoning are omitted.
 - Simulated light/sound frames are deterministic read projections of the bounded aggregate field score. They add no sensor stream, device identifier or visitor record, and transport remains disabled.
 - The ecosystem-literacy protocol reads existing public projections only. It stores no answers, quiz results, learning score or inferred comprehension, and its automated rubric measures technical evidence availability rather than a visitor.
+- The protected operational-literacy briefing reads current system settings only. It stores no acknowledgement, staff answer, competency score or visitor-learning claim; human approval and escalation contact remain a separate non-public handover responsibility.
 - Aggregate summaries may enter a server-side GPT‑5.6 composition request.
 - OpenAI requests use `store:false` and a stable system-level safety identifier.
 - Raw API keys and Operator tokens remain server-side.

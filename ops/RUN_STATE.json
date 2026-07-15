@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-15T02:46:53Z",
-  "lastSelectedItem": "OPH-022 judge-reproducibility audit",
+  "lastSuccessfulRun": "2026-07-15T04:44:09Z",
+  "lastSelectedItem": "OPH-025 protected operational-literacy handover",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "No autonomous implementation slice; await a new integration finding or human-authorised roadmap item.",
+  "nextBestSlice": "No autonomous implementation slice; await a new integration finding or human-authorised roadmap item. Human approval and escalation assignment for OPH-025 remain external handover work.",
   "deadline": "2026-07-22T00:00:00Z"
 }

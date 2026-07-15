@@ -86,6 +86,8 @@ The physical bridge is also local and deterministic. It validates the bounded pu
 
 Studio also includes a five-part ecosystem-literacy protocol for reading nodes, relations, provisional interpretations, simulated outputs and human decisions. Its rubric checks the availability of technical evidence only; it collects no visitor answer or comprehension score. See [the facilitator protocol](docs/ECOSYSTEM_LITERACY.md).
 
+Operator includes a protected operational-literacy handover briefing derived from current settings. It names role responsibilities, system boundaries, stop conditions and five review scenarios without recording answers or scoring people. It remains visibly blocked pending a human-approved escalation contact and handover record; see [the handover protocol](docs/OPERATIONAL_LITERACY_HANDOVER.md).
+
 ## Build Week status
 
 Ophrys is a pre-existing artistic concept. The runnable online system, GPT‑5.6 composition organ, public Studio, Operator controls, aggregate event contract and tests are new work created during OpenAI Build Week. See [the evidence record](docs/HACKATHON_EVIDENCE.md) for the distinction and dated proof requirements, or follow [the five-minute judging guide](docs/JUDGING.md) for a credential-free verification path.

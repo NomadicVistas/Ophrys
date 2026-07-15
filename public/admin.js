@@ -125,6 +125,40 @@ function renderComputeLedger(compute) {
   document.querySelector('#operator-compute-basis').textContent = `${compute.costBasis} Maximum ${compute.budget.maxOutputTokensPerCycle} output tokens per attempt.`
 }
 
+function labelledList(title, items, describe = item => item) {
+  const section = element('section', 'handover-block')
+  section.append(element('h3', '', title))
+  const list = element('ul')
+  for (const item of items) list.append(element('li', '', describe(item)))
+  section.append(list)
+  return section
+}
+
+function renderOperationalHandover(handover) {
+  const status = document.querySelector('#operator-handover-status')
+  status.textContent = `${handover.record.status.replaceAll('-', ' ')} · ${handover.record.version} · reviewed ${handover.record.reviewedOn}`
+  const system = handover.system
+  const summary = element('section', 'handover-summary')
+  summary.append(
+    element('p', 'handover-warning', handover.record.basis),
+    element('p', '', `Current configuration: ${system.model} / ${system.reasoningEffort} reasoning / ${system.systemMode} mode / autonomous cycles ${system.cycleEnabled ? 'enabled' : 'disabled'}. Provider request storage is ${system.requestStorage ? 'enabled' : 'disabled (store:false)'}.`),
+    element('p', '', handover.record.escalation.instruction),
+  )
+  const boundaries = labelledList('System boundaries', [
+    system.inputBoundary,
+    system.outputBoundary,
+    system.publicationGate,
+    system.physicalBoundary,
+    system.refusalBoundary,
+  ])
+  const roles = labelledList('Responsible roles', handover.roles, item => `${item.role}: ${item.responsibility}`)
+  const scenarios = labelledList('Five handover scenarios', handover.scenarios, item => `${item.situation} ${item.expectedAction}`)
+  const stops = labelledList('Stop and escalate', handover.stopConditions)
+  const review = labelledList('Review this record when', handover.reviewTriggers)
+  const privacy = element('p', 'handover-privacy', handover.assessmentBoundary.note)
+  document.querySelector('#operator-handover').replaceChildren(summary, boundaries, roles, scenarios, stops, review, privacy)
+}
+
 function artworkControl(work) {
   const row = element('article', 'admin-work')
   const provenance = work.provenance || {}
@@ -159,6 +193,7 @@ async function load() {
   loginPanel.hidden = true; adminPanel.hidden = false
   setForm(state.system)
   renderComputeLedger(state.compute)
+  renderOperationalHandover(state.operationalHandover)
   document.querySelector('#admin-artworks').replaceChildren(...state.artworks.map(artworkControl))
   renderComparison()
 }

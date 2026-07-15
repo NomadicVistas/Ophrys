@@ -99,3 +99,7 @@ The unauthenticated public and Studio APIs are assembled from declared fields ra
 ## D-025 · Judge evidence must exercise each claimed boundary
 
 The credential-free smoke uses an injected UTC clock, an in-memory store, its own disposable Operator token and an ephemeral loopback port, so deployment environment values cannot change its evidence. It sends two refusals at the same instant: the first must apply one repertoire revision and the second must remain counted aggregate pressure while being explicitly deferred. A judging claim is not considered reproducible merely because the broader unit suite covers it; the smoke itself must exercise the public HTTP and Studio projection boundary it names.
+
+## D-026 · Operational literacy protects the human gate without scoring people
+
+Operator receives a versioned, read-only briefing derived from current protected settings. It names responsible roles, aggregate-input and `store:false` limits, candidate/publication authority, simulator-only physical evidence, refusal behaviour, stop conditions and five scenario responses. It is deliberately absent from public and Studio APIs and persists no acknowledgement, answer, competency score or learning inference. Until a human approves a separately retained record and assigns an escalation contact, the briefing reports handover readiness as blocked; it is not certification, legal advice or deployment authority.

@@ -42,6 +42,7 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 5 | OPH-020 · Simulated physical bridge contract — **DONE** | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
 | 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric — **DONE** | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
 | 7 | OPH-022 · Reliability/access/privacy/judge pass — **DONE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure, malformed-relation refusal, stale-state timestamp integrity, full-payload public redaction and environment-independent fixed-clock judging evidence are covered |
+| 8 | OPH-025 · Protected operational-literacy handover — **DONE** | OPH-021–022; observatory finding | Operator names current system boundaries, responsible roles, stop conditions and five scenarios without public exposure, acknowledgement storage or people scoring; readiness remains blocked pending human approval and an assigned escalation contact |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
@@ -81,7 +82,11 @@ The fourth OPH-022 slice closes the public provenance boundary identified by int
 
 The fifth OPH-022 slice resolves a judging-evidence mismatch: the guide claimed that the credential-free smoke proved a second same-interval refusal was counted and deferred, but the script sent only one request. The fixture now injects a fixed UTC clock, sends both requests through the public HTTP boundary and verifies one applied revision, one deferred revision, two aggregate refusals and the matching hourly counter-signal projection. A second run under an otherwise empty environment with a non-UTC timezone and deliberately unusable deployment database, port, token and API-key values proves those settings do not affect the in-memory, ephemeral-loopback path or trigger provider access.
 
-OPH-022 and the bounded phase-two implementation lane are complete. No further autonomous slice is selected: production, live provider evidence, feedback, video and submission remain human/external blockers, while this job stays available for a new reviewed roadmap item or integration finding without deploying or changing scheduler topology.
+## Latest operational-literacy slice
+
+On 2026-07-15 OPH-025 integrated the observatory's independently verified AI-literacy finding as a protected Operator handover briefing. It derives the active model, reasoning, mode and cycle state from current settings, then names aggregate-only inputs, `store:false`, the human publication gate, simulator-only output, bounded refusal, role responsibilities, stop conditions and five concrete review scenarios. It stores no acknowledgement, answer or competency score and remains absent from public and Studio APIs. The record explicitly reports readiness as blocked until a human approves a separately retained handover and assigns an escalation contact; it grants no deployment authority and makes no compliance or visitor-learning claim.
+
+OPH-022 and the bounded phase-two implementation lane, including the new research-backed OPH-025 handover slice, are complete. No further autonomous slice is selected: production, live provider evidence, feedback, video and submission remain human/external blockers, while this job stays available for a new reviewed roadmap item or integration finding without deploying or changing scheduler topology.
 
 ## Slice discipline
 

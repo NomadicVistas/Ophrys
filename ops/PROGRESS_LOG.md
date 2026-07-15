@@ -251,3 +251,14 @@ Next: audit judge reproducibility as the remaining OPH-022 slice.
 - Verified the focused judging smoke in both normal and hostile environments, then `npm run check`, all 23 deterministic tests and `npm run judge:smoke`.
 
 Next: no autonomous implementation slice remains in the bounded phase-two roadmap. Await a new integration finding or human-authorised item; otherwise record an evidence-backed no-op while the fixed five-job topology remains unchanged.
+
+## 2026-07-15 — protected operational-literacy handover
+
+- Completed OPH-025 from the observatory's new operational-literacy finding after independently verifying Article 4 of Regulation (EU) 2024/1689 and the European Commission AI Literacy Q&A.
+- Added a versioned, read-only Operator briefing derived from current model, reasoning, mode and cycle settings. It names role responsibilities, aggregate-only and `store:false` boundaries, human publication authority, simulator-only output, bounded refusal, stop conditions and five scenario responses.
+- Kept the record out of public and Studio API projections and persisted no acknowledgement, staff answer, competency score or visitor-learning inference.
+- Made the unresolved human boundary visible: handover readiness remains blocked until a responsible human approves a separately retained record and assigns an escalation contact. The briefing grants no deployment, publication or hardware authority and claims neither certification nor legal compliance.
+- Added the human handover protocol and deterministic protected/public API assertions. No production state, artwork status, curatorial decision, visitor data, provider request, deployment, hardware or scheduler changed.
+- Verified `npm run check`, all 23 deterministic tests, the reduced-motion 320px accessibility smoke and `npm run judge:smoke`.
+
+Next: no autonomous implementation slice remains. Await a new integration finding or human-authorised roadmap item; otherwise record an evidence-backed no-op.

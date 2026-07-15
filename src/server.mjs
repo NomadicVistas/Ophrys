@@ -5,6 +5,7 @@ import { extname, join, normalize, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createOphrysStore } from './ophrys-store.mjs'
 import { runOphrysCycle } from './ophrys-cycle.mjs'
+import { createOperationalHandover } from './operator-handover.mjs'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const PUBLIC = join(ROOT, 'public')
@@ -111,7 +112,10 @@ export function createOphrysServer({ store = createOphrysStore(), adminToken = p
         if (!adminToken) return json(response, 503, { error: 'Admin is disabled until OPHRYS_ADMIN_TOKEN is configured.' })
         if (!authorized(request, adminToken)) return json(response, 401, { error: 'Unauthorized' })
 
-        if (request.method === 'GET' && url.pathname === '/api/admin/state') return json(response, 200, store.studioState())
+        if (request.method === 'GET' && url.pathname === '/api/admin/state') {
+          const state = store.studioState()
+          return json(response, 200, { ...state, operationalHandover: createOperationalHandover(state.system) })
+        }
         if (request.method === 'PATCH' && url.pathname === '/api/admin/settings') return json(response, 200, { settings: store.updateSettings(await body(request)) })
         if (request.method === 'POST' && url.pathname === '/api/admin/cycle') {
           const result = await cycleRunner({ store, trigger: 'admin', force: true })

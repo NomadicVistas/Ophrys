@@ -846,6 +846,7 @@ test('public and protected server surfaces keep their boundary', async () => {
   const studioResponse = await fetch(`${origin}/api/studio/state`)
   assert.equal(studioResponse.status, 200)
   const studioState = await studioResponse.json()
+  assert.equal(Object.hasOwn(studioState, 'operationalHandover'), false)
   assert.equal(studioState.ecosystem.nodes.length, 8)
   assert.equal(studioState.ecosystem.relations.length, 6)
   assert.equal(studioState.physicalBridge.safety.hardwareAction, false)
@@ -877,6 +878,23 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.equal(adminState.system.model, 'gpt-5.6-sol')
   assert.equal(adminState.compute.budget.dailyCycleLimit, 4)
   assert.equal(adminState.compute.budget.maxOutputTokensPerCycle, 2600)
+  assert.equal(adminState.operationalHandover.record.status, 'draft-pending-human-approval')
+  assert.equal(adminState.operationalHandover.record.readiness, 'blocked-pending-human-handover')
+  assert.equal(adminState.operationalHandover.record.approval.recorded, false)
+  assert.equal(adminState.operationalHandover.record.escalation.status, 'unassigned')
+  assert.equal(adminState.operationalHandover.system.model, adminState.system.model)
+  assert.equal(adminState.operationalHandover.system.requestStorage, false)
+  assert.match(adminState.operationalHandover.system.publicationGate, /human curatorial transition/i)
+  assert.match(adminState.operationalHandover.system.physicalBoundary, /transport none/i)
+  assert.equal(adminState.operationalHandover.roles.length, 4)
+  assert.equal(adminState.operationalHandover.scenarios.length, 5)
+  assert.deepEqual(adminState.operationalHandover.assessmentBoundary, {
+    acknowledgementsStored: false,
+    answersCollected: false,
+    peopleScored: false,
+    visitorLearningInferred: false,
+    note: 'A responsible human must approve and retain the actual handover record outside the public ledger; Ophrys does not turn this briefing into a competency score.',
+  })
 
   const beforeNoOp = store.db.prepare('SELECT status, provenance FROM artworks WHERE id = ?').get('seed-false-spring')
   const beforeNoOpDecisions = store.db.prepare('SELECT COUNT(*) AS count FROM curatorial_decisions WHERE artwork_id = ?').get('seed-false-spring').count

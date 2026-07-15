@@ -28,6 +28,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-022 | P1 | DONE | Phase-two reliability and judge pass | Reduced-motion/320px, transactional migration/malformed-relation handling, stale-state timestamp integrity, full-payload public redaction and fixed-clock environment-independent judge evidence are covered |
 | OPH-023 | P1 | DONE | Curatorial ecosystem quartet | Four distinct Threshold/Field/Residue/Counter-field works enter Studio with pending human review, project-owned provenance and explicit relations; only the approved seed remains public |
 | OPH-024 | P1 | DONE | Coded artwork quartet | Four original image-generation sources become distinct responsive browser works with accessible notes, reduced-motion behaviour, consequential counter-actions and explicit unpublished Studio status |
+| OPH-025 | P2 | DONE | Protected operational-literacy handover | Operator shows a versioned role/system briefing, stop conditions and five scenarios; public APIs omit it, no answers or scores persist, and readiness remains blocked pending human approval and escalation assignment |
 
 ## Current definition of done
 
