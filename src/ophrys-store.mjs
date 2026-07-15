@@ -145,6 +145,89 @@ function parseObject(value) {
   return parsed && typeof parsed === 'object' ? parsed : {}
 }
 
+function projectPublicUsage(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const usage = {}
+  for (const key of ['input_tokens', 'output_tokens', 'total_tokens']) {
+    const count = value[key]
+    if (Number.isInteger(count) && count >= 0) usage[key] = count
+  }
+  return Object.keys(usage).length ? usage : null
+}
+
+function projectAggregateByKind(metrics) {
+  const totals = new Map()
+  for (const metric of Array.isArray(metrics) ? metrics : []) {
+    if (!EVENT_KINDS.has(metric?.kind)) continue
+    const count = Number(metric.count)
+    if (!Number.isFinite(count) || count < 0) continue
+    totals.set(metric.kind, (totals.get(metric.kind) || 0) + Math.floor(count))
+  }
+  return [...totals.entries()]
+    .map(([kind, count]) => ({ kind, count }))
+    .sort((left, right) => right.count - left.count || left.kind.localeCompare(right.kind))
+}
+
+function projectPublicProvenance(value) {
+  const provenance = value && typeof value === 'object' && !Array.isArray(value) ? value : {}
+  const inputSummary = provenance.inputSummary && typeof provenance.inputSummary === 'object' ? provenance.inputSummary : {}
+  const response = provenance.response && typeof provenance.response === 'object' ? provenance.response : {}
+  const review = provenance.review && typeof provenance.review === 'object' ? provenance.review : {}
+  return {
+    promptVersion: typeof provenance.promptVersion === 'string' ? provenance.promptVersion : null,
+    rightsBasis: typeof provenance.rightsBasis === 'string' ? provenance.rightsBasis : null,
+    inputSummary: {
+      aggregateEventSummary: projectAggregateByKind(inputSummary.aggregateEventSummary),
+    },
+    response: {
+      model: typeof response.model === 'string' ? response.model : null,
+      usage: projectPublicUsage(response.usage),
+    },
+    review: {
+      status: typeof review.status === 'string' ? review.status : null,
+      decision: typeof review.decision === 'string' ? review.decision : 'pending',
+      rationale: typeof review.rationale === 'string' ? review.rationale : null,
+      rejectionReason: typeof review.rejectionReason === 'string' ? review.rejectionReason : null,
+      reviewedAt: isCanonicalUtcTimestamp(review.reviewedAt) ? review.reviewedAt : null,
+    },
+  }
+}
+
+function projectPublicArtwork(work) {
+  return {
+    id: work.id,
+    title: work.title,
+    medium: work.medium,
+    proposition: work.proposition,
+    publicDescription: work.publicDescription,
+    visitorRelation: work.visitorRelation,
+    exhibitionForm: work.exhibitionForm,
+    learningQuestion: work.learningQuestion,
+    lureHypothesis: work.lureHypothesis,
+    counterReading: work.counterReading,
+    materials: Array.isArray(work.materials) ? work.materials : [],
+    model: work.model,
+    status: work.status,
+    provenance: projectPublicProvenance(work.provenance),
+    createdAt: work.createdAt,
+  }
+}
+
+function projectPublicCycle(cycle) {
+  return {
+    trigger: cycle.trigger,
+    status: cycle.status,
+    model: cycle.model,
+    summary: cycle.summary,
+    error: cycle.error ? 'Cycle stopped; operator review required.' : null,
+    usage: projectPublicUsage(cycle.usage),
+    latencyMs: Number.isInteger(cycle.latencyMs) && cycle.latencyMs >= 0 ? cycle.latencyMs : null,
+    outputTokenBudget: Number.isInteger(cycle.outputTokenBudget) && cycle.outputTokenBudget >= 0 ? cycle.outputTokenBudget : null,
+    startedAt: cycle.startedAt,
+    completedAt: cycle.completedAt,
+  }
+}
+
 function ensureParent(path) {
   if (path !== ':memory:') mkdirSync(dirname(resolve(path)), { recursive: true })
 }
@@ -1340,7 +1423,9 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return {
       identity: { name: 'Ophrys', proposition: 'Attraction without understanding.', organism: 'Autopoiesis installation brain' },
       system: { mode: settings.systemMode, model: settings.model, publicationMode: settings.publicationMode, cycleEnabled: settings.cycleEnabled },
-      fieldScore: getFieldScore(), metrics: getMetrics(), artworks: listArtworks({ publicOnly: true, limit: 12 }),
+      fieldScore: getFieldScore(),
+      metrics: projectAggregateByKind(getMetrics()),
+      artworks: listArtworks({ publicOnly: true, limit: 12 }).map(projectPublicArtwork),
       disclosure: 'Ophrys stores aggregate event counts only. It does not retain faces, voices, identities, demographic classifications, emotions, or individual movement histories.',
     }
   }
@@ -1362,14 +1447,23 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
   function publicStudioState() {
     const state = studioState()
     return {
-      ...state,
       system: {
         systemMode: state.system.systemMode, model: state.system.model,
         reasoningEffort: state.system.reasoningEffort, publicationMode: state.system.publicationMode,
         cycleEnabled: state.system.cycleEnabled, metricWindowHours: state.system.metricWindowHours,
         promptVersion: 'ophrys-composition-v1',
       },
-      cycles: state.cycles.map(cycle => ({ ...cycle, error: cycle.error ? 'Cycle stopped; operator review required.' : null })),
+      runtime: state.runtime,
+      fieldScore: state.fieldScore,
+      physicalBridge: state.physicalBridge,
+      metrics: projectAggregateByKind(state.metrics),
+      artworks: state.artworks.map(projectPublicArtwork),
+      cycles: state.cycles.map(projectPublicCycle),
+      compute: state.compute,
+      ecosystem: state.ecosystem,
+      lifecycles: state.lifecycles,
+      literacy: state.literacy,
+      method: state.method,
       disclosure: 'Aggregate event summaries may be included in a GPT-5.6 composition request. No personal identifier, raw image, voice, exact route, or individual record is sent.',
     }
   }

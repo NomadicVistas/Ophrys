@@ -91,3 +91,7 @@ The SQLite store carries an explicit schema version and applies schema creation,
 ## D-023 · Runtime freshness requires a trustworthy clock boundary
 
 A stored timestamp may support `active` or `stale` only when it is canonical UTC, aggregate buckets remain aligned to UTC hours, and the evidence is not later than the assessment clock. An invalid or future timestamp makes freshness indeterminate and therefore projects the existing `failed` state with a generic integrity basis, no offending timestamp and no computed age; it is never clamped to age zero or presented as active. The two-hour policy is evaluated against exact elapsed time, while the displayed age is conservatively rounded up to a whole minute.
+
+## D-024 · Public provenance is an allow-listed projection
+
+The unauthenticated public and Studio APIs are assembled from declared fields rather than copies of the protected Operator state. Public cycle evidence omits provider response identifiers and exposes only bounded token totals, generic failure state, timing, model and summary fields. Public artwork provenance retains prompt version, rights basis, aggregate totals combined by event kind, bounded usage and the human-gate result; it omits source surfaces, exact routes, hidden reasoning, unknown provenance fields and reviewer attribution. The complete stored packet remains available only through the authenticated Operator boundary. Adding a field to protected provenance never makes it public without an explicit projection change and regression test.

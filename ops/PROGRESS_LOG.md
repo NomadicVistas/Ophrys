@@ -230,3 +230,14 @@ Next: audit the stale-state boundary as the next bounded OPH-022 slice; public-r
 - No visitor identity, artwork status, curatorial decision, publication, deployment, hardware transport, production database or scheduler state changed. `npm run check`, all 22 tests and `npm run judge:smoke` pass.
 
 Next: audit the public-redaction boundary as the next bounded OPH-022 slice; judge reproducibility remains open.
+
+## 2026-07-15 — full-payload public provenance boundary
+
+- Continued OPH-022 with the integration reviewer's reproduced leak: `/api/studio/state` returned a redacted lifecycle beside unredacted cycle response IDs and arbitrary artwork provenance.
+- Replaced the protected-state spread with explicit public allow-lists for cycles, artwork fields, provenance and usage. Public aggregate evidence is combined by event kind; source surfaces, exact routes, provider response IDs, hidden reasoning, unknown fields and reviewer attribution remain protected.
+- Kept useful public evidence: Studio still shows the candidate, prompt version, bounded usage, aggregate-by-kind inputs, rights basis and human-gate status. The complete provenance packet remains available through authenticated Operator state.
+- Added a deterministic HTTP boundary fixture with unique route, provider, hidden-reasoning and unknown-field markers. None occurs anywhere in the complete public Studio payload; every marker remains in the protected Operator payload.
+- Extended the credential-free judging smoke from lifecycle-only redaction to whole-payload redaction and protected-packet retention. No production state, artwork status, curatorial decision, deployment, hardware, scheduler or paid model call changed.
+- Verified the three focused tests, `npm run check`, all 23 tests and `npm run judge:smoke`.
+
+Next: audit judge reproducibility as the remaining OPH-022 slice.

@@ -66,6 +66,8 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.js'), /renderLifecycles\(state\.lifecycles\)/)
   assert.match(publicFile('studio.js'), /renderPhysicalBridge\(state\.physicalBridge\)/)
   assert.match(publicFile('studio.js'), /lifecycles\.traces\.map\(lifecycleRow\)/)
+  assert.doesNotMatch(publicFile('studio.js'), /response\.responseId/)
+  assert.match(publicFile('studio.js'), /aggregate: \$\{aggregateTotals\.join/)
   assert.match(publicFile('studio.js'), /projection\.eligibleRelations/)
   assert.match(publicFile('studio.js'), /ecosystem\.counterSignalPolicy\.privacyLimit/)
   assert.match(publicFile('studio.js'), /ecosystem\.curatorialDecisionPolicy\.limit/)
@@ -488,6 +490,86 @@ test('public trace lifecycles connect redacted aggregate observation to a human-
   assert.match(lifecycles.redaction, /omits source surfaces.+hidden model reasoning.+visitor-level record/i)
   assert.equal(store.publicStudioState().lifecycles.traces[0].outcome, 'refused')
   store.close()
+})
+
+test('public Studio allow-lists provenance while Operator retains the complete packet', async () => {
+  const store = createOphrysStore(':memory:')
+  store.createCycle({ id: 'redaction-boundary-cycle', trigger: 'test', model: 'gpt-5.6-sol' })
+  store.commitArtworkCycle('redaction-boundary-cycle', {
+    id: 'redaction-boundary-candidate',
+    title: 'Allow-listed Passage',
+    medium: 'Bounded aggregate evidence and public projection',
+    proposition: 'A deterministic candidate proves that a public evidence packet can remain useful without exposing provider or route metadata.',
+    publicDescription: 'This in-memory candidate tests the complete unauthenticated payload boundary.',
+    visitorRelation: 'No visitor record or inferred trait is created by this fixture.',
+    exhibitionForm: 'A deterministic public and protected API comparison.',
+    learningQuestion: 'Can useful provenance remain visible after private operational fields are removed?',
+    lureHypothesis: 'Aggregate arrival and refusal counts may support a slower threshold signal without explaining any person.',
+    counterReading: 'The protected packet remains available to the human Operator while the public projection exposes only declared evidence.',
+    materials: ['in-memory ledger', 'public projection', 'protected provenance'],
+    model: 'gpt-5.6-sol',
+    status: 'studio',
+    provenance: {
+      promptVersion: 'redaction-boundary-v1',
+      rightsBasis: 'Deterministic in-memory fixture.',
+      inputSummary: {
+        aggregateEventSummary: [
+          { surface: 'private/review-route', kind: 'arrival', count: 2 },
+          { surface: 'studio', kind: 'arrival', count: 1 },
+          { surface: 'studio', kind: 'refusal', count: 1 },
+        ],
+        hiddenReasoning: 'must-not-be-public',
+      },
+      response: {
+        responseId: 'resp_private_review_marker',
+        model: 'gpt-5.6-sol',
+        usage: { input_tokens: 12, output_tokens: 8, total_tokens: 20, hidden_usage_marker: 'must-not-be-public' },
+      },
+      review: { status: 'studio', decision: 'pending' },
+      unknownExtra: 'unknown-provenance-marker',
+    },
+  }, {
+    summary: 'Allow-listed Passage entered Studio.',
+    responseId: 'resp_private_review_marker',
+    usage: { input_tokens: 12, output_tokens: 8, total_tokens: 20, hidden_usage_marker: 'must-not-be-public' },
+  })
+
+  const server = createOphrysServer({ store, adminToken: 'redaction-test-token' })
+  server.listen(0, '127.0.0.1')
+  await once(server, 'listening')
+  const origin = `http://127.0.0.1:${server.address().port}`
+  try {
+    const publicResponse = await fetch(`${origin}/api/studio/state`)
+    assert.equal(publicResponse.status, 200)
+    const publicPayload = await publicResponse.json()
+    const publicText = JSON.stringify(publicPayload)
+    assert.doesNotMatch(publicText, /private\/review-route|resp_private_review_marker|must-not-be-public|unknown-provenance-marker/)
+    const candidate = publicPayload.artworks.find(work => work.id === 'redaction-boundary-candidate')
+    assert.ok(candidate)
+    assert.deepEqual(candidate.provenance.inputSummary.aggregateEventSummary, [
+      { kind: 'arrival', count: 3 },
+      { kind: 'refusal', count: 1 },
+    ])
+    assert.deepEqual(candidate.provenance.response, {
+      model: 'gpt-5.6-sol',
+      usage: { input_tokens: 12, output_tokens: 8, total_tokens: 20 },
+    })
+    assert.equal(candidate.provenance.review.decision, 'pending')
+    assert.equal(Object.hasOwn(publicPayload.cycles[0], 'responseId'), false)
+
+    const adminResponse = await fetch(`${origin}/api/admin/state`, {
+      headers: { authorization: 'Bearer redaction-test-token' },
+    })
+    assert.equal(adminResponse.status, 200)
+    const adminText = JSON.stringify(await adminResponse.json())
+    assert.match(adminText, /private\/review-route/)
+    assert.match(adminText, /resp_private_review_marker/)
+    assert.match(adminText, /must-not-be-public/)
+    assert.match(adminText, /unknown-provenance-marker/)
+  } finally {
+    server.close()
+    await once(server, 'close')
+  }
 })
 
 test('ecosystem topology projection stays closed when older relation endpoints fall outside its node limit', () => {

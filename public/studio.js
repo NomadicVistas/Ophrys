@@ -18,7 +18,7 @@ const CODED_STUDIES = {
 
 function metricRow(metric, max) {
   const row = element('div', 'metric-row')
-  const name = element('span', '', `${metric.kind.replaceAll('_', ' ')} / ${metric.surface}`)
+  const name = element('span', '', metric.kind.replaceAll('_', ' '))
   const track = element('div', 'metric-track')
   const fill = element('i', 'metric-fill')
   fill.style.width = `${Math.max(3, (Number(metric.count) / max) * 100)}%`
@@ -35,7 +35,7 @@ function cycleRow(cycle) {
   const compute = [cycle.trigger, cycle.model, date(cycle.startedAt)]
   if (Number.isInteger(cycle.latencyMs)) compute.push(`${cycle.latencyMs} ms`)
   if (Number.isFinite(usage)) compute.push(`${usage} tokens`)
-  compute.push(`${cycle.outputTokenBudget} output max`)
+  if (Number.isInteger(cycle.outputTokenBudget)) compute.push(`${cycle.outputTokenBudget} output max`)
   body.append(element('h3', '', cycle.summary || 'Composition in progress'), element('p', '', compute.join(' / ')))
   if (cycle.error) body.append(element('p', 'error', cycle.error))
   row.append(index, body)
@@ -63,10 +63,10 @@ function artworkRow(work) {
   pair.append(lure, counter); article.append(pair)
   const provenancePair = element('div', 'tactic-pair')
   const input = element('div')
-  const recentTitles = (provenance.inputSummary?.recentArtworkSummary || []).map(item => item.title).filter(Boolean).slice(0, 3)
+  const aggregateTotals = (provenance.inputSummary?.aggregateEventSummary || [])
+    .map(item => `${item.kind.replaceAll('_', ' ')} ${item.count}`)
   const inputPieces = [provenance.promptVersion || 'prompt version unrecorded']
-  if (recentTitles.length) inputPieces.push(`recent: ${recentTitles.join(', ')}`)
-  if (response.responseId) inputPieces.push(`response: ${response.responseId}`)
+  if (aggregateTotals.length) inputPieces.push(`aggregate: ${aggregateTotals.join(', ')}`)
   input.append(element('span', '', 'PROMPT / INPUT'), element('p', '', inputPieces.join(' · ')))
   const rights = element('div')
   const usage = response.usage?.total_tokens ?? response.usage?.output_tokens ?? response.usage?.input_tokens ?? null

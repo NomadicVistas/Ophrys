@@ -41,7 +41,7 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 4 | OPH-019 · Public trace lifecycle — **DONE** | OPH-016–018 | Observation, interpretation, candidate, decision and public/refused outcome can be followed end-to-end with redacted public projections |
 | 5 | OPH-020 · Simulated physical bridge contract — **DONE** | Stable bounded score schema | Deterministic light/sound adapter validates bounds, has safe/quiet fallback and recorded simulator evidence; no real hardware action |
 | 6 | OPH-021 · Ecosystem literacy protocol and evidence rubric — **DONE** | OPH-019–020 | A visitor can distinguish node, relation, interpretation, simulated output and human decision without disclosure; facilitator and automated evidence updated |
-| 7 | OPH-022 · Reliability/access/privacy/judge pass — **ACTIVE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure, malformed-relation refusal and stale-state timestamp integrity are covered; redaction and judge reproducibility remain under audit |
+| 7 | OPH-022 · Reliability/access/privacy/judge pass — **ACTIVE** | Each preceding slice | Reduced motion, 320px study controls, transactional migration failure, malformed-relation refusal, stale-state timestamp integrity and full-payload public redaction are covered; judge reproducibility remains under audit |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
@@ -77,7 +77,9 @@ The second OPH-022 slice gives SQLite schema and relation-ledger failures a fail
 
 The third OPH-022 slice closes the runtime freshness clock boundary. A reproduced future aggregate bucket was previously clamped to age zero and labelled active. Continuity evidence now requires canonical UTC timestamps, exact UTC-hour alignment for aggregate buckets and no date later than the assessment clock. Invalid evidence returns a generic failed integrity record without exposing the offending value or manufacturing an age. The two-hour threshold now uses exact elapsed time and reports a conservatively rounded-up whole-minute age. Deterministic tests cover the exact threshold, one millisecond beyond it, a future bucket, a non-hourly bucket and a malformed value; syntax checks, all 22 tests and the credential-free judging smoke pass.
 
-Next: continue OPH-022 with a bounded public-redaction audit. Judge reproducibility remains explicitly open; OPH-022 is not complete.
+The fourth OPH-022 slice closes the public provenance boundary identified by integration review. Public and Studio state now use explicit allow-listed cycle, artwork, provenance and usage projections instead of spreading the protected Operator state. Provider response identifiers, source surfaces, exact routes, hidden reasoning and unknown nested fields stay behind authentication; aggregate evidence remains visible as totals by event kind alongside bounded usage and human-gate status. A deterministic HTTP fixture asserts unique private markers are absent from the complete public payload and retained in authenticated Operator state. Syntax checks, all 23 tests and the credential-free judging smoke pass.
+
+Next: continue OPH-022 with the judge-reproducibility audit. OPH-022 remains active until that final audit has evidence.
 
 ## Slice discipline
 
