@@ -54,7 +54,7 @@ See [docs/HACKATHON.md](docs/HACKATHON.md) for the build brief and [docs/ETHICS.
 
 The Build Week implementation is one small Node 24 service with three deliberately different surfaces:
 
-- `/` — public exhibition and artwork field;
+- `/` — public exhibition and artwork field, including a visible four-study gallery;
 - `/studio` — public evidence ledger for runtime freshness, aggregate inputs, redacted candidate lifecycles, cycles, tactics, counter-readings and the simulator-only light/sound bridge;
 - `/admin` — protected Operator controls for models, retention, generation and human publication decisions.
 - `/works/<slug>` — four responsive artwork studies linked from Studio and labelled unpublished until explicit human approval.

@@ -29,6 +29,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-023 | P1 | DONE | Curatorial ecosystem quartet | Four distinct Threshold/Field/Residue/Counter-field works enter Studio with pending human review, project-owned provenance and explicit relations; only the approved seed remains public |
 | OPH-024 | P1 | DONE | Coded artwork quartet | Four original image-generation sources become distinct responsive browser works with accessible notes, reduced-motion behaviour, consequential counter-actions and explicit unpublished Studio status |
 | OPH-025 | P2 | DONE | Protected operational-literacy handover | Operator shows a versioned role/system briefing, stop conditions and five scenarios; public APIs omit it, no answers or scores persist, and readiness remains blocked pending human approval and escalation assignment |
+| OPH-026 | P1 | DONE | Public artwork-study discovery | Public field visibly presents all four coded studies with original image previews and direct routes; Studio repeats the visual entry point while every surface preserves pending-review and unpublished status |
 
 ## Current definition of done
 

@@ -54,6 +54,8 @@ One dependency-free ES module drives the four routes through a strict configurat
 
 The visual sources are original project assets generated with the built-in OpenAI image-generation path, then converted to WebP. No named artist or third-party artwork was supplied as a style reference.
 
+All four visual sources now appear as direct entry points on the public field and again beside their provenance records in Studio. This improves discovery without changing the works' `studio` status: each card and full-screen route continues to identify the work as unpublished and pending human review.
+
 ## Final image prompt set
 
 All four prompts used the `stylized-concept` taxonomy, requested a landscape 16:10 source plate for a museum-scale interactive digital artwork, and prohibited people, readable text, logos, watermarks, named-artist imitation and generic science-fiction staging.

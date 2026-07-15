@@ -10,10 +10,26 @@ function date(value) {
 }
 
 const CODED_STUDIES = {
-  'study-borrowed-weather': '/works/borrowed-weather',
-  'study-choir-of-almost': '/works/choir-of-almost',
-  'study-afterimage-commons': '/works/afterimage-commons',
-  'study-unchosen-signal': '/works/unchosen-signal',
+  'study-borrowed-weather': {
+    route: '/works/borrowed-weather',
+    image: '/assets/works/borrowed-weather.webp',
+    alt: 'A dark threshold filled by a torn pale membrane, mist and spectral chartreuse light.',
+  },
+  'study-choir-of-almost': {
+    route: '/works/choir-of-almost',
+    image: '/assets/works/choir-of-almost.webp',
+    alt: 'A black gallery holds suspended metal, dark wood and translucent planes lit by coral, violet and pearl fragments.',
+  },
+  'study-afterimage-commons': {
+    route: '/works/afterimage-commons',
+    image: '/assets/works/afterimage-commons.webp',
+    alt: 'A near-black wall carries fading mineral-cyan, violet and bone-white traces around erased darkness.',
+  },
+  'study-unchosen-signal': {
+    route: '/works/unchosen-signal',
+    image: '/assets/works/unchosen-signal.webp',
+    alt: 'Vermilion and hot-white light confront ultraviolet blue and chartreuse across a black mechanical seam.',
+  },
 }
 
 function metricRow(metric, max) {
@@ -49,14 +65,21 @@ function artworkRow(work) {
   const response = provenance.response || {}
   const head = element('header')
   head.append(element('span', `status ${work.status}`, work.status), element('span', '', date(work.createdAt)))
-  article.append(head, element('h3', '', work.title), element('p', 'medium', work.medium), element('p', '', work.proposition))
-  const studyRoute = CODED_STUDIES[work.id]
-  if (studyRoute) {
-    const studyLink = element('a', 'coded-study-link', 'Enter coded study ↗')
-    studyLink.href = studyRoute
-    studyLink.setAttribute('aria-label', `Enter the unpublished ${work.title} browser study`)
-    article.append(studyLink)
+  article.append(head)
+  const study = CODED_STUDIES[work.id]
+  if (study) {
+    const preview = element('a', 'coded-study-preview')
+    preview.href = study.route
+    preview.setAttribute('aria-label', `Enter the unpublished ${work.title} browser study`)
+    const image = element('img')
+    image.src = study.image
+    image.alt = study.alt
+    image.loading = 'lazy'
+    image.decoding = 'async'
+    preview.append(image, element('span', '', 'Enter coded study ↗'))
+    article.append(preview)
   }
+  article.append(element('h3', '', work.title), element('p', 'medium', work.medium), element('p', '', work.proposition))
   const pair = element('div', 'tactic-pair')
   const lure = element('div'); lure.append(element('span', '', 'LURE HYPOTHESIS'), element('p', '', work.lureHypothesis))
   const counter = element('div'); counter.append(element('span', '', 'COUNTER-READING'), element('p', '', work.counterReading))

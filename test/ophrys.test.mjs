@@ -87,6 +87,7 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
 
 test('the coded quartet couples four original visual sources to bounded counter-actions', () => {
   const page = publicFile('work.html')
+  const publicPage = publicFile('index.html')
   const script = publicFile('works.js')
   const studioScript = publicFile('studio.js')
   const slugs = ['borrowed-weather', 'choir-of-almost', 'afterimage-commons', 'unchosen-signal']
@@ -99,7 +100,10 @@ test('the coded quartet couples four original visual sources to bounded counter-
   for (const slug of slugs) {
     assert.match(script, new RegExp(`'${slug}'`))
     assert.match(script, new RegExp(`/assets/works/${slug}\\.webp`))
+    assert.match(publicPage, new RegExp(`href="/works/${slug}"`))
+    assert.match(publicPage, new RegExp(`src="/assets/works/${slug}\\.webp"`))
     assert.match(studioScript, new RegExp(`/works/${slug}`))
+    assert.match(studioScript, new RegExp(`/assets/works/${slug}\\.webp`))
     const asset = statSync(new URL(`../public/assets/works/${slug}.webp`, import.meta.url))
     assert.ok(asset.size > 50_000, `${slug} should contain a substantive visual source`)
     assert.ok(asset.size < 500_000, `${slug} should stay within the browser artwork budget`)
@@ -111,6 +115,8 @@ test('the coded quartet couples four original visual sources to bounded counter-
   assert.match(script, /this\.entered && !this\.reducedMotion/)
   assert.match(script, /static reduced-motion state/)
   assert.match(script, /kind: 'refusal', surface: `study\/\$\{slug\}`/)
+  assert.match(publicPage, /id="studies"[\s\S]*Studio study · review pending/)
+  assert.match(studioScript, /Enter coded study ↗/)
   assert.doesNotMatch(script, /localStorage|sessionStorage|getUserMedia|fingerprint/i)
 })
 
