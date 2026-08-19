@@ -111,3 +111,7 @@ The four coded routes remain reachable for review regardless of curatorial statu
 ## D-028 · The artworks lead the public encounter
 
 Following Ewoud Bakker’s explicit approval to publish and deploy the quartet, the public field opens with four full-viewport artwork heroes rather than an explanatory project graphic. Each hero provides a direct path into its responsive browser artwork, exposes its ledger-backed human approval and records only coarse aggregate opens and dwell bands. Pointer response is local, bounded and disabled for reduced motion; it does not identify or optimise for an individual. The explanatory proposition, live counter-read and Studio remain available after the artwork encounter rather than preceding it.
+
+## D-029 · Exhibition transparency is a contextual human review
+
+The protected handover separates possible direct AI interaction from possible generated or manipulated content and leaves both unassessed until a responsible human reviews the actual exhibition configuration. The record requires the exact visitor-facing system/content, plain-language notice, accessible equivalent, placement, Studio evidence link, configured model, responsible role and review date. Missing or uncertain fields stop and escalate a live AI-assisted encounter. The checklist does not decide legal scope, assert compliance, publish a notice or collect visitor acknowledgement, interaction history or identity.

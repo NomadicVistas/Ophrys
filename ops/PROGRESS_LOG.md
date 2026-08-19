@@ -293,3 +293,13 @@ Next: record four human publication decisions, promote this verified revision to
 - Verified the focused state matrix, `npm run check`, all 25 deterministic tests, the evidence-led homepage plus four-artwork reduced-motion 320px accessibility smoke, and `npm run judge:smoke`.
 
 Next: no autonomous implementation slice remains. OPH-029 review/integration and any deployment require separate human authority; await a new reviewed finding or human-authorised roadmap item.
+
+## 2026-08-19 — protected exhibition-transparency review
+
+- Completed OPH-030 from the observatory's new public-transparency finding after independently verifying the European Commission's AI Act and Article 50 transparency-obligations pages.
+- Extended the protected Operator handover with separate, explicitly unassessed fields for direct AI interaction and generated/manipulated content, plus required visitor-facing system/content, notice placement, accessible equivalent, Studio evidence, model, responsible role and review date.
+- Kept the actual contextual classification and public notice as human decisions. Missing or uncertain evidence stops and escalates a live AI-assisted encounter; the checklist does not assert legal scope/compliance or publish anything.
+- Preserved the privacy and authority boundary: public and Studio APIs omit the review, and no visitor acknowledgement, interaction history, identity, provider request, publication, deployment, hardware or scheduler action occurred.
+- Verified the focused protected/public boundary test, `npm run check`, all 25 deterministic tests, the credential-free judge smoke and the isolated evidence-led homepage plus four-artwork reduced-motion 320px accessibility smoke. A concurrently launched accessibility run initially observed `unavailable`; the required isolated rerun passed.
+
+Next: no autonomous implementation slice remains. A responsible human must classify the actual exhibition configuration and approve any accessible notice; await a new reviewed finding or human-authorised roadmap item.

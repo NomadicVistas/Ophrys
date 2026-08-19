@@ -152,11 +152,20 @@ function renderOperationalHandover(handover) {
     system.refusalBoundary,
   ])
   const roles = labelledList('Responsible roles', handover.roles, item => `${item.role}: ${item.responsibility}`)
+  const transparency = handover.transparencyReview
+  const transparencyReview = labelledList('Exhibition transparency review', [
+    `Status: ${transparency.status.replaceAll('-', ' ')}. ${transparency.scopeBoundary}`,
+    `Visitor-facing system: ${transparency.visitorFacingSystem || 'not assessed'}. Visitor-facing content: ${transparency.visitorFacingContent || 'not assessed'}.`,
+    `Classification: direct AI interaction ${transparency.classification.directAiInteraction}; generated or manipulated content ${transparency.classification.generatedOrManipulatedContent}.`,
+    `Notice: ${transparency.notice.plainLanguageText || 'not specified'}; placement ${transparency.notice.placement || 'not specified'}; accessible equivalent ${transparency.notice.accessibleEquivalent || 'not specified'}; evidence ${transparency.notice.evidencePath}.`,
+    `System record: configured model ${transparency.systemRecord.configuredModel}; review date ${transparency.systemRecord.reviewedAt || 'not recorded'}; responsible role ${transparency.systemRecord.reviewedByRole || 'not recorded'}.`,
+    transparency.stopCondition,
+  ])
   const scenarios = labelledList('Five handover scenarios', handover.scenarios, item => `${item.situation} ${item.expectedAction}`)
   const stops = labelledList('Stop and escalate', handover.stopConditions)
   const review = labelledList('Review this record when', handover.reviewTriggers)
   const privacy = element('p', 'handover-privacy', handover.assessmentBoundary.note)
-  document.querySelector('#operator-handover').replaceChildren(summary, boundaries, roles, scenarios, stops, review, privacy)
+  document.querySelector('#operator-handover').replaceChildren(summary, boundaries, roles, transparencyReview, scenarios, stops, review, privacy)
 }
 
 function artworkControl(work) {

@@ -86,7 +86,7 @@ The physical bridge is also local and deterministic. It validates the bounded pu
 
 Studio also includes a five-part ecosystem-literacy protocol for reading nodes, relations, provisional interpretations, simulated outputs and human decisions. Its rubric checks the availability of technical evidence only; it collects no visitor answer or comprehension score. See [the facilitator protocol](docs/ECOSYSTEM_LITERACY.md).
 
-Operator includes a protected operational-literacy handover briefing derived from current settings. It names role responsibilities, system boundaries, stop conditions and five review scenarios without recording answers or scoring people. It remains visibly blocked pending a human-approved escalation contact and handover record; see [the handover protocol](docs/OPERATIONAL_LITERACY_HANDOVER.md).
+Operator includes a protected operational-literacy handover briefing derived from current settings. It names role responsibilities, system boundaries, stop conditions, five review scenarios and an unassessed exhibition-transparency checklist without recording answers, visitor acknowledgement or identity. It remains visibly blocked pending a human-approved escalation contact, contextual transparency classification and handover record; see [the handover protocol](docs/OPERATIONAL_LITERACY_HANDOVER.md).
 
 ## Build Week status
 

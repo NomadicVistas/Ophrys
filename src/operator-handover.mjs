@@ -1,17 +1,18 @@
-export const OPERATIONAL_HANDOVER_VERSION = 'ophrys-operator-handover-v1'
+export const OPERATIONAL_HANDOVER_VERSION = 'ophrys-operator-handover-v2'
+export const TRANSPARENCY_REVIEW_VERSION = 'ophrys-article-50-review-v1'
 
 export function createOperationalHandover(settings) {
   return {
     record: {
       version: OPERATIONAL_HANDOVER_VERSION,
-      reviewedOn: '2026-07-15',
+      reviewedOn: '2026-08-19',
       status: 'draft-pending-human-approval',
       readiness: 'blocked-pending-human-handover',
       basis: 'Protected system briefing generated from current Operator settings. It is not a signed handover record, certification, legal opinion, or evidence of visitor learning.',
       approval: { required: true, recorded: false, approvedByRole: null, approvedAt: null },
       escalation: {
         status: 'unassigned',
-        instruction: 'Name a responsible human escalation contact in the separately retained handover record before any live AI-assisted installation or public demonstration.',
+        instruction: 'Name a responsible human escalation contact and complete the exhibition transparency classification in the separately retained handover record before any live AI-assisted installation or public demonstration.',
       },
     },
     roles: [
@@ -33,12 +34,42 @@ export function createOperationalHandover(settings) {
       physicalBoundary: 'The current light/sound bridge is deterministic simulation with transport none and hardwareAction false.',
       refusalBoundary: 'Refusal is accepted as aggregate counter-pressure; at most one repertoire revision applies per shared 60-second interval and later actions are explicitly deferred.',
     },
+    transparencyReview: {
+      version: TRANSPARENCY_REVIEW_VERSION,
+      status: 'unassessed-stop-and-escalate',
+      scopeBoundary: 'A responsible human must assess the actual exhibition configuration. This checklist does not decide whether Article 50 applies, establish legal compliance, or treat a generic AI label as sufficient evidence.',
+      visitorFacingSystem: null,
+      visitorFacingContent: null,
+      classification: {
+        directAiInteraction: 'unassessed',
+        generatedOrManipulatedContent: 'unassessed',
+      },
+      notice: {
+        plainLanguageText: null,
+        placement: null,
+        accessibleEquivalent: null,
+        evidencePath: '/studio',
+        requiredContext: 'Keep aggregate-only inputs, human publication authority, simulator-only output and the no-liveness limit available with the notice.',
+      },
+      systemRecord: {
+        configuredModel: settings.model,
+        reviewedAt: null,
+        reviewedByRole: null,
+      },
+      stopCondition: 'If the visitor-facing system, content classification, notice, accessible equivalent, model record or responsible review is missing or uncertain, stop the live AI-assisted encounter and escalate rather than asserting compliance.',
+      evidenceBoundary: {
+        visitorAcknowledgementCollected: false,
+        interactionHistoryCollected: false,
+        visitorIdentityCollected: false,
+      },
+    },
     stopConditions: [
       'Stop composition when provenance, aggregate-input or request-storage boundaries cannot be verified.',
       'Stop public-state claims when runtime evidence is failed, invalid or too stale for the documented local policy.',
       'Stop publication if there is no explicit rationale-bearing human decision for the candidate.',
       'Stop physical interpretation if simulator evidence is being presented as proof that hardware rendered an output.',
       'Stop facilitation if a response, refusal or accessibility preference is being recorded, scored or interpreted as a personal trait.',
+      'Stop a live AI-assisted encounter when its transparency classification or accessible notice remains missing, uncertain or inconsistent with the actual system and content.',
     ],
     scenarios: [
       { situation: 'A model cycle completes successfully.', expectedAction: 'Inspect the bounded candidate and provenance; keep it in Studio until an explicit human curatorial decision.' },
@@ -53,6 +84,7 @@ export function createOperationalHandover(settings) {
       'publication authority or responsible roles change',
       'physical transport is proposed or enabled',
       'public claims, venue context or failure procedures change',
+      'visitor-facing AI interaction, generated content or accessible notice changes',
     ],
     assessmentBoundary: {
       acknowledgementsStored: false,

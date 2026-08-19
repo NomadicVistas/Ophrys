@@ -1015,6 +1015,27 @@ test('public and protected server surfaces keep their boundary', async () => {
   assert.match(adminState.operationalHandover.system.physicalBoundary, /transport none/i)
   assert.equal(adminState.operationalHandover.roles.length, 4)
   assert.equal(adminState.operationalHandover.scenarios.length, 5)
+  assert.deepEqual(adminState.operationalHandover.transparencyReview.classification, {
+    directAiInteraction: 'unassessed',
+    generatedOrManipulatedContent: 'unassessed',
+  })
+  assert.deepEqual(adminState.operationalHandover.transparencyReview.notice, {
+    plainLanguageText: null,
+    placement: null,
+    accessibleEquivalent: null,
+    evidencePath: '/studio',
+    requiredContext: 'Keep aggregate-only inputs, human publication authority, simulator-only output and the no-liveness limit available with the notice.',
+  })
+  assert.equal(adminState.operationalHandover.transparencyReview.systemRecord.configuredModel, adminState.system.model)
+  assert.equal(adminState.operationalHandover.transparencyReview.systemRecord.reviewedAt, null)
+  assert.match(adminState.operationalHandover.transparencyReview.stopCondition, /missing or uncertain/i)
+  assert.deepEqual(adminState.operationalHandover.transparencyReview.evidenceBoundary, {
+    visitorAcknowledgementCollected: false,
+    interactionHistoryCollected: false,
+    visitorIdentityCollected: false,
+  })
+  assert.equal(JSON.stringify(publicState).includes('transparencyReview'), false)
+  assert.equal(JSON.stringify(studioState).includes('transparencyReview'), false)
   assert.deepEqual(adminState.operationalHandover.assessmentBoundary, {
     acknowledgementsStored: false,
     answersCollected: false,
