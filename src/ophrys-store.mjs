@@ -169,6 +169,18 @@ function projectAggregateByKind(metrics) {
     .sort((left, right) => right.count - left.count || left.kind.localeCompare(right.kind))
 }
 
+function projectPublicRuntime(runtime) {
+  return {
+    state: runtime.state,
+    basis: runtime.basis,
+    observedAt: runtime.observedAt,
+    updatedAt: runtime.updatedAt,
+    assessedAt: runtime.assessedAt,
+    ageMinutes: runtime.ageMinutes,
+    limit: runtime.limit,
+  }
+}
+
 function projectPublicProvenance(value) {
   const provenance = value && typeof value === 'object' && !Array.isArray(value) ? value : {}
   const inputSummary = provenance.inputSummary && typeof provenance.inputSummary === 'object' ? provenance.inputSummary : {}
@@ -1437,6 +1449,7 @@ export function createOphrysStore(path = process.env.OPHRYS_DB_PATH || 'var/ophr
     return {
       identity: { name: 'Ophrys', proposition: 'Attraction without understanding.', organism: 'Autopoiesis installation brain' },
       system: { mode: settings.systemMode, model: settings.model, publicationMode: settings.publicationMode, cycleEnabled: settings.cycleEnabled },
+      runtime: projectPublicRuntime(getRuntimeContinuity()),
       fieldScore: getFieldScore(),
       metrics: projectAggregateByKind(getMetrics()),
       artworks: listArtworks({ publicOnly: true, limit: 12 }).map(projectPublicArtwork),

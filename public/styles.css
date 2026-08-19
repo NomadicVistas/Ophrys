@@ -31,3 +31,9 @@
 .project-intro h2{margin:.15em 0 .35em;font-size:clamp(4rem,8.7vw,9.4rem);font-weight:600;letter-spacing:-.075em;line-height:.82}
 @media(max-width:1050px){.artwork-hero-index a{justify-content:center;padding:0 .7rem;font-size:0}.artwork-hero-index a span{font-size:.62rem}.artwork-hero{padding-right:6vw;padding-left:6vw}.artwork-hero-content{width:min(900px,94vw)}.artwork-hero-instruction{display:none}}
 @media(max-width:720px){.artwork-hero-index{top:111px;height:48px;margin-bottom:-48px}.artwork-hero-index a{min-height:48px}.artwork-hero{min-height:calc(100svh - 111px);padding:7.5rem 6vw 4.5rem}.artwork-hero-shade{background:linear-gradient(0deg,rgba(3,4,3,.94) 0%,rgba(3,4,3,.56) 52%,rgba(3,4,3,.12) 100%)}.artwork-hero h2{font-size:clamp(4rem,18vw,6.3rem);line-height:.79}.artwork-hero-meta{align-items:flex-start;flex-direction:column;gap:.4rem}.artwork-hero-proposition{max-width:94%;margin-top:1.4rem;font-size:.98rem}.artwork-hero-actions{align-items:flex-start;flex-direction:column;gap:.9rem;margin-top:1.5rem}.project-intro h2{font-size:3.8rem}}
+
+.system-pill i{background:#777b70;box-shadow:none}
+.system-pill[data-runtime-state="active"] i{background:var(--signal);box-shadow:0 0 12px var(--signal)}
+.system-pill[data-runtime-state="stale"] i{background:#9a6b00}
+.system-pill[data-runtime-state="failed"] i{background:var(--red)}
+@media(max-width:720px){.system-pill{max-width:150px;font-size:.56rem}.system-pill #system-status{display:inline}}

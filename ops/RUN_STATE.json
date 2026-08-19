@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-07-15T08:42:48Z",
-  "lastSelectedItem": "OPH-027 ledger-backed public study status",
+  "lastSuccessfulRun": "2026-08-19T00:38:13Z",
+  "lastSelectedItem": "OPH-029 evidence-led public runtime header",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "No autonomous implementation slice; await a new integration finding or human-authorised roadmap item. Human approval and escalation assignment for OPH-025, deployment and live provider evidence remain external work.",
+  "nextBestSlice": "No further autonomous implementation slice. Await a new integration finding or human-authorised roadmap item; review/integration of OPH-029, live provider evidence, submission work, and OPH-025 human handover remain external actions.",
   "deadline": "2026-07-22T00:00:00Z"
 }

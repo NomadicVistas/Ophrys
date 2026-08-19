@@ -1,17 +1,17 @@
 # Ophrys ecosystem roadmap
 
-Last re-audited: 2026-07-15. This is the active phase-two plan; the stopped phase-one lane remains a completed foundation.
+Last re-audited: 2026-08-19. This is the active phase-two plan; the stopped phase-one lane remains a completed foundation.
 
 ## Current-state map
 
 | Layer | Present on `codex/hourly-builder` | Evidence / gap |
 |---|---|---|
-| Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds honest continuity; OPH-017 bounds revisions; OPH-027 keeps public study labels synchronized with the human gate |
+| Runtime organism | Aggregate hourly events, labelled field score, bounded three-lure renderer, consequential refusal, candidate composition, human publication gate | OPH-016 adds honest continuity; OPH-017 bounds revisions; OPH-027 keeps public study labels synchronized with the human gate; OPH-029 prevents the homepage from presenting configuration as liveness |
 | Ecosystem | Seed and generated artwork nodes, bounded runtime-field state, hourly counter-signal nodes, append-only curatorial decision nodes, redacted end-to-end candidate lifecycles, simulator-only physical-output nodes, cycle/provenance packets, status transitions and explicit typed relations | OPH-021 connects these records through a five-part public literacy protocol while refusing learner surveillance or comprehension claims |
 | Development | Isolated review branch, narrow/full tests, project records, no deploy path | This job may commit and push only to `codex/hourly-builder`; it cannot merge or deploy |
-| Public production | `autopoiesis.art` is reachable and exposes a separate eight-agent gallery ecosystem | Read-only audit at 2026-07-14T11:49Z found no public Ophrys route; live copy claims “No prompts. No direction. Pure emergence.” and is not evidence for this bounded system |
+| Public production | `https://ophrys.nomadicvistas.online` serves human-approved revision `355d14c` | Read-only review at 2026-08-19T00:21Z found the service healthy but its runtime evidence stale; OPH-029 is review-branch work and is not public until separate human-approved integration and deployment |
 
-Branch comparison: `main` remains the phase-one baseline at `3e0c5c7`; the builder branch contains nine phase-one commits through `1fc5f5a` plus the phase-two work described here. No production state was changed.
+Branch comparison at slice selection: local `main` and `codex/hourly-builder` both pointed to deployed artwork revision `355d14c`; `origin/main` remained `3e0c5c7`. OPH-029 changes only the review branch and no production state.
 
 ## Ecosystem architecture
 
@@ -45,6 +45,7 @@ The loops share records but not authority. A runtime event cannot identify a per
 | 8 | OPH-025 · Protected operational-literacy handover — **DONE** | OPH-021–022; observatory finding | Operator names current system boundaries, responsible roles, stop conditions and five scenarios without public exposure, acknowledgement storage or people scoring; readiness remains blocked pending human approval and an assigned escalation contact |
 | 9 | OPH-026 · Public artwork-study discovery — **DONE** | OPH-023–024 | Public field and Studio expose all four coded study routes and original image previews without changing publication state |
 | 10 | OPH-027 · Ledger-backed public study status — **DONE** | OPH-018, OPH-026 | Public gallery, Studio and study routes read pending, revision, rejection or approval from a minimal allow-listed ledger projection and fail without a publication claim |
+| 11 | OPH-029 · Evidence-led public runtime header — **DONE** | OPH-016; 2026-08-19 integration finding | Homepage labels active, quiet, stale, disabled, failed or unavailable from an allow-listed timestamped runtime projection; model settings are explicitly configuration and only active evidence receives the luminous treatment |
 
 External deployment, quota, feedback, video and submission items remain blocked as recorded on the project board. They are not prerequisites for deterministic ecosystem work and this lane will not attempt them.
 
@@ -92,8 +93,12 @@ On 2026-07-15 OPH-025 integrated the observatory's independently verified AI-lit
 
 On 2026-07-15 OPH-027 corrected a drift risk introduced by public study discovery: hard-coded “review pending / unpublished” copy could survive a later human decision and contradict the ledger. Public state now projects only each fixed quartet ID, bounded artwork status and review-decision vocabulary. The public gallery, Studio preview and full-screen route derive pending, revision, rejection and approval labels from that record; unavailable evidence produces an explicit unavailable label. Deterministic store and HTTP tests exercise every status, assert the exact three-field schema and exclude rationale, reviewer attribution and source provenance.
 
-OPH-022 and the bounded phase-two implementation lane, including the research-backed OPH-025 handover and OPH-027 status-continuity repair, are complete. No further autonomous slice is selected: production, live provider evidence, feedback, video and submission remain human/external blockers, while this job stays available for a new reviewed roadmap item or integration finding without deploying or changing scheduler topology.
+## Latest public runtime-claim slice
+
+On 2026-08-19 OPH-029 resolved the integration reviewer's reproduced configuration-as-liveness regression. `/api/public/state` now includes an explicit seven-field allow-list derived from the existing runtime continuity assessment and omits evidence internals, cycle errors, provider IDs, routes, surfaces, hidden reasoning and unknown provenance. The homepage header renders the recorded `active`, `quiet`, `stale`, `disabled` or `failed` state and fails closed to `unavailable` when the projection is absent or malformed. The model is described only as configured, the header links to Studio's evidence ledger, and only a supported active state receives the luminous indicator. Deterministic HTTP/client tests cover stale, failed, active and unavailable paths without touching production or making a provider call.
+
+OPH-022 and the bounded phase-two implementation lane, including the research-backed OPH-025 handover, OPH-027 status-continuity repair and OPH-029 runtime-claim repair, are complete. No further autonomous slice is selected: OPH-029 integration/deployment, live provider evidence, feedback, video and submission remain human/external actions, while this job stays available for a new reviewed roadmap item or integration finding without deploying or changing scheduler topology.
 
 ## Slice discipline
 
-Each run chooses at most one independently testable item, records what changed and what remains absent, and stops on a clean dependency rather than manufacturing activity. Evidence must include the narrowest relevant test plus `npm run check`, `npm test`, and `npm run judge:smoke` when the public loop is affected. With OPH-015 through OPH-022 complete, future runs should record an evidence-backed no-op unless a new integration finding or human-authorised roadmap item creates a meaningful safe slice.
+Each run chooses at most one independently testable item, records what changed and what remains absent, and stops on a clean dependency rather than manufacturing activity. Evidence must include the narrowest relevant test plus `npm run check`, `npm test`, and `npm run judge:smoke` when the public loop is affected. With the bounded roadmap and OPH-029 complete, future runs should record an evidence-backed no-op unless a new integration finding or human-authorised roadmap item creates a meaningful safe slice.

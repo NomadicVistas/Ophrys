@@ -11,6 +11,7 @@ import { runOphrysCycle } from '../src/ophrys-cycle.mjs'
 import { generateArtwork } from '../src/openai-artwork.mjs'
 import { simulatePhysicalBridge, validatePhysicalBridgeScore } from '../src/physical-bridge.mjs'
 import { curatorialStatusLabel } from '../public/study-status.js'
+import { renderRuntimeHeader, runtimeHeaderView } from '../public/runtime-status.js'
 
 const publicFile = name => readFileSync(new URL(`../public/${name}`, import.meta.url), 'utf8')
 
@@ -45,7 +46,8 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.ok(contrastRatio('ff705d', '0e110e') >= 4.5, 'Operator error text must meet WCAG AA normal-text contrast')
 
   const publicScript = publicFile('app.js')
-  assert.match(publicScript, /field unavailable/)
+  assert.match(publicScript, /renderRuntimeHeader/)
+  assert.doesNotMatch(publicScript, /state\.system\.mode}.+state\.system\.model}/)
   assert.match(publicScript, /aria-busy', 'false'/)
   assert.match(publicScript, /article\.href = PUBLIC_WORK_ROUTES\[work\.id\] \|\| '\/studio#works'/)
   assert.doesNotMatch(publicScript, /article\.tabIndex/)
@@ -53,6 +55,9 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.html'), /id="compute"[\s\S]*Cost and compute ledger[\s\S]*id="compute-output-limit"/)
   assert.match(publicFile('studio.html'), /id="lineage"[\s\S]*Ecosystem topology[\s\S]*id="relation-count"/)
   assert.match(publicFile('studio.html'), /id="runtime"[\s\S]*aria-busy="true"[\s\S]*Runtime continuity[\s\S]*id="runtime-state"[\s\S]*id="runtime-updated"/)
+  assert.match(publicFile('index.html'), /id="runtime-status-link"[\s\S]*href="\/studio#runtime"[\s\S]*id="system-status"[\s\S]*id="system-status-detail"/)
+  assert.match(publicFile('styles.css'), /data-runtime-state="active"[\s\S]*box-shadow:0 0 12px var\(--signal\)/)
+  assert.doesNotMatch(publicFile('styles.css'), /data-runtime-state="stale"[^}]*box-shadow/)
   assert.match(publicFile('studio.js'), /renderRuntime\(state\.runtime\)/)
   assert.match(publicFile('studio.js'), /Runtime record loaded:/)
   assert.match(publicFile('studio.html'), /PROJECTED \/ TOTAL NODES[\s\S]*PROJECTED \/ TOTAL RELATIONS[\s\S]*id="lineage-projection"/)
@@ -236,6 +241,73 @@ test('runtime continuity fails closed on malformed or future-dated evidence', ()
   assert.equal(malformed.ageMinutes, null)
   assert.doesNotMatch(JSON.stringify(malformed), /not-a-time/)
   store.close()
+})
+
+test('public homepage runtime status is evidence-led, allow-listed and fails closed', async () => {
+  const now = new Date('2026-08-19T00:27:00.000Z')
+
+  async function publicStateFrom(store) {
+    const server = createOphrysServer({ store })
+    server.listen(0, '127.0.0.1')
+    await once(server, 'listening')
+    try {
+      const response = await fetch(`http://127.0.0.1:${server.address().port}/api/public/state`)
+      assert.equal(response.status, 200)
+      return await response.json()
+    } finally {
+      server.close()
+      await once(server, 'close')
+    }
+  }
+
+  function renderedView(state) {
+    const container = { dataset: {} }
+    const label = { textContent: '' }
+    const detail = { textContent: '' }
+    const view = renderRuntimeHeader(container, label, detail, state?.runtime, state?.system)
+    assert.equal(container.dataset.runtimeState, view.state)
+    assert.equal(label.textContent, view.label)
+    assert.equal(detail.textContent, view.detail)
+    return view
+  }
+
+  const staleStore = createOphrysStore(':memory:', { now: () => now })
+  staleStore.db.prepare("INSERT INTO visitor_metrics (bucket, surface, kind, count) VALUES ('2026-08-18T21:00:00.000Z', 'public/private-route-marker', 'arrival', 2)").run()
+  const staleState = await publicStateFrom(staleStore)
+  assert.deepEqual(Object.keys(staleState.runtime).sort(), ['ageMinutes', 'assessedAt', 'basis', 'limit', 'observedAt', 'state', 'updatedAt'])
+  assert.equal(staleState.runtime.state, 'stale')
+  assert.doesNotMatch(JSON.stringify(staleState.runtime), /private-route-marker|responseId|surface|reasoning|error/i)
+  const stale = renderedView(staleState)
+  assert.equal(stale.label, 'Runtime stale')
+  assert.match(stale.detail, /Model configured: gpt-5\.6-sol/)
+  assert.match(stale.detail, /cannot verify.+currently live/i)
+  assert.doesNotMatch(`${stale.label} ${stale.detail}`, /compose \/ gpt-5\.6-sol/)
+
+  const failedStore = createOphrysStore(':memory:', { now: () => now })
+  failedStore.createCycle({ id: 'failed-public-runtime', trigger: 'test', model: 'gpt-5.6-sol', startedAt: '2026-08-19T00:20:00.000Z' })
+  failedStore.completeCycle('failed-public-runtime', {
+    status: 'failed',
+    summary: 'Stopped safely.',
+    responseId: 'resp_private_runtime_marker',
+    error: 'private/runtime-route-marker',
+  })
+  const failedState = await publicStateFrom(failedStore)
+  assert.equal(failedState.runtime.state, 'failed')
+  assert.equal(renderedView(failedState).label, 'Runtime failed')
+  assert.doesNotMatch(JSON.stringify(failedState.runtime), /resp_private_runtime_marker|private\/runtime-route-marker/)
+
+  const activeStore = createOphrysStore(':memory:', { now: () => now })
+  activeStore.db.prepare("INSERT INTO visitor_metrics (bucket, surface, kind, count) VALUES ('2026-08-19T00:00:00.000Z', 'public', 'arrival', 1)").run()
+  const activeState = await publicStateFrom(activeStore)
+  assert.equal(activeState.runtime.state, 'active')
+  assert.equal(renderedView(activeState).label, 'Runtime active')
+  assert.equal(activeState.runtime.observedAt, '2026-08-19T00:00:00.000Z')
+
+  assert.deepEqual(runtimeHeaderView(null, { model: 'gpt-5.6-sol' }), {
+    state: 'unavailable',
+    label: 'Runtime unavailable',
+    detail: 'Runtime evidence is unavailable. No live operation is claimed. Open Studio for the evidence ledger.',
+  })
 })
 
 test('education encounter preserves the Lure, Reveal and consequential Counter-read protocol', () => {

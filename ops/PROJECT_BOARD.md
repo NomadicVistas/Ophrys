@@ -32,6 +32,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-026 | P1 | DONE | Public artwork-study discovery | Public field visibly presents all four coded studies with original image previews and direct routes; Studio repeats the visual entry point while every surface preserves pending-review and unpublished status |
 | OPH-027 | P0 | DONE | Ledger-backed public study status | Public gallery, Studio preview and full-screen route distinguish pending, revision, rejection and approval from a minimal curatorial-ledger projection; failure states make no publication claim |
 | OPH-028 | P0 | DONE [!] | Public artwork hero release | Human-approved quartet leads the homepage as four full-viewport heroes with direct interactive routes, ledger-backed publication status, bounded pointer response and aggregate-only engagement events; production promotion and HTTPS verification are recorded separately |
+| OPH-029 | P0 | DONE | Evidence-led public runtime header | Allow-listed timestamped runtime evidence drives active/quiet/stale/disabled/failed/unavailable labels; configuration is not presented as liveness and only active evidence receives the luminous treatment |
 
 ## Current definition of done
 

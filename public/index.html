@@ -20,7 +20,10 @@
       <a href="#method">Method</a>
       <a href="/studio">Studio</a>
     </nav>
-    <div class="system-pill"><i></i><span id="system-status">awakening</span></div>
+    <a class="system-pill" id="runtime-status-link" href="/studio#runtime" data-runtime-state="unavailable" aria-describedby="system-status-detail">
+      <i aria-hidden="true"></i><span id="system-status">Runtime unavailable</span>
+      <span class="sr-only" id="system-status-detail">Runtime evidence is loading. No live operation is claimed.</span>
+    </a>
   </header>
 
   <main id="main-content">

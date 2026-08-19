@@ -1,4 +1,5 @@
 import { curatorialStatusLabel } from './study-status.js'
+import { renderRuntimeHeader } from './runtime-status.js'
 
 const PUBLIC_WORK_ROUTES = {
   'study-borrowed-weather': '/works/borrowed-weather',
@@ -110,14 +111,19 @@ function initializeArtworkHeroes() {
 const grid = document.querySelector('#artwork-grid')
 initializeArtworkHeroes()
 renderStudyStatuses(state?.studyStatuses)
+renderRuntimeHeader(
+  document.querySelector('#runtime-status-link'),
+  document.querySelector('#system-status'),
+  document.querySelector('#system-status-detail'),
+  state?.runtime,
+  state?.system,
+)
 if (state?.artworks?.length) {
   grid.replaceChildren(...state.artworks.map(artworkCard))
-  document.querySelector('#system-status').textContent = `${state.system.mode} / ${state.system.model}`
   document.querySelector('#disclosure-text').textContent = state.disclosure
   renderField(state.fieldScore)
 } else {
   grid.replaceChildren(element('p', 'loading', 'The public field is temporarily quiet. Open Studio to inspect the system state.'))
-  document.querySelector('#system-status').textContent = 'field unavailable'
 }
 grid.setAttribute('aria-busy', 'false')
 

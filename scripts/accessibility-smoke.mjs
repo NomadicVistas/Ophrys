@@ -135,6 +135,38 @@ try {
       });`,
   })
 
+  await devtools.send('Page.navigate', { url: `http://127.0.0.1:${appPort}/` })
+  await devtools.evaluate(`new Promise((resolve, reject) => {
+    const deadline = Date.now() + 5000;
+    const ready = () => {
+      if (document.readyState === 'complete' && document.querySelector('#system-status')?.textContent.startsWith('Runtime ')) return resolve(true);
+      if (Date.now() > deadline) return reject(new Error('public runtime header did not become ready'));
+      setTimeout(ready, 25);
+    };
+    ready();
+  })`)
+  const publicHeader = await devtools.evaluate(`(() => {
+    const link = document.querySelector('#runtime-status-link');
+    const label = document.querySelector('#system-status');
+    const rect = link.getBoundingClientRect();
+    return {
+      state: link.dataset.runtimeState,
+      label: label.textContent,
+      detail: document.querySelector('#system-status-detail').textContent,
+      href: link.getAttribute('href'),
+      visible: getComputedStyle(label).display !== 'none' && rect.width > 0 && rect.left >= 0 && rect.right <= innerWidth,
+      indicatorShadow: getComputedStyle(link.querySelector('i')).boxShadow,
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    };
+  })()`)
+  assert.equal(publicHeader.state, 'quiet', 'homepage must derive its initial quiet label from the timestamped runtime record')
+  assert.equal(publicHeader.label, 'Runtime quiet')
+  assert.equal(publicHeader.href, '/studio#runtime')
+  assert.equal(publicHeader.visible, true, 'homepage runtime evidence link must remain visible at 320 CSS pixels')
+  assert.equal(publicHeader.indicatorShadow, 'none', 'quiet runtime must not use the luminous active indicator')
+  assert.ok(publicHeader.overflow <= 0, `homepage overflowed horizontally by ${publicHeader.overflow}px`)
+  assert.match(publicHeader.detail, /Model configured: gpt-5\.6-sol.+does not establish that the model is running/i)
+
   for (const slug of slugs) {
     await devtools.send('Page.navigate', { url: `http://127.0.0.1:${appPort}/works/${slug}` })
     await devtools.evaluate(`new Promise((resolve, reject) => {
@@ -227,7 +259,7 @@ try {
     assert.match(reducedAgain.label, /Reduced motion: static/i)
   }
 
-  console.log('Accessibility smoke passed: 4 reduced-motion artworks at 320 × 700 CSS pixels; no loop, overflow, hidden control or stored preference.')
+  console.log('Accessibility smoke passed: evidence-led homepage header plus 4 reduced-motion artworks at 320 × 700 CSS pixels; no loop, overflow, hidden control or stored preference.')
 } finally {
   devtools?.close()
   chromium.kill('SIGTERM')

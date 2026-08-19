@@ -282,3 +282,14 @@ Next: no autonomous implementation slice remains. Await a new integration findin
 - Verified `npm run check`, all 24 deterministic tests, the four-artwork reduced-motion 320px accessibility smoke, `npm run judge:smoke` and clean diff whitespace.
 
 Next: record four human publication decisions, promote this verified revision to production and verify every public artwork route over HTTPS.
+
+## 2026-08-19 — evidence-led public runtime header
+
+- Completed OPH-029 from the integration reviewer's reproduced P1 finding: the deployed homepage's luminous `compose / gpt-5.6-sol` pill described configuration while the evidence ledger reported a stale runtime and no completed composition cycles.
+- Added a seven-field public runtime allow-list derived from the existing continuity assessment. It exposes only state, basis, observation/update/assessment timestamps, rounded age and the no-liveness limit; cycle errors, provider IDs, routes, surfaces, hidden reasoning and unknown provenance remain absent.
+- Made the homepage render `active`, `quiet`, `stale`, `disabled`, `failed` or fail-closed `unavailable` labels, link to Studio evidence and describe the model only as configured. Only supported active evidence receives the luminous signal; stale, failed and unavailable states do not.
+- Added deterministic public-HTTP and client-render coverage for stale, failed, active and unavailable states, including exact runtime schema minimisation and protected-marker exclusion. No provider request, publication, deployment, production mutation, hardware action or scheduler change occurred.
+- Build Week checkpoint (2026-07-22, reported retrospectively): the bounded phase-two lane and human-authorised artwork release were complete; live model-generation evidence and submission remained separate human/external gates. This checkpoint did not stop the fixed builder lane.
+- Verified the focused state matrix, `npm run check`, all 25 deterministic tests, the evidence-led homepage plus four-artwork reduced-motion 320px accessibility smoke, and `npm run judge:smoke`.
+
+Next: no autonomous implementation slice remains. OPH-029 review/integration and any deployment require separate human authority; await a new reviewed finding or human-authorised roadmap item.
