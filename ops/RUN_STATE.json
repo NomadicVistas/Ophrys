@@ -1,18 +1,32 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "project": "Ophrys",
+  "phase": {
+    "id": "ecosystem-phase-two",
+    "status": "implementation-complete",
+    "objective": "Build an inspectable autopoietic artistic ecosystem while preserving bounded runtime, human-curated publication, and review-branch development loops."
+  },
   "automation": {
-    "jobId": "0d023788-f31e-4540-bc4c-d51882dfdfcb",
-    "name": "ophrys-build-week-hourly-sol",
+    "jobId": "f435aa80-ecbc-4973-b59d-10fbca1aba0c",
+    "name": "ophrys-ecosystem-hourly-sol",
     "branch": "codex/hourly-builder",
-    "schedule": "25 * * * * Europe/Amsterdam",
+    "schedule": "hourly (managed by OpenClaw)",
     "model": "codex/gpt-5.6-sol",
     "reasoning": "high",
+    "fallbacks": [],
     "deadline": "2026-07-22T00:00:00Z"
   },
-  "lastSuccessfulRun": null,
-  "lastSelectedItem": null,
+  "previousLane": {
+    "name": "phase-one hourly builder",
+    "stoppedAt": "2026-07-14T02:30:09Z",
+    "finalItem": "OPH-012",
+    "status": "completed-lane"
+  },
+  "lastSuccessfulRun": "2026-08-19T04:42:47Z",
+  "lastSelectedItem": "OPH-030 protected exhibition-transparency review",
   "blockerStreak": 0,
   "complete": false,
-  "stopMarker": "ops/AUTONOMY_STOP"
+  "stopped": false,
+  "nextBestSlice": "No further autonomous implementation slice. Await a new reviewed finding or human-authorised roadmap item; actual OPH-030 classification/notice decisions, OPH-029 integration/deployment, live provider evidence, submission work, and OPH-025/030 human handover remain external actions.",
+  "deadline": "2026-07-22T00:00:00Z"
 }

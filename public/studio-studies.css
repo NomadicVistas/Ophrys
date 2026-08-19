@@ -1,0 +1,117 @@
+.telemetry-grid.literacy-summary {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.literacy-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin: 2rem 0 0;
+  padding: 0;
+  border-top: 1px solid #44483f;
+  border-left: 1px solid #44483f;
+  list-style: none;
+}
+
+.literacy-step {
+  min-width: 0;
+  padding: 1.15rem;
+  border-right: 1px solid #44483f;
+  border-bottom: 1px solid #44483f;
+}
+
+.literacy-step-head {
+  display: flex;
+  min-height: 2.2rem;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.literacy-step-number {
+  color: var(--signal);
+  font-family: var(--mono);
+  font-size: .6rem;
+}
+
+.literacy-step h3 {
+  margin: 2.5rem 0 .8rem;
+  font-size: 1.2rem;
+}
+
+.literacy-step p {
+  overflow-wrap: anywhere;
+}
+
+.literacy-prompt {
+  min-height: 5.4rem;
+  color: #c6cac0;
+  font-size: .78rem;
+}
+
+.literacy-example,
+.literacy-limit {
+  font-family: var(--mono);
+  font-size: .62rem;
+}
+
+.literacy-example {
+  color: var(--signal);
+}
+
+.literacy-limit {
+  color: #92968d;
+}
+
+.literacy-step.unavailable .literacy-example {
+  color: #c3c7bd;
+}
+
+@media (max-width: 1050px) {
+  .literacy-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .literacy-prompt {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .telemetry-grid.literacy-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+.coded-study-preview {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  margin: 1.4rem -1rem 0;
+  overflow: hidden;
+  border: 1px solid #44483f;
+  background: #050605;
+}
+
+.coded-study-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 700ms ease, transform 900ms cubic-bezier(.2, .75, .2, 1);
+}
+
+.coded-study-preview span {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  padding: .55rem .7rem;
+  background: var(--signal);
+  color: var(--dark);
+  font-family: var(--mono);
+  font-size: .6rem;
+  text-transform: uppercase;
+}
+
+.coded-study-preview:hover img {
+  filter: saturate(1.14) contrast(1.04);
+  transform: scale(1.025);
+}

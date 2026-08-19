@@ -1,3 +1,5 @@
+import { curatorialStatusLabel } from './study-status.js'
+
 function element(tag, className, text) {
   const node = document.createElement(tag)
   if (className) node.className = className
@@ -9,9 +11,32 @@ function date(value) {
   return value ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'open'
 }
 
+const CODED_STUDIES = {
+  'study-borrowed-weather': {
+    route: '/works/borrowed-weather',
+    image: '/assets/works/borrowed-weather.webp',
+    alt: 'A dark threshold filled by a torn pale membrane, mist and spectral chartreuse light.',
+  },
+  'study-choir-of-almost': {
+    route: '/works/choir-of-almost',
+    image: '/assets/works/choir-of-almost.webp',
+    alt: 'A black gallery holds suspended metal, dark wood and translucent planes lit by coral, violet and pearl fragments.',
+  },
+  'study-afterimage-commons': {
+    route: '/works/afterimage-commons',
+    image: '/assets/works/afterimage-commons.webp',
+    alt: 'A near-black wall carries fading mineral-cyan, violet and bone-white traces around erased darkness.',
+  },
+  'study-unchosen-signal': {
+    route: '/works/unchosen-signal',
+    image: '/assets/works/unchosen-signal.webp',
+    alt: 'Vermilion and hot-white light confront ultraviolet blue and chartreuse across a black mechanical seam.',
+  },
+}
+
 function metricRow(metric, max) {
   const row = element('div', 'metric-row')
-  const name = element('span', '', `${metric.kind.replaceAll('_', ' ')} / ${metric.surface}`)
+  const name = element('span', '', metric.kind.replaceAll('_', ' '))
   const track = element('div', 'metric-track')
   const fill = element('i', 'metric-fill')
   fill.style.width = `${Math.max(3, (Number(metric.count) / max) * 100)}%`
@@ -24,7 +49,12 @@ function cycleRow(cycle) {
   const row = element('article', `cycle-row ${cycle.status}`)
   const index = element('span', 'cycle-state', cycle.status)
   const body = element('div')
-  body.append(element('h3', '', cycle.summary || 'Composition in progress'), element('p', '', `${cycle.trigger} / ${cycle.model} / ${date(cycle.startedAt)}`))
+  const usage = cycle.usage?.total_tokens
+  const compute = [cycle.trigger, cycle.model, date(cycle.startedAt)]
+  if (Number.isInteger(cycle.latencyMs)) compute.push(`${cycle.latencyMs} ms`)
+  if (Number.isFinite(usage)) compute.push(`${usage} tokens`)
+  if (Number.isInteger(cycle.outputTokenBudget)) compute.push(`${cycle.outputTokenBudget} output max`)
+  body.append(element('h3', '', cycle.summary || 'Composition in progress'), element('p', '', compute.join(' / ')))
   if (cycle.error) body.append(element('p', 'error', cycle.error))
   row.append(index, body)
   return row
@@ -32,28 +62,232 @@ function cycleRow(cycle) {
 
 function artworkRow(work) {
   const article = element('article', 'studio-work')
+  const provenance = work.provenance || {}
+  const review = provenance.review || {}
+  const response = provenance.response || {}
   const head = element('header')
   head.append(element('span', `status ${work.status}`, work.status), element('span', '', date(work.createdAt)))
-  article.append(head, element('h3', '', work.title), element('p', 'medium', work.medium), element('p', '', work.proposition))
+  article.append(head)
+  const study = CODED_STUDIES[work.id]
+  if (study) {
+    const preview = element('a', 'coded-study-preview')
+    preview.href = study.route
+    const statusLabel = curatorialStatusLabel({ status: work.status, reviewDecision: provenance.review?.decision })
+    preview.setAttribute('aria-label', `${work.title}. ${statusLabel}. Enter browser study.`)
+    const image = element('img')
+    image.src = study.image
+    image.alt = study.alt
+    image.loading = 'lazy'
+    image.decoding = 'async'
+    preview.append(image, element('span', '', 'Enter coded study ↗'))
+    article.append(preview)
+  }
+  article.append(element('h3', '', work.title), element('p', 'medium', work.medium), element('p', '', work.proposition))
   const pair = element('div', 'tactic-pair')
   const lure = element('div'); lure.append(element('span', '', 'LURE HYPOTHESIS'), element('p', '', work.lureHypothesis))
   const counter = element('div'); counter.append(element('span', '', 'COUNTER-READING'), element('p', '', work.counterReading))
   pair.append(lure, counter); article.append(pair)
+  const provenancePair = element('div', 'tactic-pair')
+  const input = element('div')
+  const aggregateTotals = (provenance.inputSummary?.aggregateEventSummary || [])
+    .map(item => `${item.kind.replaceAll('_', ' ')} ${item.count}`)
+  const inputPieces = [provenance.promptVersion || 'prompt version unrecorded']
+  if (aggregateTotals.length) inputPieces.push(`aggregate: ${aggregateTotals.join(', ')}`)
+  input.append(element('span', '', 'PROMPT / INPUT'), element('p', '', inputPieces.join(' · ')))
+  const rights = element('div')
+  const usage = response.usage?.total_tokens ?? response.usage?.output_tokens ?? response.usage?.input_tokens ?? null
+  const rightsPieces = [provenance.rightsBasis || 'Rights basis unrecorded.']
+  if (usage !== null) rightsPieces.push(`usage: ${usage} tokens`)
+  rightsPieces.push(`decision: ${review.decision || 'pending'}`)
+  if (review.rationale) rightsPieces.push(`rationale: ${review.rationale}`)
+  if (review.rejectionReason) rightsPieces.push(`rejection: ${review.rejectionReason}`)
+  rights.append(element('span', '', 'RIGHTS / REVIEW'), element('p', '', rightsPieces.join(' · ')))
+  provenancePair.append(input, rights)
+  article.append(provenancePair)
   return article
 }
 
-const state = await fetch('/api/studio/state').then(response => response.json()).catch(() => null)
-if (state) {
+function relationRow(relation) {
+  const row = element('article', 'lineage-row')
+  const relationKind = element('span', 'cycle-state', relation.kind.replaceAll('-', ' '))
+  const body = element('div')
+  body.append(
+    element('h3', '', `${relation.fromTitle} → ${relation.toTitle}`),
+    element('p', '', `${relation.fromStatus} ${relation.fromType} → ${relation.toStatus} ${relation.toType} · ${date(relation.createdAt)}${relation.expiresAt ? ` · expires ${date(relation.expiresAt)}` : ''}`),
+    element('p', 'lineage-evidence', relation.evidence),
+  )
+  row.append(relationKind, body)
+  return row
+}
+
+function stageEvidence(stage) {
+  if (stage.stage === 'observation') {
+    const totals = stage.evidence.totals.length
+      ? stage.evidence.totals.map(item => `${item.kind.replaceAll('_', ' ')} ${item.count}`).join(' · ')
+      : 'No aggregate events were present in the composition packet.'
+    return `${totals} · ${stage.evidence.metricWindowHours}-hour window`
+  }
+  if (typeof stage.evidence === 'string') return stage.evidence
+  if (stage.stage === 'candidate') return `${stage.evidence.status} · ${stage.evidence.proposition} Counter-reading: ${stage.evidence.counterReading}`
+  if (stage.stage === 'decision') {
+    if (stage.evidence.kind === 'pending') return 'No human decision is recorded.'
+    return `${stage.evidence.actorRole} · ${stage.evidence.previousStatus || 'unrecorded prior state'} → ${stage.evidence.resultingStatus} · ${stage.evidence.rationale}`
+  }
+  return `${stage.evidence.outcome.replaceAll('-', ' ')} · artwork status ${stage.evidence.artworkStatus}`
+}
+
+function lifecycleRow(trace) {
+  const article = element('article', 'lifecycle-row')
+  const head = element('header')
+  const title = element('h3', '', trace.stages.find(stage => stage.stage === 'candidate')?.label || 'Composition trace')
+  head.append(title, element('span', `status ${trace.outcome === 'public' ? 'published' : trace.outcome === 'refused' ? 'archived' : 'studio'}`, trace.outcome.replaceAll('-', ' ')))
+  const chain = element('ol', 'lifecycle-chain')
+  for (const [index, stage] of trace.stages.entries()) {
+    const item = element('li', `lifecycle-stage ${stage.stage}`)
+    item.append(
+      element('span', 'lifecycle-stage-number', String(index + 1).padStart(2, '0')),
+      element('strong', '', stage.label),
+      element('p', '', stageEvidence(stage)),
+      element('p', 'lifecycle-limit', stage.limit),
+    )
+    chain.append(item)
+  }
+  const links = element('p', 'lifecycle-links', trace.links.map(link => link.kind.replaceAll('-', ' ')).join(' → '))
+  article.append(head, chain, links)
+  return article
+}
+
+function renderLifecycles(lifecycles) {
+  const publicCount = lifecycles.traces.filter(trace => trace.outcome === 'public').length
+  const refusedCount = lifecycles.traces.filter(trace => trace.outcome === 'refused').length
+  document.querySelector('#lifecycle-count').textContent = `${lifecycles.traces.length} / ${lifecycles.projection.total}`
+  document.querySelector('#lifecycle-public-count').textContent = String(publicCount)
+  document.querySelector('#lifecycle-refused-count').textContent = String(refusedCount)
+  document.querySelector('#lifecycle-open-count').textContent = String(lifecycles.traces.length - publicCount - refusedCount)
+  document.querySelector('#lifecycle-authority').textContent = lifecycles.authority
+  document.querySelector('#lifecycle-projection').textContent = `${lifecycles.projection.scope}${lifecycles.projection.truncated ? ` The view is limited to ${lifecycles.projection.limit} traces.` : ''}`
+  document.querySelector('#lifecycle-redaction').textContent = lifecycles.redaction
+  document.querySelector('#lifecycle-list').replaceChildren(...(lifecycles.traces.length
+    ? lifecycles.traces.map(lifecycleRow)
+    : [element('p', 'empty', 'No composition cycle has produced a candidate lifecycle yet. Human-authored seeds remain visible in the ecosystem topology.')]))
+}
+
+function renderEcosystem(ecosystem) {
+  const projection = ecosystem.projection
+  document.querySelector('#node-count').textContent = `${ecosystem.nodes.length} / ${projection.totalNodes}`
+  document.querySelector('#relation-count').textContent = `${ecosystem.relations.length} / ${projection.totalRelations}`
+  document.querySelector('#studio-node-count').textContent = String(ecosystem.statusCounts.studio || 0)
+  document.querySelector('#published-node-count').textContent = String(ecosystem.statusCounts.published || 0)
+  document.querySelector('#counter-signal-node-count').textContent = String(ecosystem.nodeTypeCounts.counterSignal || 0)
+  document.querySelector('#decision-node-count').textContent = String(ecosystem.nodeTypeCounts.curatorialDecision || 0)
+  document.querySelector('#physical-output-node-count').textContent = String(ecosystem.nodeTypeCounts.physicalOutput || 0)
+  document.querySelector('#lineage-boundary').textContent = ecosystem.boundary
+  const truncation = []
+  if (projection.nodesTruncated) truncation.push(`work view limited to ${projection.nodeLimit}, counter-signal view to ${projection.counterSignalNodeLimit}, and decision view to ${projection.curatorialDecisionNodeLimit}`)
+  if (projection.relationsTruncated) truncation.push(`relation view limited to ${projection.relationLimit}`)
+  document.querySelector('#lineage-projection').textContent = `${projection.scope} ${projection.eligibleRelations} of ${projection.totalRelations} total relations are eligible for this closed node projection.${truncation.length ? ` Current limits: ${truncation.join('; ')}.` : ''}`
+  document.querySelector('#counter-signal-policy').textContent = `${ecosystem.counterSignalPolicy.aggregation} Retention: ${ecosystem.counterSignalPolicy.retentionHours} hours. ${ecosystem.counterSignalPolicy.privacyLimit}`
+  document.querySelector('#curatorial-decision-policy').textContent = `${ecosystem.curatorialDecisionPolicy.authority} ${ecosystem.curatorialDecisionPolicy.limit}`
+  document.querySelector('#physical-output-policy').textContent = `${ecosystem.physicalOutputPolicy.contract}. ${ecosystem.physicalOutputPolicy.boundary} ${ecosystem.physicalOutputPolicy.fallback}`
+  document.querySelector('#lineage-list').replaceChildren(...(ecosystem.relations.length
+    ? ecosystem.relations.map(relationRow)
+    : [element('p', 'empty', 'One seed work is present. Explicit lineage will appear after a bounded composition cycle uses an earlier work as context.')]))
+}
+
+function renderPhysicalBridge(bridge) {
+  document.querySelector('#physical-bridge-state').textContent = bridge.status
+  document.querySelector('#physical-bridge-revision').textContent = bridge.source ? String(bridge.source.revision) : 'invalid input'
+  document.querySelector('#physical-bridge-light').textContent = bridge.light.enabled
+    ? `${bridge.light.pattern} · ${bridge.light.intensityPercent}% · ${bridge.light.pulseBpm} BPM`
+    : 'quiet · 0%'
+  document.querySelector('#physical-bridge-sound').textContent = bridge.sound.enabled
+    ? `${bridge.sound.toneHz} Hz · ${bridge.sound.gainPercent}% · ${bridge.sound.pulseBpm} BPM`
+    : 'silence · 0%'
+  document.querySelector('#physical-bridge-boundary').textContent = `Hardware action: ${bridge.safety.hardwareAction ? 'enabled' : 'disabled'} · transport: ${bridge.safety.transport}.`
+  document.querySelector('#physical-bridge-evidence').textContent = bridge.evidence.validation === 'passed'
+    ? `Validated by ${bridge.evidence.mappingVersion}; input digest ${bridge.evidence.inputDigest}. This is a deterministic simulator frame, not evidence that a device rendered it.`
+    : `Validation failed: ${bridge.evidence.errors.join('; ')}`
+  document.querySelector('#physical-bridge-fallback').textContent = bridge.safety.fallback
+}
+
+function literacyStep(step, index) {
+  const item = element('li', `literacy-step ${step.supported ? 'supported' : 'unavailable'}`)
+  const head = element('div', 'literacy-step-head')
+  head.append(
+    element('span', 'literacy-step-number', String(index + 1).padStart(2, '0')),
+    element('span', 'cycle-state', step.supported ? 'evidence present' : 'not recorded'),
+  )
+  item.append(
+    head,
+    element('h3', '', step.label),
+    element('p', 'literacy-prompt', step.prompt),
+    element('p', 'literacy-example', step.example),
+    element('p', 'literacy-limit', step.limit),
+  )
+  return item
+}
+
+function renderLiteracy(literacy) {
+  document.querySelector('#literacy-outcome').textContent = literacy.learningOutcome
+  document.querySelector('#literacy-checks').textContent = `${literacy.rubric.supportedChecks} / ${literacy.rubric.totalChecks}`
+  document.querySelector('#literacy-duration').textContent = `${literacy.durationMinutes} min`
+  document.querySelector('#literacy-rubric').textContent = literacy.rubric.limit
+  document.querySelector('#literacy-privacy').textContent = literacy.privacyBoundary
+  document.querySelector('#literacy-steps').replaceChildren(...literacy.steps.map(literacyStep))
+  document.querySelector('#literacy').setAttribute('aria-busy', 'false')
+}
+
+const status = document.querySelector('#studio-status')
+
+function renderRuntime(runtime) {
+  document.querySelector('#runtime-state').textContent = runtime.state
+  document.querySelector('#runtime-observed').textContent = runtime.observedAt ? date(runtime.observedAt) : 'none recorded'
+  document.querySelector('#runtime-updated').textContent = date(runtime.updatedAt)
+  document.querySelector('#runtime-assessed').textContent = date(runtime.assessedAt)
+  document.querySelector('#runtime-age').textContent = runtime.ageMinutes === null ? 'not applicable' : `${runtime.ageMinutes} min`
+  document.querySelector('#runtime-basis').textContent = runtime.basis
+  document.querySelector('#runtime-policy').textContent = runtime.freshnessPolicy
+  document.querySelector('#runtime-limit').textContent = runtime.limit
+  document.querySelector('#runtime').setAttribute('aria-busy', 'false')
+}
+
+function renderComputeLedger(compute) {
+  document.querySelector('#compute-attempts').textContent = `${compute.attempts} / ${compute.budget.dailyCycleLimit}`
+  document.querySelector('#compute-remaining').textContent = String(compute.budget.remainingCycles)
+  document.querySelector('#compute-tokens').textContent = compute.usage.recordedCycles ? String(compute.usage.totalTokens) : 'not returned'
+  document.querySelector('#compute-latency').textContent = compute.latency.averageMs === null ? 'not recorded' : `${compute.latency.averageMs} ms`
+  document.querySelector('#compute-models').textContent = compute.models.length ? compute.models.map(item => `${item.model} × ${item.count}`).join(', ') : document.querySelector('#model').textContent
+  document.querySelector('#compute-output-limit').textContent = `${compute.budget.maxOutputTokensPerCycle} tokens`
+  document.querySelector('#compute-basis').textContent = compute.costBasis
+}
+
+try {
+  const response = await fetch('/api/studio/state')
+  if (!response.ok) throw new Error(`Studio state failed (${response.status})`)
+  const state = await response.json()
   document.querySelector('#mode').textContent = state.system.systemMode
   document.querySelector('#model').textContent = state.system.model
   document.querySelector('#cycle-count').textContent = state.cycles.length
   document.querySelector('#work-count').textContent = state.artworks.length
   document.querySelector('#studio-disclosure').textContent = state.disclosure
+  renderLiteracy(state.literacy)
+  renderRuntime(state.runtime)
+  renderPhysicalBridge(state.physicalBridge)
+  renderLifecycles(state.lifecycles)
+  renderEcosystem(state.ecosystem)
+  renderComputeLedger(state.compute)
   const max = Math.max(1, ...state.metrics.map(item => Number(item.count)))
   document.querySelector('#metrics').replaceChildren(...(state.metrics.length ? state.metrics.map(item => metricRow(item, max)) : [element('p', 'empty', 'No aggregate public events yet.')]))
   document.querySelector('#cycles-list').replaceChildren(...(state.cycles.length ? state.cycles.map(cycleRow) : [element('p', 'empty', 'The first GPT‑5.6 cycle has not run yet.')]))
   document.querySelector('#studio-artworks').replaceChildren(...state.artworks.map(artworkRow))
   document.querySelector('#method-list').replaceChildren(...state.method.map(step => element('li', '', step)))
+  status.textContent = `Runtime record loaded: ${state.runtime.state}.`
+  status.className = 'surface-status sr-only'
+} catch {
+  document.querySelector('#literacy').setAttribute('aria-busy', 'false')
+  document.querySelector('#runtime').setAttribute('aria-busy', 'false')
+  status.className = 'surface-status error'
+  status.textContent = 'The public trace could not be loaded. No system state is being claimed.'
 }
 
 fetch('/api/public/event', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'studio_open', surface: 'studio' }) }).catch(() => {})

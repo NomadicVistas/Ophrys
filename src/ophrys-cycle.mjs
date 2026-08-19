@@ -10,7 +10,9 @@ export async function runOphrysCycle({ store, trigger = 'manual', force = false,
   if (!force && !settings.cycleEnabled) return { skipped: true, reason: 'Cycles are disabled' }
 
   const cycleId = randomUUID()
-  store.createCycle({ id: cycleId, trigger, model: settings.model })
+  const startedAt = new Date().toISOString()
+  const startedMs = Date.now()
+  store.createCycle({ id: cycleId, trigger, model: settings.model, outputTokenBudget: settings.maxOutputTokens, startedAt })
   try {
     const result = await generator({
       settings,
@@ -23,11 +25,12 @@ export async function runOphrysCycle({ store, trigger = 'manual', force = false,
     store.commitArtworkCycle(cycleId, {
       id: artworkId, ...result.artwork, model: result.model,
       status, createdAt: new Date().toISOString(),
-    }, { summary, responseId: result.responseId })
-    return { skipped: false, cycleId, artworkId, status, title: result.artwork.title, model: result.model }
+      provenance: result.provenance,
+    }, { summary, responseId: result.responseId, usage: result.usage, latencyMs: Date.now() - startedMs })
+    return { skipped: false, cycleId, artworkId, status, title: result.artwork.title, model: result.model, usage: result.usage || null, outputTokenBudget: settings.maxOutputTokens }
   } catch (error) {
     const message = safeError(error)
-    store.completeCycle(cycleId, { status: 'failed', summary: 'The composition cycle stopped without publishing.', error: message })
+    store.completeCycle(cycleId, { status: 'failed', summary: 'The composition cycle stopped without publishing.', error: message, latencyMs: Date.now() - startedMs })
     throw new Error(message)
   }
 }

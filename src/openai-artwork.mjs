@@ -15,6 +15,8 @@ const ARTWORK_SCHEMA = {
   },
 }
 
+const PROMPT_VERSION = 'ophrys-composition-v1'
+
 function outputText(response) {
   for (const item of response.output || []) {
     if (item.type !== 'message') continue
@@ -26,6 +28,24 @@ function outputText(response) {
 export async function generateArtwork({ settings, metrics, recentArtworks, apiKey = process.env.OPENAI_API_KEY, fetchImpl = fetch }) {
   if (!apiKey) throw new Error('OPENAI_API_KEY is required for an Ophrys composition cycle')
 
+  const aggregateEventSummary = metrics.map(({ surface, kind, count }) => ({ surface, kind, count }))
+  const recentArtworkSummary = recentArtworks.map(({ id, title, status, createdAt }) => ({ id, title, status, createdAt })).slice(0, 8)
+  const inputSummary = {
+    promptVersion: PROMPT_VERSION,
+    settings: {
+      systemMode: settings.systemMode,
+      model: settings.model,
+      reasoningEffort: settings.reasoningEffort,
+      explorationRate: settings.explorationRate,
+      metricWindowHours: settings.metricWindowHours,
+      maxOutputTokens: settings.maxOutputTokens,
+    },
+    aggregateEventSummary,
+    recentArtworkSummary,
+    requiredSpatialGrammar: ['threshold', 'field', 'residue', 'counter-field'],
+    desiredAudience: ['culturally experienced visitors', 'curious general public', 'students and educators'],
+  }
+
   const instructions = `You are the bounded composition organ of Ophrys, a contemporary art ecosystem and public AI-literacy installation.
 Create one original, museum-grade artwork proposition that could be prototyped physically and represented online.
 Your subject is attraction without understanding: an adaptive system may improve at drawing attention while remaining uncertain about a person.
@@ -36,11 +56,12 @@ Refusal must materially alter the work. Do not write promotional hype, imitate a
 Produce a precise artwork, not an essay, chatbot, dashboard, or generic interactive installation.`
 
   const input = {
+    promptVersion: PROMPT_VERSION,
     currentMode: settings.systemMode,
     curatorialDirective: settings.curatorialDirective,
     explorationRate: settings.explorationRate,
-    aggregateEvents: metrics,
-    recentArtworkTitles: recentArtworks.map(item => item.title).slice(0, 8),
+    aggregateEvents: aggregateEventSummary,
+    recentArtworkTitles: recentArtworkSummary.map(item => item.title),
     requiredSpatialGrammar: ['threshold', 'field', 'residue', 'counter-field'],
     desiredAudience: ['culturally experienced visitors', 'curious general public', 'students and educators'],
   }
@@ -54,12 +75,36 @@ Produce a precise artwork, not an essay, chatbot, dashboard, or generic interact
       safety_identifier: 'ophrys-composition-organ-v1',
       reasoning: { effort: settings.reasoningEffort || 'high', context: 'current_turn' },
       text: { verbosity: 'medium', format: { type: 'json_schema', name: 'ophrys_artwork', strict: true, schema: ARTWORK_SCHEMA } },
-      max_output_tokens: 2600,
+      max_output_tokens: settings.maxOutputTokens || 2600,
     }), signal: AbortSignal.timeout(Number(process.env.OPHRYS_OPENAI_TIMEOUT_MS || 120_000)),
   })
 
   const payload = await response.json().catch(() => ({}))
   if (!response.ok) throw new Error(`OpenAI Responses API ${response.status}: ${payload.error?.message || 'request failed'}`)
   const artwork = JSON.parse(outputText(payload))
-  return { artwork, responseId: payload.id || null, model: payload.model || settings.model }
+  return {
+    artwork,
+    responseId: payload.id || null,
+    model: payload.model || settings.model,
+    usage: payload.usage || null,
+    provenance: {
+      promptVersion: PROMPT_VERSION,
+      sourceReferences: ['Aggregate public metrics', 'Recent candidate titles', 'Curatorial directive'],
+      rightsBasis: 'Generated from aggregate public events and project-owned candidate history only; no visitor identifiers, raw media, or third-party corpus text were ingested.',
+      inputSummary,
+      response: {
+        responseId: payload.id || null,
+        model: payload.model || settings.model,
+        usage: payload.usage || null,
+      },
+      review: {
+        status: 'studio',
+        decision: 'pending',
+        rationale: null,
+        rejectionReason: null,
+        reviewedAt: null,
+        reviewedBy: null,
+      },
+    },
+  }
 }
