@@ -34,6 +34,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-028 | P0 | DONE [!] | Public artwork hero release | Human-approved quartet leads the homepage as four full-viewport heroes with direct interactive routes, ledger-backed publication status, bounded pointer response and aggregate-only engagement events; production promotion and HTTPS verification are recorded separately |
 | OPH-029 | P0 | DONE | Evidence-led public runtime header | Allow-listed timestamped runtime evidence drives active/quiet/stale/disabled/failed/unavailable labels; configuration is not presented as liveness and only active evidence receives the luminous treatment |
 | OPH-030 | P1 | DONE | Protected exhibition-transparency review | Operator separates direct AI interaction from generated/manipulated content, leaves actual scope unassessed, requires notice/access/model/reviewer evidence and stops on uncertainty; public APIs collect and expose no review or visitor acknowledgement |
+| OPH-031 | P1 | DONE | Deterministic runtime-header readiness | Homepage runtime evidence exposes a truthful `aria-busy` loading lifecycle and the 320px browser smoke waits for hydration instead of accepting the fail-closed placeholder as assessed state |
 
 ## Current definition of done
 

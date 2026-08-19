@@ -22,11 +22,11 @@
     "finalItem": "OPH-012",
     "status": "completed-lane"
   },
-  "lastSuccessfulRun": "2026-08-19T04:42:47Z",
-  "lastSelectedItem": "OPH-030 protected exhibition-transparency review",
+  "lastSuccessfulRun": "2026-08-19T07:30:02Z",
+  "lastSelectedItem": "OPH-031 deterministic runtime-header readiness",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "No further autonomous implementation slice. Await a new reviewed finding or human-authorised roadmap item; actual OPH-030 classification/notice decisions, OPH-029 integration/deployment, live provider evidence, submission work, and OPH-025/030 human handover remain external actions.",
+  "nextBestSlice": "No further autonomous implementation slice. Await a new reviewed finding or human-authorised roadmap item; OPH-029/031 integration/deployment, actual OPH-030 classification/notice decisions, live provider evidence, submission work, and OPH-025/030 human handover remain external actions.",
   "deadline": "2026-07-22T00:00:00Z"
 }

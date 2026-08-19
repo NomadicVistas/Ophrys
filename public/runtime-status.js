@@ -44,5 +44,6 @@ export function renderRuntimeHeader(container, labelNode, detailNode, runtime, s
   container.dataset.runtimeState = view.state
   labelNode.textContent = view.label
   detailNode.textContent = view.detail
+  container.setAttribute('aria-busy', 'false')
   return view
 }

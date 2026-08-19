@@ -303,3 +303,12 @@ Next: no autonomous implementation slice remains. OPH-029 review/integration and
 - Verified the focused protected/public boundary test, `npm run check`, all 25 deterministic tests, the credential-free judge smoke and the isolated evidence-led homepage plus four-artwork reduced-motion 320px accessibility smoke. A concurrently launched accessibility run initially observed `unavailable`; the required isolated rerun passed.
 
 Next: no autonomous implementation slice remains. A responsible human must classify the actual exhibition configuration and approve any accessible notice; await a new reviewed finding or human-authorised roadmap item.
+
+## 2026-08-19 — deterministic runtime-header readiness
+
+- Completed OPH-031 after the required isolated accessibility smoke reproduced the homepage runtime as `unavailable` while its in-memory API record was `quiet`. The smoke's readiness predicate was accepting the server-rendered fail-closed placeholder before the module fetched and rendered timestamped evidence.
+- Added an explicit `aria-busy="true"` loading state to the public runtime evidence link and clear it only after `renderRuntimeHeader` completes. The placeholder remains honest if JavaScript or the public-state request fails; no state is inferred from configuration.
+- Made the Chromium smoke wait for that hydration boundary before assessing the recorded state, then assert that loading completed. This changes no runtime projection, artwork status, curatorial decision, visitor data, provider request, publication, deployment, hardware or scheduler state.
+- Verified the focused homepage tests, `npm run check`, all 25 deterministic tests, the isolated evidence-led homepage plus four-artwork 320px accessibility smoke and `npm run judge:smoke`.
+
+Next: no further autonomous implementation slice. OPH-029/031 integration and deployment, OPH-030 contextual review, live provider evidence and submission remain human/external actions.

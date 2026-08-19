@@ -139,7 +139,7 @@ try {
   await devtools.evaluate(`new Promise((resolve, reject) => {
     const deadline = Date.now() + 5000;
     const ready = () => {
-      if (document.readyState === 'complete' && document.querySelector('#system-status')?.textContent.startsWith('Runtime ')) return resolve(true);
+      if (document.readyState === 'complete' && document.querySelector('#runtime-status-link')?.getAttribute('aria-busy') === 'false') return resolve(true);
       if (Date.now() > deadline) return reject(new Error('public runtime header did not become ready'));
       setTimeout(ready, 25);
     };
@@ -151,6 +151,7 @@ try {
     const rect = link.getBoundingClientRect();
     return {
       state: link.dataset.runtimeState,
+      busy: link.getAttribute('aria-busy'),
       label: label.textContent,
       detail: document.querySelector('#system-status-detail').textContent,
       href: link.getAttribute('href'),
@@ -160,6 +161,7 @@ try {
     };
   })()`)
   assert.equal(publicHeader.state, 'quiet', 'homepage must derive its initial quiet label from the timestamped runtime record')
+  assert.equal(publicHeader.busy, 'false', 'homepage runtime evidence must finish loading before it is assessed')
   assert.equal(publicHeader.label, 'Runtime quiet')
   assert.equal(publicHeader.href, '/studio#runtime')
   assert.equal(publicHeader.visible, true, 'homepage runtime evidence link must remain visible at 320 CSS pixels')

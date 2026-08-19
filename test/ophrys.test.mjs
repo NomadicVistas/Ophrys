@@ -55,7 +55,7 @@ test('public surfaces preserve keyboard, motion, contrast, mobile and error-stat
   assert.match(publicFile('studio.html'), /id="compute"[\s\S]*Cost and compute ledger[\s\S]*id="compute-output-limit"/)
   assert.match(publicFile('studio.html'), /id="lineage"[\s\S]*Ecosystem topology[\s\S]*id="relation-count"/)
   assert.match(publicFile('studio.html'), /id="runtime"[\s\S]*aria-busy="true"[\s\S]*Runtime continuity[\s\S]*id="runtime-state"[\s\S]*id="runtime-updated"/)
-  assert.match(publicFile('index.html'), /id="runtime-status-link"[\s\S]*href="\/studio#runtime"[\s\S]*id="system-status"[\s\S]*id="system-status-detail"/)
+  assert.match(publicFile('index.html'), /id="runtime-status-link"[\s\S]*href="\/studio#runtime"[\s\S]*aria-busy="true"[\s\S]*id="system-status"[\s\S]*id="system-status-detail"/)
   assert.match(publicFile('styles.css'), /data-runtime-state="active"[\s\S]*box-shadow:0 0 12px var\(--signal\)/)
   assert.doesNotMatch(publicFile('styles.css'), /data-runtime-state="stale"[^}]*box-shadow/)
   assert.match(publicFile('studio.js'), /renderRuntime\(state\.runtime\)/)
@@ -261,11 +261,13 @@ test('public homepage runtime status is evidence-led, allow-listed and fails clo
   }
 
   function renderedView(state) {
-    const container = { dataset: {} }
+    const attributes = new Map([['aria-busy', 'true']])
+    const container = { dataset: {}, setAttribute: (name, value) => attributes.set(name, value) }
     const label = { textContent: '' }
     const detail = { textContent: '' }
     const view = renderRuntimeHeader(container, label, detail, state?.runtime, state?.system)
     assert.equal(container.dataset.runtimeState, view.state)
+    assert.equal(attributes.get('aria-busy'), 'false')
     assert.equal(label.textContent, view.label)
     assert.equal(detail.textContent, view.detail)
     return view
