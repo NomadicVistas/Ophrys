@@ -10,7 +10,7 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 | OPH-004 | P0 | DONE | Complete adaptive artwork loop | Bounded field score changes tempo/tilt from aggregate state; tested refusal suppresses the active lure and rotates the next state |
 | OPH-005 | P0 | DONE | Provenance and curator decision records | Model, prompt version, inputs, usage, rights, decision and rejection reason stored |
 | OPH-006 | P0 | DONE | Accessibility and responsive verification | Keyboard, reduced motion, contrast, mobile and error-state evidence recorded in `docs/ACCESSIBILITY.md`; automated and Chromium smoke checks pass |
-| OPH-007 | P0 | BLOCKED [!] | Production deployment | Disk capacity, admin secret, Caddy route and HTTPS verified |
+| OPH-007 | P0 | DONE [!] | Production deployment | Disk capacity, admin secret, read-only code mount, Caddy route, HTTPS, health and rollback receipt verified on 2026-07-15 |
 | OPH-008 | P0 | BLOCKED [!] | Hackathon evidence package | Prior/new boundary, baseline SHA and repeatable judge path complete; primary `/feedback` Session ID and public URL require human/external state |
 | OPH-009 | P0 | BLOCKED [!] | Submission video and Devpost entry | Human recording, approval and submission required |
 | OPH-010 | P1 | DONE | Artwork candidate comparison | Operator compares up to two candidates across artistic, public-agency and provenance fields; approval and rejection both require stored rationale |
@@ -38,4 +38,13 @@ Statuses: `DONE`, `ACTIVE`, `READY`, `BLOCKED`, `LATER`. `[!]` requires human au
 
 ## Current definition of done
 
-Phase one and the bounded phase-two implementation lane are complete. Remaining deployment, live-generation and submission items require explicit human authority or external state and remain separately visible rather than being treated as autonomous ecosystem implementation work.
+Phase one, the bounded phase-two implementation lane and the human-authorised artwork release are complete. Remaining live-generation and submission items require explicit human authority or external state and remain separately visible rather than being treated as autonomous ecosystem implementation work.
+
+## Release handoff — 2026-10-20
+
+OPH-032: retained and reconciled the four historical deployment-record paths,
+with no extra application changes beyond `713db99`. The revision-bound handoff
+is in `docs/RELEASE_HANDOFF_2026-10-20.md`; clean-checkout qualification results
+and the full candidate SHA accompany the builder run report. OPH-029/030/031
+remain review-branch-only; merge/deploy and real assistive-technology evidence
+remain separate human actions. Historical DONE entries are not current authority.

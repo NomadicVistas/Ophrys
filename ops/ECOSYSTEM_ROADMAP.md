@@ -112,3 +112,17 @@ OPH-022 and the bounded phase-two implementation lane, including the research-ba
 ## Slice discipline
 
 Each run chooses at most one independently testable item, records what changed and what remains absent, and stops on a clean dependency rather than manufacturing activity. Evidence must include the narrowest relevant test plus `npm run check`, `npm test`, and `npm run judge:smoke` when the public loop is affected. With the bounded roadmap and OPH-030 complete, future runs should record an evidence-backed no-op unless a new integration finding, observatory finding or human-authorised roadmap item creates a meaningful safe slice.
+
+## 2026-10-20 — OPH-032 release-record reconciliation
+
+Retained the four pre-existing deployment-record changes without deleting or
+reinterpreting their historical evidence; annotated the receipt and deployment
+gates to separate historical claims from today's read-only verification.
+[The release handoff](../docs/RELEASE_HANDOFF_2026-10-20.md) binds qualification
+to the unchanged application tree at `713db99` and a separately reported clean
+record-only candidate SHA. No new product slice or autonomous release authority
+was created. The existing header fix remains undeployed on production `355d14c`.
+
+Next: hand the qualified candidate to separate human review; retain real-device
+assistive-technology evaluation and contextual exhibition review as evidence
+gaps. Do not repeat full qualification absent a changed candidate or new failure.

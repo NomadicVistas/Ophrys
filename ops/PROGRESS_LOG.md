@@ -283,6 +283,16 @@ Next: no autonomous implementation slice remains. Await a new integration findin
 
 Next: record four human publication decisions, promote this verified revision to production and verify every public artwork route over HTTPS.
 
+## 2026-07-15 — production artwork publication
+
+- Recorded four separate rationale-bearing approvals in the protected curatorial ledger under Ewoud Bakker’s explicit release authority. All four public projections now report `published / approved`; route availability itself remains non-authoritative.
+- Fast-forwarded production from `3e0c5c7` to verified artwork release `355d14c`, restarted the hardened service with read-only application code and its separate persistent database mount, and retained `3e0c5c7` as the rollback target.
+- Verified the public homepage, Studio, four artwork routes and four source images over HTTPS; live and ready probes returned 200 while an unauthenticated Operator-state request returned 401.
+- Rendered the production homepage at desktop and mobile widths and all four artwork routes in Chromium. Each hero and route showed `Published · human approved`, each route initialised its canvas, and the production engagement endpoint accepted an aggregate-only `artwork_open` smoke event with no visitor identifier.
+- Captured the immutable deployment details, image digest, health, public-state assertions and rollback command in `docs/DEPLOYMENT_RECEIPT_2026-07-15.md`.
+
+Next: no publication or deployment action remains for the quartet. Submission and live model-generation gates remain separate.
+
 ## 2026-08-19 — evidence-led public runtime header
 
 - Completed OPH-029 from the integration reviewer's reproduced P1 finding: the deployed homepage's luminous `compose / gpt-5.6-sol` pill described configuration while the evidence ledger reported a stale runtime and no completed composition cycles.
@@ -312,3 +322,22 @@ Next: no autonomous implementation slice remains. A responsible human must class
 - Verified the focused homepage tests, `npm run check`, all 25 deterministic tests, the isolated evidence-led homepage plus four-artwork 320px accessibility smoke and `npm run judge:smoke`.
 
 Next: no further autonomous implementation slice. OPH-029/031 integration and deployment, OPH-030 contextual review, live provider evidence and submission remain human/external actions.
+
+## 2026-10-20 — release-record reconciliation (OPH-032)
+
+- Followed the latest integration finding instead of adding a feature: retained
+  all four inherited dirty deployment-record contents, with an external original
+  snapshot and additive provenance/age qualifications. No historical deployment
+  was repeated, and this run does not establish the inherited record's authorship.
+- Independently checked production with GETs only: served HTML/JS hashes match
+  `355d14c`, readiness is healthy, four works remain approved/published, Operator
+  returns 401, public runtime is absent and Studio evidence is stale with zero
+  cycles. The runtime-header correction remains undeployed.
+- Added a revision-bound handoff and unchanged-application-tree acceptance check.
+  Full clean-checkout command results and the record-only candidate SHA are
+  attached to this run's report after qualification; no provider, public-action,
+  hardware, scheduler, merge or deployment action is part of the run.
+
+Next: separate human review of the qualified existing release candidate. Actual
+assistive-technology/device checks and contextual OPH-030 decisions remain
+unperformed; no new application slice is justified without a reproduced finding.
