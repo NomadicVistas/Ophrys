@@ -56,3 +56,12 @@ qualification report is not retrieved. The handoff now lists all four required
 command results as absent rather than claiming independently verified passes.
 Recover that revision-bound evidence before treating the candidate as qualified.
 No new implementation or deployment item is authorised by this correction.
+
+### Qualification evidence recovered — 2026-10-21
+
+The original report is now preserved in `docs/BUILDER_QUALIFICATION_2026-10-20.json`
+and linked by the release handoff, superseding the missing-report caveat above.
+All four required commands recorded exit 0 for `380a3a9`; application paths
+remain unchanged at subsequent record-only addenda. This run checked artifact
+integrity, not a fresh suite execution. Human release and real-device/contextual
+reviews remain separate and outstanding.

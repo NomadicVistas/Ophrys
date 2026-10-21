@@ -1,0 +1,62 @@
+{
+  "candidate": "380a3a9bf25e2f55cc650a572a96af130b81ae1f",
+  "startedAt": "2026-10-20T13:27:47.422015+00:00",
+  "node": "v24.21.0",
+  "chromium": "Chromium 155.0.8059.39 built on Debian GNU/Linux 13 (trixie)",
+  "checks": [
+    {
+      "command": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "exitCode": 0,
+      "output": "\n> ophrys@0.1.0 check\n> node --check src/server.mjs && node --check src/ophrys-store.mjs && node --check src/physical-bridge.mjs && node --check src/operator-handover.mjs && node --check src/openai-artwork.mjs && node --check src/ophrys-cycle.mjs && node --check public/app.js && node --check public/runtime-status.js && node --check public/study-status.js && node --check public/studio.js && node --check public/works.js && node --check public/admin.js && node --check scripts/judging-smoke.mjs && node --check scripts/accessibility-smoke.mjs\n\n"
+    },
+    {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "output": "\n> ophrys@0.1.0 test\n> node --test\n\n\u2714 public surfaces preserve keyboard, motion, contrast, mobile and error-state boundaries (10.632239ms)\n\u2714 the coded quartet couples four public artwork heroes to bounded counter-actions (2.657206ms)\n\u2714 public study discovery follows the allow-listed human curatorial ledger (14.403594ms)\n\u2714 runtime continuity labels stored evidence with a deterministic clock and no liveness claim (5.020002ms)\n\u2714 runtime continuity fails closed on malformed or future-dated evidence (4.171782ms)\n\u2714 public homepage runtime status is evidence-led, allow-listed and fails closed (93.706299ms)\n\u2714 education encounter preserves the Lure, Reveal and consequential Counter-read protocol (1.586314ms)\n\u2714 ecosystem literacy distinguishes five evidence types without collecting or scoring a visitor (37.386153ms)\n\u2714 aggregate events never create visitor identity records (5.998977ms)\n\u2714 the curatorial quartet enters the Studio without bypassing human publication (5.630606ms)\n\u2714 curatorial decision migration is idempotent across store restarts (71.005591ms)\n\u2714 store migration rolls back incompatible schemas without partially upgrading them (31.3961ms)\n\u2714 artwork relations fail closed at insertion and when a stored ledger is malformed (89.171874ms)\n\u2714 curatorial decisions require an actual artwork status transition (3.65516ms)\n\u2714 public trace lifecycles connect redacted aggregate observation to a human-gated outcome (9.591142ms)\n\u2714 public Studio allow-lists provenance while Operator retains the complete packet (36.067461ms)\n\u2714 ecosystem topology projection stays closed when older relation endpoints fall outside its node limit (70.701955ms)\n\u2714 aggregate conditions bound the field score and an anonymous refusal burst rotates once per interval (8.101112ms)\n\u2714 the physical bridge validates bounded scores and falls quiet without hardware transport (9.176442ms)\n\u2714 refusals coalesce into retained hourly counter-signal nodes without request-level traces (9.65681ms)\n\u2714 public refusal responses distinguish one applied revision from deferred aggregate pressure (51.515276ms)\n\u2714 public and protected server surfaces keep their boundary (52.29268ms)\n\u2714 GPT-5.6 generation uses Responses structured output without storing the request (2.062337ms)\n\u2714 compute ledger records exact returned usage, latency and enforces the UTC attempt budget (4.214024ms)\n\u2714 artwork provenance packets store the composition packet and curator decision (8.734419ms)\n\u2139 tests 25\n\u2139 suites 0\n\u2139 pass 25\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 849.94193\n"
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "test:accessibility"
+      ],
+      "exitCode": 0,
+      "output": "\n> ophrys@0.1.0 test:accessibility\n> node scripts/accessibility-smoke.mjs\n\nAccessibility smoke passed: evidence-led homepage header plus 4 reduced-motion artworks at 320 \u00d7 700 CSS pixels; no loop, overflow, hidden control or stored preference.\n"
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "judge:smoke"
+      ],
+      "exitCode": 0,
+      "output": "\n> ophrys@0.1.0 judge:smoke\n> node scripts/judging-smoke.mjs\n\nOphrys judging smoke: PASS\nrefusals: orbit -> interruption; revision 1; same-interval follow-up deferred\nruntime: active; basis: public-field-revision\nboundaries: hourly counter-signal only; complete public Studio payload allow-listed; full provenance protected for Operator; five-part literacy evidence complete without learner scoring; simulated light/sound transport disabled; no request trace or liveness claim; Operator denied by default; publication curated; compute budget visible\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "713db99",
+        "HEAD",
+        "--",
+        "src",
+        "public",
+        "scripts",
+        "test",
+        "package.json"
+      ],
+      "exitCode": 0,
+      "output": ""
+    }
+  ],
+  "cleanAfter": true,
+  "completedAt": "2026-10-20T13:28:00.806983+00:00"
+}

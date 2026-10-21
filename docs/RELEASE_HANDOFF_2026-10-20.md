@@ -14,8 +14,9 @@ OPH-029 (`8b82704`), OPH-030 (`b3f3652`) and OPH-031 (`713db99`) above deployed
 only `docs/` and `ops/`; there must be no additional application, test, asset,
 script or package change. The reconciliation SHA is
 `380a3a9bf25e2f55cc650a572a96af130b81ae1f`. The original handoff referred
-to completed results in a builder run report; that report has not been retrieved
-or independently attested in this repository. See the evidence status below.
+to completed results in a builder run report; that report had not been retrieved
+or independently attested at the first 2026-10-21 review. The original report
+has since been recovered; see the chronological evidence statuses below.
 
 ## Independently observed production boundary
 
@@ -52,36 +53,45 @@ judge fixtures use in-memory state and ephemeral loopback services. Automated
 320px/reduced-motion checks are not actual screen-reader/device evidence.
 Qualification results belong to the exact reported SHA, not to production.
 
-## Evidence status — 2026-10-21
+## Evidence status — 2026-10-21 (initial review)
 
-Qualified-result availability is **unverified**, not a test failure or a newly
-qualified release. The candidate under review is clean reconciliation revision
-`380a3a9bf25e2f55cc650a572a96af130b81ae1f`, with application candidate
-`713db9986daebdf9da057592fd3f4101d2c6ac08` unchanged. Any later documentation-only
-commit is a handoff addendum, not a new application qualification.
+The initial review at addendum `990dec0` could not retrieve the referenced run
+report and explicitly marked the four command results absent. That was an
+evidence-availability gap, not a failed test. The recovery below supersedes
+that availability status without changing the qualified application candidate.
 
-| Required qualification command | Revision-bound result available here |
+## Recovered qualification evidence — 2026-10-21 05:25 UTC run
+
+The original shared-lane report was located at
+`/data/.openclaw/workspace/ops/ophrys-ecosystem/BUILDER_QUALIFICATION_2026-10-20.json`
+and is preserved byte-for-byte as [the qualification artifact](BUILDER_QUALIFICATION_2026-10-20.json).
+Its SHA-256 is `0ad847ad2fadb5481fb554cb2713bd76585b7c3f7ffe77544c9168a384677766`.
+The accompanying external `BUILDER_HANDOFF_2026-10-20.md` records a clean detached
+checkout before and after qualification, with provider secrets and Ophrys
+settings removed and in-memory local fixture state only. The JSON itself records
+`cleanAfter: true`; it does not independently encode the starting status.
+
+| Required qualification command | Recovered result for `380a3a9bf25e2f55cc650a572a96af130b81ae1f` |
 |---|---|
-| `npm run check` | Absent; prior run report not retrieved |
-| `npm test` | Absent; prior run report not retrieved |
-| `npm run test:accessibility` | Absent; prior run report not retrieved |
-| `npm run judge:smoke` | Absent; prior run report not retrieved |
+| `npm run check` | Exit 0; syntax checks passed |
+| `npm test` | Exit 0; 25 passed, 0 failed, 0 skipped |
+| `npm run test:accessibility` | Exit 0; evidence-led header and four reduced-motion works at 320 × 700 CSS pixels |
+| `npm run judge:smoke` | Exit 0; applied/deferred refusal, redaction, protected Operator, human publication and simulator boundaries passed |
 
-The builder independently confirmed clean status at `380a3a9`, no application
-changes against `713db99` in `src public scripts test package.json`, and passing
-`git diff --check main..HEAD` on 2026-10-21. These structural checks do **not**
-attest the four qualification commands above. Historical test statements in the
-progress log are not substituted for revision-bound output. Full suites were
-not repeated merely for cadence on unchanged code, following the current
-integration recommendation.
+The report records Node `v24.21.0`, Chromium `155.0.8059.39` on Debian 13,
+and execution from `2026-10-20T13:27:47.422015+00:00` to
+`2026-10-20T13:28:00.806983+00:00`. It also records a passing application-path
+diff against `713db99`. This run independently parsed command identities, all
+five exit codes, the candidate SHA and clean-after flag, checked unchanged
+application paths at the current addendum, and checked Git whitespace integrity.
+It recovered prior execution evidence; it did not rerun or newly attest the
+four suites. Later record-only addenda are not new application qualifications.
 
-Before treating this candidate as technically qualified, retrieve the original
-report with its exact SHA, command outcomes, environment versions and clean
-before/after status. If unavailable, leave the evidence gap explicit; do not
-infer a pass or release authority from this note. Actual assistive-technology,
-point-of-encounter refusal and contextual exhibition reviews remain separate
-and unperformed. Research recommendations are not demonstrated product defects
-or approved artistic substitutions.
+Technical qualification evidence is now available for the exact reconciliation
+candidate. It is not release approval, actual assistive-technology evidence,
+paid provider proof, contextual exhibition assessment or production verification.
+No visitor traces, secrets or protected prompts are included in the artifact.
+Do not repeat full qualification solely for cadence on unchanged code.
 
 ## Separate human decisions still required
 

@@ -136,3 +136,18 @@ qualification results are absent from the repository handoff. No new runtime
 slice or repeated full qualification was selected. Next: retrieve the original
 report before claiming qualification; retain separate human release and
 contextual/accessibility reviews.
+
+## 2026-10-21 — original qualification report recovered
+
+Located the original shared-lane qualification JSON and accompanying handoff;
+preserved the JSON byte-for-byte in `docs/BUILDER_QUALIFICATION_2026-10-20.json`
+and linked it from the release handoff. It records all four required checks
+passing for exact candidate `380a3a9` (25 tests, automated browser smoke and
+judge smoke). Independently checked report structure, candidate/exit codes,
+clean-after evidence, unchanged application paths and whitespace integrity.
+The earlier absent-report statement is retained as historical, now superseded.
+No suites were rerun, no application changed and no release authority was added.
+
+Next: separate human review/merge/deploy of the existing candidate; actual
+assistive-technology, offered-route refusal, contextual exhibition and artistic
+continuity reviews remain unperformed. No new runtime slice is justified.
