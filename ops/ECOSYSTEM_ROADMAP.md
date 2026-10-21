@@ -126,3 +126,13 @@ was created. The existing header fix remains undeployed on production `355d14c`.
 Next: hand the qualified candidate to separate human review; retain real-device
 assistive-technology evaluation and contextual exhibition review as evidence
 gaps. Do not repeat full qualification absent a changed candidate or new failure.
+
+## 2026-10-21 — qualification evidence availability
+
+The integration review's handoff gap is now explicit in the release record:
+clean reconciliation candidate `380a3a9` preserves application `713db99`, but
+the referenced run report has not been retrieved and the four revision-bound
+qualification results are absent from the repository handoff. No new runtime
+slice or repeated full qualification was selected. Next: retrieve the original
+report before claiming qualification; retain separate human release and
+contextual/accessibility reviews.

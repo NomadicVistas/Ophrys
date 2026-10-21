@@ -12,8 +12,10 @@ Application candidate: `713db9986daebdf9da057592fd3f4101d2c6ac08`, comprising
 OPH-029 (`8b82704`), OPH-030 (`b3f3652`) and OPH-031 (`713db99`) above deployed
 `355d14cd488a864839a5fda6b7e300b49d9aff62`. The reconciliation commit changes
 only `docs/` and `ops/`; there must be no additional application, test, asset,
-script or package change. The full reconciliation SHA and completed command
-results are attached in the builder's run report after clean-checkout testing.
+script or package change. The reconciliation SHA is
+`380a3a9bf25e2f55cc650a572a96af130b81ae1f`. The original handoff referred
+to completed results in a builder run report; that report has not been retrieved
+or independently attested in this repository. See the evidence status below.
 
 ## Independently observed production boundary
 
@@ -49,6 +51,37 @@ Use no provider credentials, production database or hardware. The browser and
 judge fixtures use in-memory state and ephemeral loopback services. Automated
 320px/reduced-motion checks are not actual screen-reader/device evidence.
 Qualification results belong to the exact reported SHA, not to production.
+
+## Evidence status — 2026-10-21
+
+Qualified-result availability is **unverified**, not a test failure or a newly
+qualified release. The candidate under review is clean reconciliation revision
+`380a3a9bf25e2f55cc650a572a96af130b81ae1f`, with application candidate
+`713db9986daebdf9da057592fd3f4101d2c6ac08` unchanged. Any later documentation-only
+commit is a handoff addendum, not a new application qualification.
+
+| Required qualification command | Revision-bound result available here |
+|---|---|
+| `npm run check` | Absent; prior run report not retrieved |
+| `npm test` | Absent; prior run report not retrieved |
+| `npm run test:accessibility` | Absent; prior run report not retrieved |
+| `npm run judge:smoke` | Absent; prior run report not retrieved |
+
+The builder independently confirmed clean status at `380a3a9`, no application
+changes against `713db99` in `src public scripts test package.json`, and passing
+`git diff --check main..HEAD` on 2026-10-21. These structural checks do **not**
+attest the four qualification commands above. Historical test statements in the
+progress log are not substituted for revision-bound output. Full suites were
+not repeated merely for cadence on unchanged code, following the current
+integration recommendation.
+
+Before treating this candidate as technically qualified, retrieve the original
+report with its exact SHA, command outcomes, environment versions and clean
+before/after status. If unavailable, leave the evidence gap explicit; do not
+infer a pass or release authority from this note. Actual assistive-technology,
+point-of-encounter refusal and contextual exhibition reviews remain separate
+and unperformed. Research recommendations are not demonstrated product defects
+or approved artistic substitutions.
 
 ## Separate human decisions still required
 

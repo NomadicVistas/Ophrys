@@ -341,3 +341,21 @@ Next: no further autonomous implementation slice. OPH-029/031 integration and de
 Next: separate human review of the qualified existing release candidate. Actual
 assistive-technology/device checks and contextual OPH-030 decisions remain
 unperformed; no new application slice is justified without a reproduced finding.
+
+## 2026-10-21 — explicit release qualification evidence gap
+
+- Addressed the latest integration recommendation without changing application
+  code: named full reconciliation candidate `380a3a9` in the handoff and explicitly
+  marked each required qualification result absent from the repository record;
+  the referenced prior builder run report was not retrieved or attested.
+- Independently verified clean starting status, unchanged application paths
+  against `713db99`, and `git diff --check main..HEAD`. These are structural
+  checks, not substitutes for full qualification. Did not repeat unchanged
+  suites solely for cadence or claim a test failure/pass without its evidence.
+- Retained the latest research proposals as human-review inputs, not reproduced
+  defects or new runtime requirements. No provider, public-state mutation,
+  publication, deployment, hardware, scheduler or main-branch action occurred.
+
+Next: retrieve original revision-bound results before claiming technical
+qualification. Keep human release, real-device accessibility, offered-route
+refusal, contextual exhibition and artistic continuity decisions separate.

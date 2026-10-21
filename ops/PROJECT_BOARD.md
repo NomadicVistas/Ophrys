@@ -48,3 +48,11 @@ is in `docs/RELEASE_HANDOFF_2026-10-20.md`; clean-checkout qualification results
 and the full candidate SHA accompany the builder run report. OPH-029/030/031
 remain review-branch-only; merge/deploy and real assistive-technology evidence
 remain separate human actions. Historical DONE entries are not current authority.
+
+### Qualification evidence caveat — 2026-10-21
+
+Candidate `380a3a9` is clean and application-identical to `713db99`; the prior
+qualification report is not retrieved. The handoff now lists all four required
+command results as absent rather than claiming independently verified passes.
+Recover that revision-bound evidence before treating the candidate as qualified.
+No new implementation or deployment item is authorised by this correction.

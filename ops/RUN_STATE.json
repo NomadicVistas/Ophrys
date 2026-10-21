@@ -23,13 +23,16 @@
     "status": "completed-lane"
   },
   "lastSuccessfulRun": "2026-08-19T07:30:02Z",
-  "lastSelectedItem": "OPH-032 release-record reconciliation and revision-bound qualification",
+  "lastSelectedItem": "OPH-032 qualification evidence availability addendum",
   "blockerStreak": 0,
   "complete": false,
   "stopped": false,
-  "nextBestSlice": "Separate human review of the qualified record-only handoff candidate; no deployment authority. Actual assistive-technology/device evidence, OPH-030 contextual decisions, live provider evidence and submission remain outstanding. Await a reproduced implementation defect or new human-authorised scope; do not manufacture activity.",
+  "nextBestSlice": "Retrieve original qualification report for 380a3a9; no cadence-only rerun on unchanged application. Separate human release, contextual exhibition and actual assistive-technology reviews remain outstanding. Await a reproduced implementation defect or authorised scope.",
   "deadline": "2026-07-22T00:00:00Z",
   "lastRecordReconciliation": "2026-10-20",
   "applicationCandidate": "713db9986daebdf9da057592fd3f4101d2c6ac08",
-  "qualificationProtocol": "docs/RELEASE_HANDOFF_2026-10-20.md; exact candidate SHA and clean-checkout command results accompany the builder run report"
+  "qualificationProtocol": "docs/RELEASE_HANDOFF_2026-10-20.md; recover revision-bound results for 380a3a9 before claiming technical qualification",
+  "lastEvidenceReview": "2026-10-21",
+  "reconciliationCandidate": "380a3a9bf25e2f55cc650a572a96af130b81ae1f",
+  "qualificationEvidenceStatus": "unverified: prior run report not retrieved; four revision-bound command results explicitly absent in repository handoff"
 }
